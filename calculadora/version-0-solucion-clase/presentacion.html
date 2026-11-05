@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V0: Solución de Clase (Ramón Abramo)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --code-bg: #090d16;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--card-border);
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--accent);
+    }
+
+    .brand-badge {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      border: 1px solid var(--accent);
+    }
+
+    .controls-nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover { background: #334155; border-color: var(--accent); color: #fff; }
+
+    .btn-primary { background: var(--accent); color: #0f172a; border-color: var(--accent); font-weight: 600; }
+    .btn-primary:hover { background: #7dd3fc; color: #0f172a; }
+
+    .slide-counter { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); min-width: 60px; text-align: center; }
+
+    .progress-bar-container { width: 100%; height: 4px; background: var(--card-border); }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), #818cf8); width: 0%; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1100px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .slide.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tag { display: inline-block; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 8px; }
+    h1 { font-size: 2.3rem; margin-bottom: 14px; font-weight: 800; }
+    h2 { font-size: 1.7rem; margin-bottom: 12px; color: #fff; }
+    p.lead { font-size: 1.15rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+
+    .card { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; }
+    .card-title { font-size: 1.05rem; font-weight: 700; color: var(--accent); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+
+    .test-box {
+      margin-top: 14px;
+      padding: 12px 16px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid #10b981;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #a7f3d0;
+    }
+
+    ul.feature-list { list-style: none; }
+    ul.feature-list li { position: relative; padding-left: 24px; margin-bottom: 10px; line-height: 1.5; font-size: 0.95rem; color: #e2e8f0; }
+    ul.feature-list li::before { content: "➔"; position: absolute; left: 0; color: var(--accent); }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 16px;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      color: #e2e8f0;
+    }
+
+    .kw { color: #f472b6; font-weight: 600; }
+    .fn { color: #38bdf8; font-weight: 600; }
+    .str { color: #a3e635; }
+    .num { color: #fbbf24; }
+    .cm { color: #64748b; font-style: italic; }
+    .obj { color: #c084fc; }
+
+    footer { padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.9); border-top: 1px solid var(--card-border); font-size: 0.8rem; color: var(--text-muted); }
+    kbd { background: #334155; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; border: 1px solid #475569; }
+
+    @media (max-width: 768px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      body { overflow-y: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span>🖩 Versión 0</span>
+      <span class="brand-badge">Solución de Clase (Ramón Abramo)</span>
+    </div>
+    <div class="controls-nav">
+      <button class="btn" id="btnPrev">◀ Anterior</button>
+      <span class="slide-counter" id="slideCounter">1 / 8</span>
+      <button class="btn btn-primary" id="btnNext">Siguiente ▶</button>
+      <button class="btn" id="btnFullscreen">⛶</button>
+    </div>
+  </header>
+
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <main id="mainContainer">
+
+    <!-- SLIDE 1: Portada -->
+    <section class="slide active">
+      <span class="tag">Solución Canónica de Aula</span>
+      <h1>La Solución de Clase de Ramón Abramo</h1>
+      <p class="lead">Esta versión es la explicada directamente en la pizarra: función pura <code>calcular()</code>, tres colecciones en el DOM (<code>numeros</code>, <code>operadores</code>, <code>acciones</code>) y manipulación directa sobre la pantalla.</p>
+      
+      <div class="grid-3" style="margin-top: 24px;">
+        <div class="card">
+          <div class="card-title">1. Función Pura</div>
+          <p style="font-size:0.9rem; color: #cbd5e1;"><code>calcular(n1, n2, op)</code> no depende de variables externas; recibe valores y devuelve el resultado.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">2. 3 Grupos Semánticos</div>
+          <p style="font-size:0.9rem; color: #cbd5e1;">Agrupamos botones en <code>numeros</code>, <code>operadores</code> y <code>acciones</code> ('igual' y 'borrar').</p>
+        </div>
+        <div class="card">
+          <div class="card-title">3. Estado Eficiente</div>
+          <p style="font-size:0.9rem; color: #cbd5e1;"><code>empezarNumero</code>, <code>operadorPendiente</code>, <code>numeroAnterior</code> y <code>numeroActual</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: Función Pura de Cálculo -->
+    <section class="slide">
+      <span class="tag">Paso 1</span>
+      <h2>1. La Función Pura de Cálculo</h2>
+      <p class="lead">Recibe dos números y el operador. Controla la división por cero devolviendo <code>'Error'</code>.</p>
+
+      <div class="grid-2">
+        <div>
+          <pre><code><span class="kw">function</span> <span class="fn">calcular</span>(numero1, numero2, operacion) {
+    <span class="kw">let</span> resultado = <span class="num">0</span>;
+
+    <span class="kw">switch</span> (operacion) {
+        <span class="kw">case</span> <span class="str">'+'</span>:
+            resultado = numero1 + numero2;
+            <span class="kw">break</span>;
+        <span class="kw">case</span> <span class="str">'-'</span>:
+            resultado = numero1 - numero2;
+            <span class="kw">break</span>;
+        <span class="kw">case</span> <span class="str">'*'</span>:
+            resultado = numero1 * numero2;
+            <span class="kw">break</span>;
+        <span class="kw">case</span> <span class="str">'/'</span>:
+            <span class="kw">if</span> (numero2 === <span class="num">0</span>) {
+                resultado = <span class="str">'Error'</span>;
+            } <span class="kw">else</span> {
+                resultado = numero1 / numero2;
+            }
+            <span class="kw">break</span>;
+    }
+
+    <span class="kw">return</span> resultado;
+}</code></pre>
+        </div>
+        <div class="card">
+          <div class="card-title">💡 ¿Por qué es una función pura?</div>
+          <p style="font-size:0.95rem; color:#cbd5e1; line-height:1.6;">
+            Porque no modifica variables globales. Para los mismos parámetros de entrada, siempre devuelve exactamente el mismo resultado. Esto la hace 100% testeable y libre de efectos secundarios.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: Estado y DOM -->
+    <section class="slide">
+      <span class="tag">Paso 2</span>
+      <h2>2. Memoria de Estado y Selección en el DOM</h2>
+      <p class="lead">Las variables que recuerdan la operación y los 3 selectores de botones.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Memoria de Estado</div>
+          <pre><code><span class="cm">// Limpiar display tras operador</span>
+<span class="kw">let</span> empezarNumero = <span class="kw">false</span>;
+
+<span class="cm">// Operación pendiente (+, -, *, /)</span>
+<span class="kw">let</span> operadorPendiente = <span class="kw">null</span>;
+
+<span class="cm">// Número antes de pulsar operador</span>
+<span class="kw">let</span> numeroAnterior = <span class="kw">null</span>;
+
+<span class="cm">// Número actual en pantalla</span>
+<span class="kw">let</span> numeroActual = <span class="kw">null</span>;</code></pre>
+        </div>
+        <div class="card">
+          <div class="card-title">Selectores del DOM</div>
+          <pre><code><span class="kw">const</span> numeros = 
+    <span class="obj">document</span>.<span class="fn">querySelectorAll</span>(<span class="str">'[data-numero]'</span>);
+
+<span class="kw">const</span> operadores = 
+    <span class="obj">document</span>.<span class="fn">querySelectorAll</span>(<span class="str">'[data-operador]'</span>);
+
+<span class="kw">const</span> acciones = 
+    <span class="obj">document</span>.<span class="fn">querySelectorAll</span>(<span class="str">'[data-accion]'</span>);
+
+<span class="kw">const</span> pantalla = 
+    <span class="obj">document</span>.<span class="fn">querySelector</span>(<span class="str">'output'</span>);</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: Números -->
+    <section class="slide">
+      <span class="tag">Paso 3</span>
+      <h2>3. Pulsación de Números (0 al 9)</h2>
+      <p class="lead">Sustituye el '0' inicial o limpia la pantalla si venimos de pulsar un operador.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">La regla de la pantalla</div>
+          <ul class="feature-list">
+            <li>Si <code>pantalla.textContent === '0'</code> o <code>empezarNumero === true</code>: escribimos el nuevo valor limpio y apagamos la bandera.</li>
+            <li>En caso contrario: concatenamos con <code>+=</code> detrás de los existentes.</li>
+          </ul>
+          <div class="test-box">
+            🧪 <strong>Prueba:</strong> Teclea <code>7</code> <code>8</code> <code>9</code> ➔ Muestra <code>789</code>.
+          </div>
+        </div>
+        <div>
+          <pre><code>numeros.<span class="fn">forEach</span>(numero => {
+    numero.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () => {
+        <span class="kw">const</span> valor = numero.dataset.numero;
+
+        <span class="kw">if</span> (pantalla.<span class="prop">textContent</span> === <span class="str">'0'</span> || empezarNumero) {
+            pantalla.<span class="prop">textContent</span> = valor;
+            empezarNumero = <span class="kw">false</span>;
+        } <span class="kw">else</span> {
+            pantalla.<span class="prop">textContent</span> += valor;
+        }
+    });
+});</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: Operadores -->
+    <section class="slide">
+      <span class="tag">Paso 4</span>
+      <h2>4. Pulsación de Operadores (+, -, *, /)</h2>
+      <p class="lead">Memoriza la operación y resuelve subtotales si el usuario encadena cálculos.</p>
+
+      <div class="grid-2">
+        <div>
+          <pre><code>operadores.<span class="fn">forEach</span>(operador => {
+    operador.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () => {
+        <span class="kw">const</span> valor = operador.dataset.operador;
+
+        <span class="cm">// Si ya había operador pendiente, resolvemos subtotal</span>
+        <span class="kw">if</span> (operadorPendiente !== <span class="kw">null</span> && empezarNumero !== <span class="kw">true</span>) {
+            numeroActual = <span class="fn">Number</span>(pantalla.<span class="prop">textContent</span>);
+            numeroAnterior = <span class="fn">calcular</span>(numeroAnterior, numeroActual, operadorPendiente);
+            pantalla.<span class="prop">textContent</span> = numeroAnterior;
+        } <span class="kw">else</span> {
+            numeroAnterior = <span class="fn">Number</span>(pantalla.<span class="prop">textContent</span>);
+        }
+
+        <span class="cm">// Control de Error y bandera de pantalla limpia</span>
+        operadorPendiente = (numeroAnterior === <span class="str">'Error'</span>) ? <span class="kw">null</span> : valor;
+        empezarNumero = <span class="kw">true</span>;
+    });
+});</code></pre>
+        </div>
+        <div class="card">
+          <div class="card-title">Puntos Clave</div>
+          <ul class="feature-list">
+            <li>Usa <code>Number(pantalla.textContent)</code> para convertir a número.</li>
+            <li>Si <code>numeroAnterior === 'Error'</code>, desactiva <code>operadorPendiente</code> para no arrastrar el fallo.</li>
+            <li><code>empezarNumero = true</code> garantiza que el siguiente número no se pegue.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: Acciones (Igual y Borrar) -->
+    <section class="slide">
+      <span class="tag">Paso 5</span>
+      <h2>5. Acciones: Botón Igual (=) y Borrar (C)</h2>
+      <p class="lead">Un solo bucle para el grupo <code>acciones</code> mediante una estructura <code>switch</code>.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Dos casos claros</div>
+          <ul class="feature-list">
+            <li><strong>case 'igual':</strong> Si hay operador pendiente, llama a <code>calcular()</code> y muestra el total. Resetea <code>operadorPendiente = null</code>.</li>
+            <li><strong>case 'borrar':</strong> Pone la pantalla en <code>'0'</code> y resetea las variables.</li>
+          </ul>
+          <div class="test-box">
+            🧪 <strong>Prueba Igual:</strong> <code>7 + 8 =</code> ➔ <strong>15</strong><br>
+            🧪 <strong>Prueba Borrar:</strong> <code>999 C</code> ➔ <strong>0</strong>
+          </div>
+        </div>
+        <div>
+          <pre><code>acciones.<span class="fn">forEach</span>(accion => {
+    accion.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () => {
+        <span class="kw">const</span> valor = accion.dataset.accion;
+
+        <span class="kw">switch</span> (valor) {
+            <span class="kw">case</span> <span class="str">'igual'</span>:
+                <span class="kw">if</span> (operadorPendiente !== <span class="kw">null</span>) {
+                    numeroActual = <span class="fn">Number</span>(pantalla.<span class="prop">textContent</span>);
+                    numeroAnterior = <span class="fn">calcular</span>(numeroAnterior, numeroActual, operadorPendiente);
+                    pantalla.<span class="prop">textContent</span> = numeroAnterior;
+                }
+                operadorPendiente = <span class="kw">null</span>;
+                empezarNumero = <span class="kw">true</span>;
+                <span class="kw">break</span>;
+
+            <span class="kw">case</span> <span class="str">'borrar'</span>:
+                pantalla.<span class="prop">textContent</span> = <span class="str">'0'</span>;
+                operadorPendiente = <span class="kw">null</span>;
+                empezarNumero = <span class="kw">true</span>;
+                <span class="kw">break</span>;
+        }
+    });
+});</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: Comparativa de Versiones -->
+    <section class="slide">
+      <span class="tag">Comparativa</span>
+      <h2>La Versión 0 frente a las Versiones 1 y 2</h2>
+      <p class="lead">¿Qué aporta el enfoque de la Versión 0?</p>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">Versión 0 (Clase)</div>
+          <p style="font-size:0.85rem; color:#cbd5e1;">Agrupa en 3 listas (<code>numeros</code>, <code>operadores</code>, <code>acciones</code>). Función pura <code>calcular(n1,n2,op)</code>. Manipulación directa de <code>pantalla.textContent</code>.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">Versión 1 (Individuales)</div>
+          <p style="font-size:0.85rem; color:#cbd5e1;">Separa número a número e igual y borrar por separado. Función de renderizado <code>actualizarDisplay()</code>.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">Versión 2 (Delegación)</div>
+          <p style="font-size:0.85rem; color:#cbd5e1;">1 solo listener en <code>.teclado</code> con Event Bubbling y <code>closest('button')</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: Fin -->
+    <section class="slide">
+      <span class="tag">Resumen</span>
+      <h2>¡Lista para practicar en clase!</h2>
+      <p class="lead">Utiliza los archivos de la carpeta <code>version-0-solucion-clase</code>:</p>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">app.alumnos.js</div>
+          <p style="font-size:0.85rem; color:#cbd5e1;">Para entregar a los alumnos con los TODOs vacíos.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">app.solucion.js</div>
+          <p style="font-size:0.85rem; color:#cbd5e1;">Tu solución de clase canónica para proyectar.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">PDF Detallado</div>
+          <p style="font-size:0.85rem; color:#cbd5e1;">El documento de estudio paso a paso para el alumno.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div>Atajos: <kbd>◀</kbd> <kbd>▶</kbd> o <kbd>Espacio</kbd> | Pantalla completa: <kbd>F</kbd></div>
+    <div>Calculadora JS &bull; Versión 0 (Clase Ramón Abramo)</div>
+  </footer>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const counter = document.getElementById('slideCounter');
+    const progressBar = document.getElementById('progressBar');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnFullscreen = document.getElementById('btnFullscreen');
+
+    let currentSlide = 0;
+    const totalSlides = slides.length;
+
+    function updateSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= totalSlides) index = totalSlides - 1;
+
+      currentSlide = index;
+
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === currentSlide);
+      });
+
+      counter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+      progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+
+      btnPrev.disabled = currentSlide === 0;
+      btnNext.textContent = currentSlide === totalSlides - 1 ? 'Finalizar' : 'Siguiente ▶';
+    }
+
+    btnPrev.addEventListener('click', () => updateSlide(currentSlide - 1));
+    btnNext.addEventListener('click', () => updateSlide(currentSlide + 1));
+
+    btnFullscreen.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        updateSlide(currentSlide + 1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        updateSlide(currentSlide - 1);
+      } else if (e.key === 'Home') {
+        updateSlide(0);
+      } else if (e.key === 'End') {
+        updateSlide(totalSlides - 1);
+      } else if (e.key.toLowerCase() === 'f') {
+        btnFullscreen.click();
+      }
+    });
+
+    updateSlide(0);
+  </script>
+</body>
+</html>

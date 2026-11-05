@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V1: Calculadora por Hitos de Funcionamiento (Escuchadores Individuales)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --code-bg: #090d16;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--card-border);
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--accent);
+    }
+
+    .brand-badge {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      border: 1px solid var(--accent);
+    }
+
+    .controls-nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover { background: #334155; border-color: var(--accent); color: #fff; }
+
+    .btn-primary { background: var(--accent); color: #0f172a; border-color: var(--accent); font-weight: 600; }
+    .btn-primary:hover { background: #7dd3fc; color: #0f172a; }
+
+    .slide-counter { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); min-width: 60px; text-align: center; }
+
+    .progress-bar-container { width: 100%; height: 4px; background: var(--card-border); }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), #818cf8); width: 0%; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1100px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .slide.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tag { display: inline-block; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 8px; }
+    h1 { font-size: 2.3rem; margin-bottom: 14px; font-weight: 800; }
+    h2 { font-size: 1.7rem; margin-bottom: 12px; color: #fff; }
+    p.lead { font-size: 1.15rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+
+    .card { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; }
+    .card-title { font-size: 1.05rem; font-weight: 700; color: var(--accent); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+
+    .test-box {
+      margin-top: 14px;
+      padding: 12px 16px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid #10b981;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #a7f3d0;
+    }
+
+    ul.feature-list { list-style: none; }
+    ul.feature-list li { position: relative; padding-left: 24px; margin-bottom: 10px; line-height: 1.5; font-size: 0.95rem; color: #e2e8f0; }
+    ul.feature-list li::before { content: "➔"; position: absolute; left: 0; color: var(--accent); }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 16px;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      color: #e2e8f0;
+    }
+
+    .kw { color: #f472b6; font-weight: 600; }
+    .fn { color: #38bdf8; font-weight: 600; }
+    .str { color: #a3e635; }
+    .num { color: #fbbf24; }
+    .cm { color: #64748b; font-style: italic; }
+    .obj { color: #c084fc; }
+
+    .milestone-badge {
+      background: #38bdf8;
+      color: #0f172a;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+
+    footer { padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.9); border-top: 1px solid var(--card-border); font-size: 0.8rem; color: var(--text-muted); }
+    kbd { background: #334155; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; border: 1px solid #475569; }
+
+    @media (max-width: 768px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      body { overflow-y: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span>🖩 Versión 1</span>
+      <span class="brand-badge">Por Hitos de Funcionamiento</span>
+    </div>
+    <div class="controls-nav">
+      <button class="btn" id="btnPrev">◀ Anterior</button>
+      <span class="slide-counter" id="slideCounter">1 / 10</span>
+      <button class="btn btn-primary" id="btnNext">Siguiente ▶</button>
+      <button class="btn" id="btnFullscreen">⛶</button>
+    </div>
+  </header>
+
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <main id="mainContainer">
+
+    <!-- SLIDE 1: Portada -->
+    <section class="slide active">
+      <span class="tag">Desarrollo Incremental</span>
+      <h1>Calculadora por Hitos de Funcionamiento</h1>
+      <p class="lead">Aprenderemos a programar la calculadora paso a paso, viendo resultados funcionales en cada etapa: primero los números, luego la suma, luego el resultado, y así hasta completarla.</p>
+      
+      <div class="grid-3" style="margin-top: 24px;">
+        <div class="card">
+          <div class="card-title">1. Ver resultados ya</div>
+          <p style="font-size:0.9rem; color: #cbd5e1;">Cada hito termina con una prueba visual en el navegador. No escribimos código a ciegas.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">2. Escuchadores Directos</div>
+          <p style="font-size:0.9rem; color: #cbd5e1;">Usamos <code>forEach</code> para asignar un <code>addEventListener</code> a cada botón individualmente.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">3. Modularidad</div>
+          <p style="font-size:0.9rem; color: #cbd5e1;">Construimos funciones pequeñas que se encargan de una sola tarea a la vez.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: Mapa de Hitos -->
+    <section class="slide">
+      <span class="tag">La Hoja de Ruta</span>
+      <h2>Los 7 Hitos de Funcionamiento</h2>
+      <p class="lead">¿Qué sabrá hacer nuestra calculadora en cada etapa?</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <ul class="feature-list">
+            <li><span class="milestone-badge">HITO 1</span> <strong>Pintar números:</strong> Al pulsar 1, 2, 3... se ven en la pantalla LCD.</li>
+            <li><span class="milestone-badge">HITO 2</span> <strong>Aprender a sumar (+):</strong> Guardar el primer número y preparar la pantalla.</li>
+            <li><span class="milestone-badge">HITO 3</span> <strong>Resolver con (=):</strong> Calcular la suma y mostrar el total.</li>
+            <li><span class="milestone-badge">HITO 4</span> <strong>Más operaciones:</strong> Resta (-), Multiplicación (*) y División (/).</li>
+          </ul>
+        </div>
+        <div class="card">
+          <ul class="feature-list">
+            <li><span class="milestone-badge">HITO 5</span> <strong>Operaciones encadenadas:</strong> Recordar acumulado (ej: <code>5 + 3 + 2 = 10</code>).</li>
+            <li><span class="milestone-badge">HITO 6</span> <strong>Botón Borrar (C):</strong> Devolver toda la memoria a cero.</li>
+            <li><span class="milestone-badge">HITO 7</span> <strong>Casos límite:</strong> Manejar división por cero (<code>Error</code>) y redondeo decimal.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: Hito 1 -->
+    <section class="slide">
+      <span class="tag">Hito 1</span>
+      <h2>[HITO 1] Escribir Números en Pantalla</h2>
+      <p class="lead">Objetivo: Que al hacer clic en cualquier tecla del 0 al 9, el número aparezca en el display.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Lógica a implementar</div>
+          <ul class="feature-list">
+            <li>Si <code>reiniciarDisplay</code> es true, el nuevo número limpia la pantalla.</li>
+            <li>Si la pantalla tiene <code>'0'</code>, lo reemplazamos (para no mostrar "07").</li>
+            <li>En cualquier otro caso, concatenamos: <code>'1' + '2' = '12'</code>.</li>
+          </ul>
+          <div class="test-box">
+            🧪 <strong>Prueba del alumno:</strong> Pulsa 1, 2, 3 en la calculadora ➔ Debe verse <code>123</code>.
+          </div>
+        </div>
+        <div>
+          <pre><code><span class="kw">function</span> <span class="fn">agregarNumero</span>(numero) {
+    <span class="kw">if</span> (reiniciarDisplay) {
+        operandoActual = numero;
+        reiniciarDisplay = <span class="kw">false</span>;
+    } <span class="kw">else</span> {
+        operandoActual = (operandoActual === <span class="str">'0'</span>) 
+            ? numero 
+            : operandoActual + numero;
+    }
+    <span class="fn">actualizarDisplay</span>();
+}
+
+<span class="cm">// Escuchador a cada botón de número</span>
+botonesNumeros.<span class="fn">forEach</span>((boton) => {
+    boton.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () => {
+        <span class="fn">agregarNumero</span>(boton.dataset.numero);
+    });
+});</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: Hito 2 -->
+    <section class="slide">
+      <span class="tag">Hito 2</span>
+      <h2>[HITO 2] Guardar Memoria y Elegir Suma (+)</h2>
+      <p class="lead">Objetivo: Al pulsar '+', la calculadora guarda el primer número y prepara la pantalla.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">¿Qué hace la memoria?</div>
+          <ul class="feature-list">
+            <li>Guarda <code>operandoActual</code> en <code>operandoAnterior</code>.</li>
+            <li>Guarda el operador seleccionado en <code>operacion</code>.</li>
+            <li>Activa <code>reiniciarDisplay = true</code> para que el siguiente número empiece limpio y no se pegue al anterior.</li>
+          </ul>
+          <div class="test-box">
+            🧪 <strong>Prueba del alumno:</strong> Escribe <code>15</code>, pulsa <code>+</code>, escribe <code>4</code> ➔ En pantalla se ve <code>4</code> (el 15 está en memoria).
+          </div>
+        </div>
+        <div>
+          <pre><code><span class="kw">function</span> <span class="fn">seleccionarOperador</span>(nuevoOperador) {
+    <span class="cm">// Si ya había una operación pendiente, calcula primero</span>
+    <span class="kw">if</span> (operacion !== <span class="kw">null</span> && !reiniciarDisplay) {
+        <span class="fn">calcular</span>();
+    }
+
+    operandoAnterior = operandoActual;
+    operacion = nuevoOperador;
+    reiniciarDisplay = <span class="kw">true</span>;
+}
+
+<span class="cm">// Escuchador a cada operador</span>
+botonesOperadores.<span class="fn">forEach</span>((boton) => {
+    boton.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () => {
+        <span class="fn">seleccionarOperador</span>(boton.dataset.operador);
+    });
+});</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: Hito 3 -->
+    <section class="slide">
+      <span class="tag">Hito 3</span>
+      <h2>[HITO 3] Resolver con el Botón Igual (=)</h2>
+      <p class="lead">Objetivo: Al pulsar '=', convertir texto a número con <code>parseFloat()</code> y realizar la suma.</p>
+
+      <div class="grid-2">
+        <div>
+          <pre><code><span class="kw">function</span> <span class="fn">calcular</span>() {
+    <span class="kw">if</span> (operacion === <span class="kw">null</span> || operandoAnterior === <span class="kw">null</span>) <span class="kw">return</span>;
+
+    <span class="kw">const</span> anterior = <span class="fn">parseFloat</span>(operandoAnterior);
+    <span class="kw">const</span> actual = <span class="fn">parseFloat</span>(operandoActual);
+    <span class="kw">let</span> resultado;
+
+    <span class="kw">switch</span> (operacion) {
+        <span class="kw">case</span> <span class="str">'+'</span>:
+            resultado = anterior + actual;
+            <span class="kw">break</span>;
+    }
+
+    operandoActual = resultado.<span class="fn">toString</span>();
+    operacion = <span class="kw">null</span>;
+    operandoAnterior = <span class="kw">null</span>;
+    reiniciarDisplay = <span class="kw">true</span>;
+    <span class="fn">actualizarDisplay</span>();
+}
+
+<span class="cm">// Escuchador para la tecla =</span>
+botonIgual.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () => <span class="fn">calcular</span>());</code></pre>
+        </div>
+        <div class="card">
+          <div class="card-title">¡La primera suma funciona!</div>
+          <p style="font-size:0.95rem; color:#cbd5e1; line-height:1.6;">
+            Convertimos las cadenas de texto con <code>parseFloat()</code> porque si hiciéramos <code>"7" + "8"</code> en JavaScript resultaría en <code>"78"</code>.
+          </p>
+          <div class="test-box">
+            🧪 <strong>Prueba del alumno:</strong> Teclea <code>7</code> <code>+</code> <code>8</code> <code>=</code> ➔ La pantalla muestra <code>15</code>.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: Hito 4 -->
+    <section class="slide">
+      <span class="tag">Hito 4</span>
+      <h2>[HITO 4] Añadir Resta (-), Multiplicación (*) y División (/)</h2>
+      <p class="lead">Objetivo: Ampliar el <code>switch</code> de la función <code>calcular()</code> para cubrir las 4 operaciones básicas.</p>
+
+      <div class="grid-2">
+        <div>
+          <pre><code><span class="kw">switch</span> (operacion) {
+    <span class="kw">case</span> <span class="str">'+'</span>: 
+        resultado = anterior + actual; 
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'-'</span>: 
+        resultado = anterior - actual; 
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'*'</span>: 
+        resultado = anterior * actual; 
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'/'</span>:
+        resultado = (actual === <span class="num">0</span>) 
+            ? <span class="str">'Error'</span> 
+            : anterior / actual;
+        <span class="kw">break</span>;
+}</code></pre>
+        </div>
+        <div class="card">
+          <div class="card-title">Batería de Pruebas</div>
+          <div class="test-box">
+            🧪 <strong>Resta:</strong> <code>9 - 4 =</code> ➔ <strong>5</strong><br><br>
+            🧪 <strong>Multiplicación:</strong> <code>6 * 3 =</code> ➔ <strong>18</strong><br><br>
+            🧪 <strong>División:</strong> <code>20 / 4 =</code> ➔ <strong>5</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: Hito 5 -->
+    <section class="slide">
+      <span class="tag">Hito 5</span>
+      <h2>[HITO 5] Operaciones Encadenadas</h2>
+      <p class="lead">Objetivo: Que al escribir <code>5 + 3 + 2 =</code>, al pulsar el segundo <code>+</code> ya calcule automáticamente <code>8</code>.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">¿Cómo lo detectamos?</div>
+          <ul class="feature-list">
+            <li>Al pulsar cualquier operador, comprobamos si <code>operacion !== null</code>.</li>
+            <li>Si es así, invocamos a <code>calcular()</code> antes de asignar la nueva operación.</li>
+            <li>El usuario no necesita pulsar el botón <code>=</code> entre medias.</li>
+          </ul>
+          <div class="test-box">
+            🧪 <strong>Prueba del alumno:</strong> Teclea <code>5</code> <code>+</code> <code>3</code> <code>+</code> ➔ En el segundo <code>+</code> la pantalla se actualiza sola a <code>8</code>. Luego teclea <code>2</code> <code>=</code> ➔ Muestra <code>10</code>.
+          </div>
+        </div>
+        <div>
+          <pre><code><span class="kw">function</span> <span class="fn">seleccionarOperador</span>(nuevoOperador) {
+    <span class="cm">// Si ya había una operación y se introdujo un número:</span>
+    <span class="kw">if</span> (operacion !== <span class="kw">null</span> && !reiniciarDisplay) {
+        <span class="fn">calcular</span>(); <span class="cm">// Resuelve 5 + 3 = 8</span>
+    }
+
+    operandoAnterior = operandoActual; <span class="cm">// Memoriza 8</span>
+    operacion = nuevoOperador;         <span class="cm">// Memoriza el nuevo +</span>
+    reiniciarDisplay = <span class="kw">true</span>;
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: Hito 6 -->
+    <section class="slide">
+      <span class="tag">Hito 6</span>
+      <h2>[HITO 6] Botón de Borrado (Tecla 'C')</h2>
+      <p class="lead">Objetivo: Devolver la calculadora y sus variables a los valores iniciales de fábrica.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Reset Completo</div>
+          <ul class="feature-list">
+            <li><code>operandoActual = '0'</code></li>
+            <li><code>operandoAnterior = null</code></li>
+            <li><code>operacion = null</code></li>
+            <li><code>reiniciarDisplay = false</code></li>
+          </ul>
+          <div class="test-box">
+            🧪 <strong>Prueba del alumno:</strong> Escribe <code>999</code>, pulsa <code>C</code> ➔ La pantalla vuelve limpiamente a <code>0</code>.
+          </div>
+        </div>
+        <div>
+          <pre><code><span class="kw">function</span> <span class="fn">borrar</span>() {
+    operandoActual = <span class="str">'0'</span>;
+    operandoAnterior = <span class="kw">null</span>;
+    operacion = <span class="kw">null</span>;
+    reiniciarDisplay = <span class="kw">false</span>;
+    <span class="fn">actualizarDisplay</span>();
+}
+
+<span class="cm">// Escuchador para la tecla C</span>
+botonBorrar.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () => <span class="fn">borrar</span>());</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 9: Hito 7 -->
+    <section class="slide">
+      <span class="tag">Hito 7</span>
+      <h2>[HITO 7] Casos Límite y Afinamiento</h2>
+      <p class="lead">Objetivo: Blindar la calculadora ante errores matemáticos e imprecisiones de JavaScript.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">1. División por Cero</div>
+          <p style="font-size:0.9rem; color:#cbd5e1; margin-bottom:8px;">Evitamos que aparezca <code>Infinity</code> protegiendo la división:</p>
+          <pre><code><span class="kw">if</span> (actual === <span class="num">0</span>) {
+    resultado = <span class="str">'Error'</span>;
+} <span class="kw">else</span> {
+    resultado = anterior / actual;
+}</code></pre>
+          <div class="test-box">
+            🧪 <strong>Prueba:</strong> <code>8 / 0 =</code> ➔ <strong>Error</strong>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">2. Redondeo Decimal</div>
+          <p style="font-size:0.9rem; color:#cbd5e1; margin-bottom:8px;">En JS, <code>0.1 + 0.2 = 0.30000000000000004</code>. Lo arreglamos redondeando:</p>
+          <pre><code><span class="kw">if</span> (<span class="kw">typeof</span> resultado === <span class="str">'number'</span>) {
+    resultado = <span class="obj">Math</span>.<span class="fn">round</span>(resultado * <span class="num">100000000</span>) / <span class="num">100000000</span>;
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 10: Checklist final -->
+    <section class="slide">
+      <span class="tag">Evaluación</span>
+      <h2>¡Calculadora Completa!</h2>
+      <p class="lead">Comprueba la lista de verificación final con tus alumnos:</p>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">✅ Entrada</div>
+          <ul class="feature-list">
+            <li>Números se escriben sin 0 inicial</li>
+            <li>Concatenación correcta</li>
+            <li>Display se limpia tras operador</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">✅ Operaciones</div>
+          <ul class="feature-list">
+            <li>Suma, Resta, Multiplicación, División</li>
+            <li>Cálculo encadenado automático</li>
+            <li>Botón igual muestra total</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">✅ Robustez</div>
+          <ul class="feature-list">
+            <li>División por cero da "Error"</li>
+            <li>Botón C resetea todo a 0</li>
+            <li>Código modular y limpio</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div>Atajos: <kbd>◀</kbd> <kbd>▶</kbd> o <kbd>Espacio</kbd> | Pantalla completa: <kbd>F</kbd></div>
+    <div>Práctica Calculadora JS &bull; Por Hitos de Funcionamiento</div>
+  </footer>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const counter = document.getElementById('slideCounter');
+    const progressBar = document.getElementById('progressBar');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnFullscreen = document.getElementById('btnFullscreen');
+
+    let currentSlide = 0;
+    const totalSlides = slides.length;
+
+    function updateSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= totalSlides) index = totalSlides - 1;
+
+      currentSlide = index;
+
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === currentSlide);
+      });
+
+      counter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+      progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+
+      btnPrev.disabled = currentSlide === 0;
+      btnNext.textContent = currentSlide === totalSlides - 1 ? 'Finalizar' : 'Siguiente ▶';
+    }
+
+    btnPrev.addEventListener('click', () => updateSlide(currentSlide - 1));
+    btnNext.addEventListener('click', () => updateSlide(currentSlide + 1));
+
+    btnFullscreen.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        updateSlide(currentSlide + 1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        updateSlide(currentSlide - 1);
+      } else if (e.key === 'Home') {
+        updateSlide(0);
+      } else if (e.key === 'End') {
+        updateSlide(totalSlides - 1);
+      } else if (e.key.toLowerCase() === 'f') {
+        btnFullscreen.click();
+      }
+    });
+
+    updateSlide(0);
+  </script>
+</body>
+</html>
