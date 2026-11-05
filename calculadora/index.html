@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Calculadora</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+
+    <main class="calculadora" aria-label="Calculadora">
+
+        <!-- Display: aquí mostrarás lo que se teclea y el resultado -->
+        <output id="display" class="display" aria-live="polite">0</output>
+
+        <!-- Teclado -->
+        <div class="teclado">
+
+            <button type="button" class="tecla tecla--borrar" data-accion="borrar">C</button>
+            <button type="button" class="tecla tecla--operador" data-operador="/">/</button>
+
+            <button type="button" class="tecla" data-numero="7">7</button>
+            <button type="button" class="tecla" data-numero="8">8</button>
+            <button type="button" class="tecla" data-numero="9">9</button>
+            <button type="button" class="tecla tecla--operador" data-operador="*">*</button>
+
+            <button type="button" class="tecla" data-numero="4">4</button>
+            <button type="button" class="tecla" data-numero="5">5</button>
+            <button type="button" class="tecla" data-numero="6">6</button>
+            <button type="button" class="tecla tecla--operador" data-operador="-">-</button>
+
+            <button type="button" class="tecla" data-numero="1">1</button>
+            <button type="button" class="tecla" data-numero="2">2</button>
+            <button type="button" class="tecla" data-numero="3">3</button>
+            <button type="button" class="tecla tecla--operador" data-operador="+">+</button>
+
+            <button type="button" class="tecla tecla--cero" data-numero="0">0</button>
+            <button type="button" class="tecla tecla--igual" data-accion="igual">=</button>
+
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
