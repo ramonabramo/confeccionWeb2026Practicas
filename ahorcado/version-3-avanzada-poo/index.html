@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Juego del Ahorcado - Versión 3: Avanzada con POO, Audio y Estadísticas</title>
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+
+  <!-- Canvas para animación de Confeti en Victoria -->
+  <canvas id="canvas-confeti" class="canvas-confeti"></canvas>
+
+  <div class="contenedor-principal">
+    <!-- Barra Superior: Ajustes, Dificultad y Estadísticas -->
+    <header class="cabecera">
+      <div class="barra-superior">
+        <div class="dificultad-selector">
+          <label for="select-dificultad" class="label-dificultad">Dificultad:</label>
+          <select id="select-dificultad" class="select-personalizado">
+            <option value="facil">🟢 Fácil (8 vidas + 2 letras)</option>
+            <option value="medio" selected>🟡 Normal (6 vidas)</option>
+            <option value="dificil">🔴 Difícil (5 vidas + 45s)</option>
+          </select>
+        </div>
+
+        <div class="herramientas-cabecera">
+          <button id="btn-audio" class="btn-icono" title="Activar/Silenciar efectos sonoros" aria-label="Control de sonido">
+            <span id="icono-audio">🔊</span>
+          </button>
+          <button id="btn-stats" class="btn-icono" title="Ver estadísticas globales" aria-label="Abrir panel de estadísticas">
+            📊
+          </button>
+        </div>
+      </div>
+
+      <div class="titulo-area">
+        <span class="badge">Nivel 3: Arquitectura POO & Audio</span>
+        <h1>🎮 El Juego del Ahorcado Pro</h1>
+        <div class="categoria-pista-wrapper">
+          <div class="categoria-pill">
+            <span class="pill-etiqueta">Categoría:</span>
+            <span id="categoria-display" class="pill-valor">Cargando...</span>
+          </div>
+          <button id="btn-pista" class="btn-pista-pro">💡 Pedir Pista</button>
+        </div>
+      </div>
+
+      <!-- Barra de tiempo (se activa en modo difícil) -->
+      <div id="caja-temporizador" class="caja-temporizador oculta">
+        <div class="temporizador-meta">
+          <span>⏱️ Tiempo restante:</span>
+          <span id="tiempo-texto" class="tiempo-texto">45s</span>
+        </div>
+        <div class="barra-tiempo-fondo">
+          <div id="barra-tiempo-fill" class="barra-tiempo-fill"></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="juego-grid">
+      <!-- Panel Gráfico del Ahorcado -->
+      <section class="panel-grafico" aria-label="Lienzo del Ahorcado">
+        <div class="escenario-svg">
+          <svg id="svg-ahorcado" viewBox="0 0 220 260" class="canvas-ahorcado">
+            <!-- Horca -->
+            <line x1="20" y1="240" x2="110" y2="240" class="trazo-horca base" />
+            <line x1="55" y1="240" x2="55" y2="20" class="trazo-horca poste" />
+            <line x1="55" y1="20" x2="155" y2="20" class="trazo-horca viga" />
+            <line x1="55" y1="60" x2="95" y2="20" class="trazo-horca escuadra" />
+            <line x1="155" y1="20" x2="155" y2="52" class="trazo-cuerda" />
+
+            <!-- Personaje (hasta 8 partes para modo fácil) -->
+            <!-- 1: Cabeza -->
+            <circle id="parte-cabeza" cx="155" cy="74" r="21" class="trazo-cuerpo parte-oculta" />
+            <!-- 2: Tronco -->
+            <line id="parte-cuerpo" x1="155" y1="95" x2="155" y2="160" class="trazo-cuerpo parte-oculta" />
+            <!-- 3: Brazo izquierdo -->
+            <line id="parte-brazo-izq" x1="155" y1="112" x2="125" y2="145" class="trazo-cuerpo parte-oculta" />
+            <!-- 4: Brazo derecho -->
+            <line id="parte-brazo-der" x1="155" y1="112" x2="185" y2="145" class="trazo-cuerpo parte-oculta" />
+            <!-- 5: Pierna izquierda -->
+            <line id="parte-pierna-izq" x1="155" y1="160" x2="130" y2="210" class="trazo-cuerpo parte-oculta" />
+            <!-- 6: Pierna derecha -->
+            <line id="parte-pierna-der" x1="155" y1="160" x2="180" y2="210" class="trazo-cuerpo parte-oculta" />
+            <!-- 7: Mano izquierda (modo fácil) -->
+            <circle id="parte-mano-izq" cx="123" cy="147" r="4" class="trazo-cuerpo parte-oculta" />
+            <!-- 8: Mano derecha (modo fácil) -->
+            <circle id="parte-mano-der" cx="187" cy="147" r="4" class="trazo-cuerpo parte-oculta" />
+
+            <!-- Expresión de Derrota -->
+            <g id="parte-cara-derrota" class="parte-oculta">
+              <line x1="146" y1="68" x2="152" y2="74" class="trazo-cara" />
+              <line x1="152" y1="68" x2="146" y2="74" class="trazo-cara" />
+              <line x1="158" y1="68" x2="164" y2="74" class="trazo-cara" />
+              <line x1="164" y1="68" x2="158" y2="74" class="trazo-cara" />
+              <path d="M 148 84 Q 155 77 162 84" class="trazo-cara" fill="none" />
+            </g>
+          </svg>
+        </div>
+
+        <!-- Indicador de Vidas -->
+        <div class="marcador-vidas">
+          <div class="vidas-cabecera">
+            <span class="vidas-label">Vidas restantes:</span>
+            <span id="vidas-numero" class="vidas-numero">6 / 6</span>
+          </div>
+          <div class="barra-salud-fondo">
+            <div id="barra-salud-fill" class="barra-salud-fill"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel Derecho: Tablero de Juego -->
+      <section class="panel-juego">
+        <!-- Pista desplegable -->
+        <div id="caja-pista" class="caja-pista oculta">
+          <span class="pista-icono">💡</span>
+          <span id="texto-pista" class="texto-pista"></span>
+        </div>
+
+        <!-- Casillas de la Palabra -->
+        <div class="caja-palabra">
+          <div id="palabra-display" class="palabra-display" aria-live="polite"></div>
+        </div>
+
+        <!-- Teclado Virtual Pro -->
+        <div class="seccion-teclado">
+          <div class="teclado-encabezado">
+            <span>Elige una letra:</span>
+            <span class="teclado-atajo">⌨️ Soporte de teclado físico activo</span>
+          </div>
+          <div id="teclado-virtual" class="teclado-virtual" role="group"></div>
+        </div>
+
+        <!-- Mensaje de Feedback -->
+        <div id="mensaje-estado" class="mensaje-alerta">Partida lista. ¡Selecciona tu primera letra!</div>
+
+        <!-- Botón Reinicio Rápido -->
+        <div class="acciones-partida">
+          <button id="btn-nueva-partida" class="btn btn-secundario">🔄 Nueva Palabra</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="pie-pagina">
+      <p>Práctica de JavaScript • <strong>Versión 3: Arquitectura POO y Persistencia</strong> • Profesor Ramón Abramo</p>
+    </footer>
+  </div>
+
+  <!-- Modal de Fin de Partida -->
+  <div id="modal-fin" class="modal-overlay oculta" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div id="modal-icono" class="modal-icono">🏆</div>
+      <h2 id="modal-titulo" class="modal-titulo">¡Victoria!</h2>
+      <p id="modal-descripcion" class="modal-descripcion"></p>
+      
+      <div class="modal-stats-rapidas">
+        <div class="stat-caja">
+          <span class="stat-cifra" id="modal-stat-racha">0</span>
+          <span class="stat-tag">Racha</span>
+        </div>
+        <div class="stat-caja">
+          <span class="stat-cifra" id="modal-stat-tiempo">0s</span>
+          <span class="stat-tag">Tiempo</span>
+        </div>
+        <div class="stat-caja">
+          <span class="stat-cifra" id="modal-stat-vidas">0</span>
+          <span class="stat-tag">Vidas</span>
+        </div>
+      </div>
+
+      <button id="modal-btn-jugar" class="btn btn-primario-grande">Jugar Otra Vez</button>
+    </div>
+  </div>
+
+  <!-- Modal de Estadísticas Globales -->
+  <div id="modal-estadisticas" class="modal-overlay oculta" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header-cerrar">
+        <h2>📊 Estadísticas del Jugador</h2>
+        <button id="btn-cerrar-stats" class="btn-cerrar" aria-label="Cerrar modal">✕</button>
+      </div>
+
+      <div class="grid-estadisticas">
+        <div class="stat-box-global">
+          <span class="stat-numero" id="stat-partidas">0</span>
+          <span class="stat-nombre">Partidas Jugadas</span>
+        </div>
+        <div class="stat-box-global">
+          <span class="stat-numero" id="stat-porcentaje">0%</span>
+          <span class="stat-nombre">% Victorias</span>
+        </div>
+        <div class="stat-box-global">
+          <span class="stat-numero" id="stat-racha-actual">0</span>
+          <span class="stat-nombre">Racha Actual</span>
+        </div>
+        <div class="stat-box-global">
+          <span class="stat-numero" id="stat-mejor-racha">0</span>
+          <span class="stat-nombre">Récord de Racha</span>
+        </div>
+      </div>
+
+      <button id="btn-resetear-stats" class="btn-reset-stats">Restablecer Historial</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía del alumno · Calculadora paso a paso — Ramón Abramo</title>
+<style>
+  :root {
+    --bg: #0f172a; --card: #1e293b; --borde: #334155; --texto: #f1f5f9; --suave: #94a3b8;
+    --code-bg: #0a0f1c; --v0: #f59e0b; --v1: #a78bfa; --v2: #38bdf8; --ok: #10b981; --mal: #f43f5e; --acento: #38bdf8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--texto); display: flex; flex-direction: column; overflow: hidden; font-size: 18px; }
+
+  header { display: flex; justify-content: space-between; align-items: center; padding: 10px 24px; border-bottom: 1px solid var(--borde); background: rgba(15,23,42,.9); gap: 16px; }
+  .marca { font-weight: 700; color: var(--acento); font-size: .95rem; white-space: nowrap; }
+  .seccion-actual { font-size: .85rem; color: var(--suave); flex: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav { display: flex; gap: 8px; align-items: center; }
+  .btn { background: var(--card); border: 1px solid var(--borde); color: var(--texto); padding: 6px 12px; border-radius: 8px; font-size: .85rem; cursor: pointer; text-decoration: none; display: inline-block; }
+  .btn:hover { border-color: var(--acento); }
+  .contador { font-size: .85rem; color: var(--suave); min-width: 64px; text-align: center; font-variant-numeric: tabular-nums; }
+  .barra { height: 4px; background: var(--borde); }
+  .barra > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--v0), var(--v1), var(--v2)); transition: width .3s; }
+
+  main { flex: 1; display: flex; overflow: hidden; }
+  .escenario { flex: 1; display: flex; align-items: center; justify-content: center; padding: 22px; overflow-y: auto; }
+
+  .slide { display: none; width: 100%; max-width: 1200px; background: var(--card); border: 1px solid var(--borde); border-radius: 18px; padding: 28px 38px; box-shadow: 0 25px 50px -12px rgba(0,0,0,.5); animation: entra .25s ease-out; margin: auto 0; }
+  .slide.activa { display: block; }
+  @keyframes entra { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .slide.v0 { border-top: 6px solid var(--v0); } .slide.v1 { border-top: 6px solid var(--v1); } .slide.v2 { border-top: 6px solid var(--v2); } .slide.fin { border-top: 6px solid var(--ok); }
+
+  .etiqueta { display: inline-block; font-size: .72rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; color: var(--suave); }
+  .v0 .etiqueta { color: var(--v0); } .v1 .etiqueta { color: var(--v1); } .v2 .etiqueta { color: var(--v2); } .fin .etiqueta { color: var(--ok); }
+  h1 { font-size: 2.5rem; line-height: 1.15; margin-bottom: 14px; }
+  h2 { font-size: 1.75rem; margin-bottom: 14px; line-height: 1.2; }
+  h3 { font-size: 1.05rem; margin: 8px 0 8px; }
+  p { line-height: 1.55; margin-bottom: 10px; }
+  .lead { font-size: 1.15rem; color: #cbd5e1; }
+  .suave { color: var(--suave); }
+  strong { color: #fff; }
+  code { font-family: "Cascadia Code", Consolas, "Courier New", monospace; background: rgba(148,163,184,.15); padding: 1px 6px; border-radius: 5px; font-size: .9em; }
+  sup.cita { color: var(--acento); font-size: .7em; font-weight: 700; }
+  ul, ol { margin: 0 0 10px 22px; line-height: 1.5; }
+  li { margin-bottom: 5px; }
+
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
+  .g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: start; }
+  .caja { background: rgba(15,23,42,.6); border: 1px solid var(--borde); border-radius: 12px; padding: 14px 18px; }
+  .caja h3 { margin-top: 0; }
+  .caja.v0c { border-color: var(--v0); } .caja.v1c { border-color: var(--v1); } .caja.v2c { border-color: var(--v2); }
+  .t0 { color: var(--v0); } .t1 { color: var(--v1); } .t2 { color: var(--v2); }
+
+  .objetivo { background: rgba(56,189,248,.1); border-left: 5px solid var(--acento); border-radius: 8px; padding: 10px 14px; margin-bottom: 10px; }
+  .objetivo::before { content: "🎯 Objetivo: "; font-weight: 700; color: var(--acento); }
+  .donde { font-size: .92rem; color: #cbd5e1; margin-bottom: 8px; }
+  .donde::before { content: "📍 Dónde: "; font-weight: 700; color: #fff; }
+  .analogia { background: rgba(245,158,11,.1); border-left: 5px solid var(--v0); border-radius: 8px; padding: 10px 14px; margin: 10px 0; }
+  .analogia::before { content: "🍳 Para entenderlo: "; font-weight: 700; color: var(--v0); }
+  .ojo { background: rgba(244,63,94,.12); border-left: 5px solid var(--mal); border-radius: 8px; padding: 10px 14px; margin: 10px 0; font-size: .95rem; }
+  .ojo::before { content: "🆘 Si no funciona: "; font-weight: 700; color: #fda4af; }
+  .ojo.aviso::before { content: "⚠️ Ojo: "; }
+  .prueba { background: rgba(16,185,129,.12); border-left: 5px solid var(--ok); border-radius: 8px; padding: 10px 14px; margin: 10px 0; font-size: .95rem; }
+  .prueba::before { content: "✅ Comprobadlo: "; font-weight: 700; color: #6ee7b7; }
+
+  pre { background: var(--code-bg); border: 1px solid #1e293b; border-radius: 12px; padding: 12px 14px; overflow-x: auto; font-size: .8rem; line-height: 1.5; margin-bottom: 10px; }
+  pre code { background: none; padding: 0; font-size: 1em; color: #e2e8f0; }
+  .k { color: #c084fc; } .s { color: #86efac; } .c { color: #64748b; font-style: italic; } .n { color: #fbbf24; } .f { color: #7dd3fc; }
+
+  details.solucion { border: 1px dashed var(--borde); border-radius: 10px; padding: 8px 12px; margin: 10px 0; }
+  details.solucion summary { cursor: pointer; font-weight: 700; color: var(--v0); list-style: none; }
+  details.solucion summary::-webkit-details-marker { display: none; }
+  details.solucion summary::before { content: "👀 "; }
+  details.solucion[open] summary { margin-bottom: 8px; }
+  details.solucion pre { max-height: 44vh; overflow: auto; }
+  details.solucion[open] summary::after { content: " (pulsad para ocultar)"; color: var(--suave); font-weight: 400; }
+
+  label.hecho { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; background: rgba(16,185,129,.1); border: 1px solid var(--ok); border-radius: 999px; padding: 6px 14px; font-weight: 600; font-size: .9rem; margin-top: 6px; }
+  label.hecho input { width: 18px; height: 18px; accent-color: var(--ok); }
+
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; margin-bottom: 10px; }
+  th, td { padding: 7px 10px; border-bottom: 1px solid var(--borde); text-align: left; vertical-align: top; }
+  th { background: rgba(15,23,42,.8); color: var(--acento); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+
+  .portada { text-align: center; padding: 46px 40px; }
+  .portada .numero { font-size: 5.5rem; font-weight: 900; line-height: 1; }
+  .v0 .numero { color: var(--v0); } .v1 .numero { color: var(--v1); } .v2 .numero { color: var(--v2); }
+  .portada p.lead { max-width: 780px; margin: 10px auto 0; }
+  .ruta { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px; }
+  .ruta span { background: rgba(15,23,42,.7); border: 1px solid var(--borde); border-radius: 999px; padding: 4px 12px; font-size: .85rem; }
+
+  .camino a { text-decoration: none; color: inherit; display: block; }
+  .camino .caja:hover { transform: translateY(-2px); transition: .15s; }
+  .progreso { height: 8px; background: var(--borde); border-radius: 999px; overflow: hidden; margin-top: 8px; }
+  .progreso > div { height: 100%; width: 0; transition: width .3s; }
+  .progreso.p0 > div { background: var(--v0); } .progreso.p1 > div { background: var(--v1); } .progreso.p2 > div { background: var(--v2); }
+
+  .ciclo { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 10px 0; }
+  .ciclo span { background: rgba(15,23,42,.7); border: 1px solid var(--acento); border-radius: 10px; padding: 8px 14px; font-weight: 700; }
+  .ciclo b { color: var(--acento); }
+
+  .pie-ayuda { font-size: .75rem; color: var(--suave); text-align: center; padding: 6px; border-top: 1px solid var(--borde); }
+  kbd { background: #334155; border-radius: 4px; padding: 1px 6px; font-size: .75rem; font-family: inherit; }
+  .fuentes li { font-size: .86rem; margin-bottom: 3px; }
+  .fuentes a { color: var(--acento); }
+
+  @media (max-width: 900px) { .g2, .g3 { grid-template-columns: 1fr; } body { font-size: 16px; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="marca">🖩 Guía del alumno · Calculadora JS</div>
+  <div class="seccion-actual" id="seccionActual"></div>
+  <div class="nav">
+    <button class="btn" id="btnInicio" title="Volver a «Elige tu camino»">🧭 Caminos</button>
+    <button class="btn" id="btnPantalla" title="Pantalla completa (F)">⛶</button>
+    <button class="btn" id="btnAnt">◀</button>
+    <span class="contador" id="contador">1 / 1</span>
+    <button class="btn" id="btnSig">▶</button>
+  </div>
+</header>
+<div class="barra"><div id="barra"></div></div>
+
+<main><div class="escenario" id="escenario">
+
+<!-- ===================================================================== -->
+<!-- PORTADA Y PREPARACIÓN -->
+<!-- ===================================================================== -->
+<section class="slide portada" data-seccion="Antes de empezar">
+  <span class="etiqueta">Guía del alumno · JavaScript en el navegador</span>
+  <h1>Vuestra calculadora,<br>paso a paso</h1>
+  <p class="lead">Buenas, soy Ramón Abramo, profesor con más de 25 años de experiencia docente. Esta guía os lleva de la mano para programar la calculadora de tres formas distintas. Un paso por diapositiva, una prueba al final de cada paso y la solución escondida por si os atascáis.</p>
+  <p class="suave" style="margin-top:18px">Avanzad con <kbd>→</kbd> o con los botones de arriba.</p>
+</section>
+
+<section class="slide" data-seccion="Antes de empezar">
+  <span class="etiqueta">Antes de empezar · Preparad el sitio de trabajo</span>
+  <h2>Lo que necesitáis tener abierto</h2>
+  <div class="g2">
+    <div>
+      <ol>
+        <li>Abrid la carpeta de la solución que vais a hacer en vuestro editor (Visual Studio Code, por ejemplo).</li>
+        <li>Dentro tenéis <code>index.html</code>, <code>main.css</code> y <code>app.js</code>. <strong>Solo vais a tocar <code>app.js</code></strong>, que es la plantilla con los comentarios <code>TODO</code>.</li>
+        <li>Abrid <code>index.html</code> en el navegador (doble clic o con la extensión Live Server).</li>
+        <li>Pulsad <kbd>F12</kbd> y abrid la pestaña <strong>Consola</strong>. Ahí aparecen los errores y ahí podréis probar cosas<sup class="cita">[1]</sup>.</li>
+      </ol>
+      <div class="ojo aviso">el HTML y el CSS ya están hechos. Si cambiáis los atributos <code>data-</code> de los botones, el JavaScript dejará de encontrarlos.</div>
+    </div>
+    <div>
+      <h3>El ciclo que vais a repetir mil veces</h3>
+      <div class="ciclo"><span>✍️ Escribir</span><b>→</b><span>💾 Guardar</span><b>→</b><span>🔄 Recargar (F5)</span><b>→</b><span>🧪 Probar</span></div>
+      <p>Parece una tontería, pero la mitad de las dudas que me llegan son de alguien que no ha guardado o no ha recargado. Si cambiáis el código y la página sigue igual, sospechad primero de eso.</p>
+      <p>Y una regla de oro: <strong>no paséis al siguiente paso hasta que la prueba del actual salga bien</strong>. Si acumuláis cinco pasos sin probar y algo falla, no sabréis cuál de los cinco ha sido.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-seccion="Antes de empezar">
+  <span class="etiqueta">Antes de empezar · Cómo se usa esta guía</span>
+  <h2>Así es cada diapositiva de paso</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">lo que tiene que pasar en pantalla cuando terminéis el paso.</div>
+      <p class="donde">en qué bloque <code>TODO</code> de vuestro <code>app.js</code> tenéis que escribir.</p>
+      <h3>Pistas, en orden</h3>
+      <p>Una lista de lo que hay que escribir, contado con palabras. Intentad convertirla en código vosotros solos.</p>
+    </div>
+    <div>
+      <div class="prueba">qué teclas pulsar y qué tiene que salir.</div>
+      <div class="ojo">los fallos más típicos de ese paso y cómo arreglarlos.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary><p>Aquí aparece el código del paso. Copiarlo sin pensar es como mirar la última página de un sudoku: lo terminas, pero no has aprendido nada.</p></details>
+      <label class="hecho"><input type="checkbox" data-paso="demo"> ¡Hecho! Funciona en pantalla</label>
+      <p class="suave" style="margin-top:8px">Las casillas «Hecho» se quedan guardadas en vuestro navegador, así que mañana sabréis por dónde ibais.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-seccion="Antes de empezar">
+  <span class="etiqueta">Antes de empezar · El HTML que ya tenéis</span>
+  <h2>Cada botón lleva una etiqueta pegada</h2>
+  <div class="g2">
+<pre><code class="js-html">&lt;output id="display" class="display"&gt;0&lt;/output&gt;
+
+&lt;div class="teclado"&gt;
+  &lt;button data-accion="borrar"&gt;C&lt;/button&gt;
+  &lt;button data-operador="/"&gt;/&lt;/button&gt;
+  &lt;button data-numero="7"&gt;7&lt;/button&gt;
+  ...
+  &lt;button data-operador="+"&gt;+&lt;/button&gt;
+  &lt;button data-numero="0"&gt;0&lt;/button&gt;
+  &lt;button data-accion="igual"&gt;=&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+    <div>
+      <p>Hay tres tipos de botones, y se distinguen por su atributo <code>data-</code>:</p>
+      <ul>
+        <li><code>data-numero</code> → del <code>0</code> al <code>9</code> (10 botones).</li>
+        <li><code>data-operador</code> → <code>+</code> <code>-</code> <code>*</code> <code>/</code> (4 botones).</li>
+        <li><code>data-accion</code> → <code>igual</code> y <code>borrar</code> (2 botones).</li>
+      </ul>
+      <div class="analogia">son como las etiquetas de los botes de la cocina: todos los botes son iguales, pero la etiqueta os dice qué hay dentro.</div>
+      <p>Desde JavaScript, <code>data-numero="7"</code> se lee como <code>boton.dataset.numero</code> y vale <code>'7'</code>, <strong>con comillas</strong>: es texto<sup class="cita">[2]</sup>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-seccion="Antes de empezar">
+  <span class="etiqueta">Antes de empezar · La memoria de la calculadora</span>
+  <h2>Cuatro cosas que la calculadora tiene que recordar</h2>
+  <div class="g2">
+    <div>
+      <p>Pensad en lo que pasa cuando tecleáis <code>15</code> <code>+</code> <code>4</code> <code>=</code>. Para poder decir <code>19</code>, la calculadora necesita tener apuntado:</p>
+      <ol>
+        <li><strong>Lo que hay ahora en pantalla</strong> → <code>4</code></li>
+        <li><strong>El número de antes</strong> → <code>15</code></li>
+        <li><strong>La operación pendiente</strong> → <code>+</code></li>
+        <li><strong>Una bandera</strong> que diga: «el próximo dígito empieza un número nuevo, no lo pegues al de antes».</li>
+      </ol>
+      <div class="analogia">un camarero con su libreta. Apunta el primer plato, qué queréis hacer con él y luego el segundo. Si no apunta, se le olvida.</div>
+    </div>
+    <div>
+      <table>
+        <tr><th>Qué guarda</th><th class="t0">Solución 0</th><th class="t1">Soluciones 1 y 2</th></tr>
+        <tr><td>Lo de la pantalla</td><td>la propia pantalla</td><td><code>operandoActual</code></td></tr>
+        <tr><td>El número de antes</td><td><code>numeroAnterior</code></td><td><code>operandoAnterior</code></td></tr>
+        <tr><td>La operación</td><td><code>operadorPendiente</code></td><td><code>operacion</code></td></tr>
+        <tr><td>La bandera</td><td><code>empezarNumero</code></td><td><code>reiniciarDisplay</code></td></tr>
+      </table>
+      <p>Estas variables <strong>ya están declaradas</strong> en vuestra plantilla. No las borréis ni las cambiéis de nombre.</p>
+      <p class="suave">Sin la bandera, al teclear <code>15 + 4</code> veríais <code>154</code>. Y eso no es una suma.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-seccion="Antes de empezar">
+  <span class="etiqueta">Antes de empezar · Las herramientas</span>
+  <h2>Las piezas de JavaScript que vais a usar</h2>
+  <div class="g3">
+    <div class="caja">
+      <h3>Buscar botones</h3>
+      <p><code>querySelectorAll</code> busca <strong>todos</strong> los elementos que cumplen un selector<sup class="cita">[3]</sup>. <code>querySelector</code> devuelve solo <strong>el primero</strong><sup class="cita">[4]</sup>.</p>
+<pre><code class="js">document.querySelectorAll('[data-numero]');
+document.querySelector('.teclado');</code></pre>
+    </div>
+    <div class="caja">
+      <h3>Recorrer una lista</h3>
+      <p><code>forEach</code> hace lo mismo con cada elemento de la lista, uno tras otro<sup class="cita">[5]</sup>.</p>
+<pre><code class="js">numeros.forEach(boton => {
+  // "boton" es cada uno
+});</code></pre>
+    </div>
+    <div class="caja">
+      <h3>Reaccionar al clic</h3>
+      <p><code>addEventListener</code> dice: «cuando te hagan clic, ejecuta esto»<sup class="cita">[6]</sup>.</p>
+<pre><code class="js">boton.addEventListener('click', () => {
+  // esto pasa al hacer clic
+});</code></pre>
+    </div>
+  </div>
+  <p>Y para escribir en la pantalla de la calculadora, <code>pantalla.textContent = '7'</code>. Para leerla, <code>pantalla.textContent</code> a secas<sup class="cita">[7]</sup>. Siempre es texto.</p>
+</section>
+
+<section class="slide" data-seccion="Elige tu camino" id="caminos">
+  <span class="etiqueta">Elige tu camino</span>
+  <h2>Tres soluciones, la misma calculadora</h2>
+  <p class="lead">Pulsad en la que vayáis a hacer. Mi consejo: empezad por la 0, seguid con la 1 y dejad la 2 para el final. Cada una se apoya en lo que aprendéis en la anterior.</p>
+  <div class="g3 camino">
+    <a href="#" data-ir="s0"><div class="caja v0c"><h3 class="t0">0 · La solución de clase</h3><p class="suave">Tres grupos de botones y una función <code>calcular()</code> que recibe los datos y devuelve el resultado.</p><div class="progreso p0"><div></div></div><p class="suave" style="font-size:.8rem;margin-top:4px" data-progreso="v0"></p></div></a>
+    <a href="#" data-ir="s1"><div class="caja v1c"><h3 class="t1">1 · Un escuchador por botón</h3><p class="suave">Cada botón avisa a una función con nombre propio: <code>agregarNumero</code>, <code>calcular</code>…</p><div class="progreso p1"><div></div></div><p class="suave" style="font-size:.8rem;margin-top:4px" data-progreso="v1"></p></div></a>
+    <a href="#" data-ir="s2"><div class="caja v2c"><h3 class="t2">2 · Delegación de eventos</h3><p class="suave">Un solo escuchador en todo el teclado. Las funciones son las mismas que en la 1.</p><div class="progreso p2"><div></div></div><p class="suave" style="font-size:.8rem;margin-top:4px" data-progreso="v2"></p></div></a>
+  </div>
+  <p style="margin-top:14px"><a href="#" class="btn" data-ir="final">🧪 Ir a la lista de comprobación final</a> <a href="#" class="btn" data-ir="errores">🆘 Mensajes de error de la consola</a></p>
+</section>
+
+<!-- ===================================================================== -->
+<!-- SOLUCIÓN 0 -->
+<!-- ===================================================================== -->
+<section class="slide v0 portada" data-seccion="Solución 0 · La de clase" id="s0">
+  <div class="numero">0</div>
+  <span class="etiqueta">Solución 0 · Carpeta version-0-solucion-clase</span>
+  <h1>La solución de clase</h1>
+  <p class="lead">Primero construiremos una función que solo hace cuentas. Después, agruparemos los botones en tres montones (números, operadores y acciones) y le daremos a cada montón su escuchador.</p>
+  <div class="ruta"><span>1 · calcular()</span><span>2 · Botones</span><span>3 · Hito 1</span><span>4 · Hito 2</span><span>5 · Hito 3</span><span>6 · Hito 4</span><span>7 · Hito 5</span><span>8 · Hito 6</span><span>9 · Hito 7</span></div>
+</section>
+
+<section class="slide v0" data-seccion="Solución 0 · Paso 1">
+  <span class="etiqueta">Solución 0 · Paso 1 de 9 · Preparativos</span>
+  <h2>La función <code>calcular()</code></h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">una función que recibe dos números y una operación, y devuelve el resultado. No toca la pantalla ni ninguna variable de fuera.</div>
+      <p class="donde">bloque <code>TODO 0.1</code>, dentro de <code>function calcular(numero1, numero2, operacion)</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Escribid un <code>switch (operacion)</code><sup class="cita">[8]</sup>.</li>
+        <li>Un <code>case</code> para cada operador: <code>'+'</code>, <code>'-'</code>, <code>'*'</code> y <code>'/'</code>. En cada uno, guardad la cuenta en <code>resultado</code>.</li>
+        <li>Terminad cada <code>case</code> con <code>break</code>.</li>
+        <li>En la división: si <code>numero2 === 0</code>, <code>resultado = 'Error'</code>; si no, dividid<sup class="cita">[9]</sup>.</li>
+        <li>El <code>return resultado;</code> ya está escrito al final. No lo toquéis.</li>
+      </ol>
+      <div class="analogia">una exprimidora. Le dais dos naranjas y le decís «zumo». Os da zumo. No le importa de dónde vienen las naranjas.</div>
+    </div>
+    <div>
+      <div class="prueba">esta función se puede probar sin tocar ni un botón. Recargad y escribid en la consola:<br><code>calcular(7, 8, '+')</code> → <code>15</code><br><code>calcular(9, 4, '-')</code> → <code>5</code><br><code>calcular(8, 0, '/')</code> → <code>'Error'</code></div>
+      <div class="ojo"><code>calcular(9, 4, '+')</code> da <code>5</code> en vez de <code>13</code>: os falta un <code>break</code> y el código se «cae» al caso de abajo. Si da <code>0</code>, revisad que escribís <code>'+'</code> con comillas en el <code>case</code>.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">function calcular(numero1, numero2, operacion) {
+    let resultado = 0;
+
+    switch (operacion) {
+        case '+':
+            resultado = numero1 + numero2;
+            break;
+        case '-':
+            resultado = numero1 - numero2;
+            break;
+        case '*':
+            resultado = numero1 * numero2;
+            break;
+        case '/':
+            if (numero2 === 0) {
+                resultado = 'Error';
+            } else {
+                resultado = numero1 / numero2;
+            }
+            break;
+    }
+
+    return resultado;
+}</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v0-1"> ¡Hecho! Funciona en la consola</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v0" data-seccion="Solución 0 · Paso 2">
+  <span class="etiqueta">Solución 0 · Paso 2 de 9 · Preparativos</span>
+  <h2>Comprobad que encontráis los botones</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">tener los botones agrupados en tres listas y la pantalla localizada.</div>
+      <p class="donde">bloque <code>TODO 0.2</code>.</p>
+      <p>Este paso ya viene escrito en la plantilla. Aun así, no os lo saltéis: quiero que entendáis cada línea.</p>
+<pre><code class="js">const numeros    = document.querySelectorAll('[data-numero]');
+const operadores = document.querySelectorAll('[data-operador]');
+const acciones   = document.querySelectorAll('[data-accion]');
+const pantalla   = document.querySelector('output');</code></pre>
+      <p>Los corchetes <code>[data-numero]</code> significan «cualquier elemento que tenga ese atributo, valga lo que valga».</p>
+    </div>
+    <div>
+      <div class="prueba">en la consola escribid:<br><code>numeros.length</code> → <code>10</code><br><code>operadores.length</code> → <code>4</code><br><code>acciones.length</code> → <code>2</code><br><code>pantalla</code> → os marca la pantalla de la calculadora.</div>
+      <div class="ojo">si alguno da <code>0</code>, revisad que el selector está bien escrito (<code>data-numero</code>, no <code>data-numeros</code>) y que lleva corchetes.</div>
+      <label class="hecho"><input type="checkbox" data-paso="v0-2"> ¡Hecho! Salen 10, 4 y 2</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v0" data-seccion="Solución 0 · Hito 1">
+  <span class="etiqueta">Solución 0 · Paso 3 de 9 · Hito 1</span>
+  <h2>Escribir números en pantalla</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">al pulsar los números, aparecen en pantalla uno detrás de otro. Sin ceros delante: nada de <code>07</code>.</div>
+      <p class="donde">bloque <code>TODO 1</code>, dentro de <code>numeros.forEach(...)</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Leed el dígito pulsado: <code>const valor = numero.dataset.numero;</code></li>
+        <li>Preguntad: ¿la pantalla muestra <code>'0'</code> <strong>o</strong> <code>empezarNumero</code> es <code>true</code>? El «o» se escribe <code>||</code><sup class="cita">[10]</sup>.</li>
+        <li>Si es así: <strong>sustituid</strong> la pantalla por <code>valor</code> y bajad la bandera (<code>empezarNumero = false</code>).</li>
+        <li>Si no: <strong>pegad</strong> el dígito detrás con <code>+=</code>.</li>
+      </ol>
+      <p class="suave">Como <code>textContent</code> es texto, <code>'1' + '2'</code> da <code>'12'</code>. Justo lo que queremos.</p>
+    </div>
+    <div>
+      <div class="prueba">pulsad <code>1</code> <code>2</code> <code>3</code> → se ve <code>123</code>.<br>Recargad y pulsad <code>0</code> <code>0</code> <code>7</code> → se ve <code>7</code>, no <code>007</code>.</div>
+      <div class="ojo">si no pasa nada al pulsar, mirad la consola: seguramente hay un error en rojo. Si se ve <code>07</code>, la comparación con <code>'0'</code> no está bien (¿le habéis puesto comillas?).</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">numeros.forEach(numero => {
+    numero.addEventListener('click', () => {
+        const valor = numero.dataset.numero;
+
+        if (pantalla.textContent === '0' || empezarNumero) {
+            pantalla.textContent = valor;
+            empezarNumero = false;
+        } else {
+            pantalla.textContent += valor;
+        }
+    });
+});</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v0-3"> ¡Hecho! Escribo 123</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v0" data-seccion="Solución 0 · Hito 2">
+  <span class="etiqueta">Solución 0 · Paso 4 de 9 · Hito 2</span>
+  <h2>Guardar el primer número al pulsar un operador</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">al pulsar <code>+</code>, la calculadora apunta el número de la pantalla y la operación. El siguiente dígito empieza un número nuevo.</div>
+      <p class="donde">bloque <code>TODO 2</code>, dentro de <code>operadores.forEach(...)</code>.</p>
+      <p>Vamos a hacer primero una <strong>versión sencilla</strong>. En el hito 5 la ampliaremos.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Leed el operador: <code>const valor = operador.dataset.operador;</code></li>
+        <li>Guardad lo de la pantalla en <code>numeroAnterior</code>, pero <strong>convertido a número</strong> con <code>Number(...)</code><sup class="cita">[11]</sup>.</li>
+        <li>Guardad <code>valor</code> en <code>operadorPendiente</code>.</li>
+        <li>Levantad la bandera: <code>empezarNumero = true</code>.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba">escribid <code>15</code>, pulsad <code>+</code>, escribid <code>4</code> → se ve <code>4</code>, no <code>154</code>.<br>En la consola: <code>numeroAnterior</code> → <code>15</code> y <code>operadorPendiente</code> → <code>'+'</code>.</div>
+      <div class="ojo">si se ve <code>154</code>, no estáis levantando la bandera, o la estáis poniendo a <code>false</code> en lugar de <code>true</code>.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">operadores.forEach(operador => {
+    operador.addEventListener('click', () => {
+        const valor = operador.dataset.operador;
+
+        numeroAnterior = Number(pantalla.textContent);
+        operadorPendiente = valor;
+        empezarNumero = true;
+    });
+});</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v0-4"> ¡Hecho! Veo el 4 y la consola dice 15</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v0" data-seccion="Solución 0 · Hito 3">
+  <span class="etiqueta">Solución 0 · Paso 5 de 9 · Hito 3</span>
+  <h2>Resolver la cuenta con el igual</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">al pulsar <code>=</code>, se hace la cuenta pendiente y se ve el resultado.</div>
+      <p class="donde">bloque <code>TODO 3</code>, dentro de <code>acciones.forEach(...)</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Leed la acción: <code>const valor = accion.dataset.accion;</code></li>
+        <li>Escribid un <code>switch (valor)</code> con un <code>case 'igual':</code>. El de borrar lo haremos en el hito 6.</li>
+        <li>Dentro: si <code>operadorPendiente !== null</code>…
+          <ul>
+            <li>convertid la pantalla a número y guardadla en <code>numeroActual</code>,</li>
+            <li>llamad a <code>calcular(numeroAnterior, numeroActual, operadorPendiente)</code> y guardad lo que devuelve en <code>numeroAnterior</code>,</li>
+            <li>pintad <code>numeroAnterior</code> en la pantalla.</li>
+          </ul>
+        </li>
+        <li>Fuera del <code>if</code>: <code>operadorPendiente = null</code> y <code>empezarNumero = true</code>. Y el <code>break</code>.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba"><code>7</code> <code>+</code> <code>8</code> <code>=</code> → <code>15</code>.<br>Pulsad <code>=</code> sin haber pulsado operador: no debe pasar nada raro.</div>
+      <div class="ojo">si sale <code>78</code>, estáis sumando textos: os falta el <code>Number(...)</code> en algún sitio. Si sale <code>0</code>, revisad que el paso 1 funciona en la consola.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">acciones.forEach(accion => {
+    accion.addEventListener('click', () => {
+        const valor = accion.dataset.accion;
+
+        switch (valor) {
+            case 'igual':
+                if (operadorPendiente !== null) {
+                    numeroActual = Number(pantalla.textContent);
+                    numeroAnterior = calcular(numeroAnterior, numeroActual, operadorPendiente);
+                    pantalla.textContent = numeroAnterior;
+                }
+                operadorPendiente = null;
+                empezarNumero = true;
+                break;
+        }
+    });
+});</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v0-5"> ¡Hecho! 7 + 8 = 15</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v0" data-seccion="Solución 0 · Hito 4">
+  <span class="etiqueta">Solución 0 · Paso 6 de 9 · Hito 4</span>
+  <h2>Resta, multiplicación y división</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">que las cuatro operaciones funcionen desde los botones.</div>
+      <p class="donde">no hay que escribir nada nuevo.</p>
+      <p>¿Por qué? Porque en el paso 1 ya pusisteis los cuatro <code>case</code> dentro de <code>calcular()</code>. Esa es la gracia de tener la cuenta en una función aparte: los botones no saben ni les importa qué operación es. Le pasan el operador a <code>calcular()</code> y ella se apaña.</p>
+      <p>Este paso es solo de comprobación. Así de simple.</p>
+    </div>
+    <div>
+      <div class="prueba">
+        <code>9 - 4 =</code> → <code>5</code><br>
+        <code>6 * 3 =</code> → <code>18</code><br>
+        <code>20 / 4 =</code> → <code>5</code>
+      </div>
+      <div class="ojo">si una de las tres falla y las otras no, el problema está en ese <code>case</code> de <code>calcular()</code>. Volved al paso 1 y probadla en la consola.</div>
+      <label class="hecho"><input type="checkbox" data-paso="v0-6"> ¡Hecho! Salen 5, 18 y 5</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v0" data-seccion="Solución 0 · Hito 5">
+  <span class="etiqueta">Solución 0 · Paso 7 de 9 · Hito 5</span>
+  <h2>Operaciones encadenadas</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">si tecleáis <code>5 + 3 +</code>, al pulsar el segundo <code>+</code> la pantalla ya muestra el subtotal <code>8</code>.</div>
+      <p class="donde">volvemos al bloque <code>TODO 2</code> (operadores) y lo ampliamos.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Antes de guardar nada, preguntad: ¿había ya una operación pendiente (<code>operadorPendiente !== null</code>) <strong>y</strong> el usuario ha escrito un número nuevo (<code>empezarNumero !== true</code>)?</li>
+        <li><strong>Sí</strong> → haced lo mismo que en el igual: <code>numeroActual</code>, <code>calcular(...)</code> y pintar el resultado.</li>
+        <li><strong>No</strong> → lo de antes: <code>numeroAnterior = Number(pantalla.textContent)</code>.</li>
+        <li>Lo demás (guardar operador y levantar la bandera) se queda igual, después del <code>if/else</code>.</li>
+      </ol>
+      <p class="suave">La segunda condición evita que, si pulsáis <code>+</code> dos veces seguidas, se haga una cuenta que nadie ha pedido.</p>
+    </div>
+    <div>
+      <div class="prueba"><code>5</code> <code>+</code> <code>3</code> <code>+</code> → se ve <code>8</code>.<br>Seguid con <code>2</code> <code>=</code> → <code>10</code>.<br>Y <code>5</code> <code>+</code> <code>+</code> <code>3</code> <code>=</code> → <code>8</code>.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">operadores.forEach(operador => {
+    operador.addEventListener('click', () => {
+        const valor = operador.dataset.operador;
+
+        if (operadorPendiente !== null && empezarNumero !== true) {
+            numeroActual = Number(pantalla.textContent);
+            numeroAnterior = calcular(numeroAnterior, numeroActual, operadorPendiente);
+            pantalla.textContent = numeroAnterior;
+        } else {
+            numeroAnterior = Number(pantalla.textContent);
+        }
+
+        operadorPendiente = valor;
+        empezarNumero = true;
+    });
+});</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v0-7"> ¡Hecho! 5 + 3 + 2 = 10</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v0" data-seccion="Solución 0 · Hito 6">
+  <span class="etiqueta">Solución 0 · Paso 8 de 9 · Hito 6</span>
+  <h2>El botón de borrar</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">al pulsar <code>C</code>, la pantalla vuelve a <code>0</code> y la calculadora olvida la operación pendiente.</div>
+      <p class="donde">bloque <code>TODO 3</code>, dentro del <code>switch (valor)</code>, debajo del <code>case 'igual'</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Añadid un <code>case 'borrar':</code>.</li>
+        <li>Poned la pantalla a <code>'0'</code>.</li>
+        <li><code>operadorPendiente = null</code> y <code>empezarNumero = true</code>.</li>
+        <li><code>break</code>.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba">escribid <code>999</code>, pulsad <code>C</code> → <code>0</code>.<br>Escribid <code>5</code> <code>+</code> <code>C</code> y luego <code>3</code> <code>=</code> → se ve <code>3</code>: la suma pendiente se ha olvidado.</div>
+      <div class="ojo">si al pulsar <code>C</code> se hace una cuenta, os falta el <code>break</code> del <code>case 'igual'</code>… o el de <code>'borrar'</code> está encima y se cae al de abajo.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">            case 'borrar':
+                pantalla.textContent = '0';
+                operadorPendiente = null;
+                empezarNumero = true;
+                break;</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v0-8"> ¡Hecho! 999 C → 0</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v0" data-seccion="Solución 0 · Hito 7">
+  <span class="etiqueta">Solución 0 · Paso 9 de 9 · Hito 7</span>
+  <h2>Errores y decimales</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">dividir entre cero muestra <code>Error</code>, después de un error no se sigue operando, y los decimales no salen con quince cifras.</div>
+      <h3>Parte A · No seguir operando tras un error</h3>
+      <p class="donde">bloque <code>TODO 2</code> (operadores), la línea de <code>operadorPendiente = valor</code>.</p>
+      <p>Cambiadla por un ternario<sup class="cita">[12]</sup>: si <code>numeroAnterior</code> es <code>'Error'</code>, el operador pendiente vuelve a <code>null</code>; si no, se guarda <code>valor</code>.</p>
+      <h3>Parte B · Redondear (no viene en la plantilla)</h3>
+      <p class="donde">dentro de <code>calcular()</code>, justo antes del <code>return</code>.</p>
+      <p>Si el resultado es un número (<code>typeof resultado === 'number'</code><sup class="cita">[13]</sup>), redondeadlo a 8 decimales: multiplicad por <code>100000000</code>, redondead con <code>Math.round</code><sup class="cita">[14]</sup> y volved a dividir.</p>
+    </div>
+    <div>
+      <div class="prueba"><code>8 / 0 =</code> → <code>Error</code>.<br><code>8 / 0 +</code> → <code>Error</code>, y el <code>+</code> no queda pendiente.<br><code>10 / 3 =</code> → <code>3.33333333</code> (antes salía <code>3.3333333333333335</code>).</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">// Parte A: en los operadores
+operadorPendiente = (numeroAnterior === 'Error') ? null : valor;
+
+// Parte B: en calcular(), antes del return
+if (typeof resultado === 'number') {
+    resultado = Math.round(resultado * 100000000) / 100000000;
+}
+return resultado;</code></pre></details>
+      <div class="ojo aviso">el <code>typeof</code> está para no intentar redondear el texto <code>'Error'</code>. Sin él, <code>Math.round</code> devolvería <code>NaN</code>.</div>
+      <label class="hecho"><input type="checkbox" data-paso="v0-9"> ¡Hecho! Error y 3.33333333</label>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- SOLUCIÓN 1 -->
+<!-- ===================================================================== -->
+<section class="slide v1 portada" data-seccion="Solución 1 · Escuchadores individuales" id="s1">
+  <div class="numero">1</div>
+  <span class="etiqueta">Solución 1 · Carpeta version-1-escuchadores-individuales</span>
+  <h1>Un escuchador por botón</h1>
+  <p class="lead">Ahora el número de la pantalla se guarda en una variable, <code>operandoActual</code>, y cada tarea va en su propia función. Los botones solo pasan el recado: «me han pulsado, encárgate tú».</p>
+  <div class="analogia" style="text-align:left;max-width:780px;margin:16px auto 0">en un restaurante, el camarero no cocina. Toma nota y se la pasa a la cocina. Los botones son los camareros; las funciones, los cocineros.</div>
+  <div class="ruta"><span>Preparativos</span><span>1 · Hito 1</span><span>2 · Hito 2</span><span>3 · Hito 3</span><span>4 · Hito 4</span><span>5 · Hito 5</span><span>6 · Hito 6</span><span>7 · Hito 7</span></div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Preparativos">
+  <span class="etiqueta">Solución 1 · Preparativos (ya escritos)</span>
+  <h2>Lo que ya tenéis en la plantilla</h2>
+  <div class="g2">
+<pre><code class="js">const display = document.getElementById('display');
+const botonesNumeros    = document.querySelectorAll('[data-numero]');
+const botonesOperadores = document.querySelectorAll('[data-operador]');
+const botonIgual  = document.querySelector('[data-accion="igual"]');
+const botonBorrar = document.querySelector('[data-accion="borrar"]');
+
+let operandoActual = '0';
+let operandoAnterior = null;
+let operacion = null;
+let reiniciarDisplay = false;
+
+function actualizarDisplay() {
+    display.textContent = operandoActual;
+}</code></pre>
+    <div>
+      <p><code>getElementById</code> busca un elemento por su <code>id</code><sup class="cita">[15]</sup>. El igual y el borrar se buscan con <code>querySelector</code>, en singular, porque solo hay uno de cada.</p>
+      <p><code>operandoActual</code> empieza en <code>'0'</code>, <strong>con comillas</strong>. Lo guardamos como texto para poder pegar dígitos: <code>'1' + '2'</code> → <code>'12'</code>.</p>
+      <p><code>actualizarDisplay()</code> es la <strong>única</strong> función que toca la pantalla. Regla para toda la solución: cambiáis la variable y luego llamáis a <code>actualizarDisplay()</code>.</p>
+      <div class="prueba">en la consola: <code>botonesNumeros.length</code> → <code>10</code>, <code>botonIgual</code> → os marca el botón <code>=</code>.</div>
+      <label class="hecho"><input type="checkbox" data-paso="v1-0"> ¡Hecho! Lo he leído y lo entiendo</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Hito 1">
+  <span class="etiqueta">Solución 1 · Paso 1 de 7 · Hito 1</span>
+  <h2>Escribir números en pantalla</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">al pulsar los números, aparecen en pantalla. Sin <code>07</code>.</div>
+      <p class="donde"><code>TODO 1.1</code> (función <code>agregarNumero</code>) y <code>TODO 1.2</code> (el <code>forEach</code> de debajo).</p>
+      <h3>Pistas para <code>agregarNumero(numero)</code></h3>
+      <ol>
+        <li>Si <code>reiniciarDisplay</code> es <code>true</code>: <code>operandoActual = numero</code> y bajad la bandera.</li>
+        <li>Si no: si <code>operandoActual</code> es <code>'0'</code>, sustituidlo por <code>numero</code>; si no, pegad <code>numero</code> detrás.</li>
+        <li>Al final, <code>actualizarDisplay()</code>.</li>
+      </ol>
+      <h3>Pistas para el <code>TODO 1.2</code></h3>
+      <ol>
+        <li>Dentro del <code>forEach</code>, añadid a <code>boton</code> un <code>addEventListener('click', ...)</code>.</li>
+        <li>Dentro del escuchador, una sola línea: <code>agregarNumero(boton.dataset.numero)</code>.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba"><code>1</code> <code>2</code> <code>3</code> → <code>123</code>. Recargad: <code>0</code> <code>0</code> <code>7</code> → <code>7</code>.</div>
+      <div class="ojo">si la variable cambia pero la pantalla no (comprobadlo escribiendo <code>operandoActual</code> en la consola), os habéis olvidado de llamar a <code>actualizarDisplay()</code>.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">function agregarNumero(numero) {
+    if (reiniciarDisplay) {
+        operandoActual = numero;
+        reiniciarDisplay = false;
+    } else {
+        operandoActual = (operandoActual === '0')
+            ? numero
+            : operandoActual + numero;
+    }
+    actualizarDisplay();
+}
+
+botonesNumeros.forEach((boton) => {
+    boton.addEventListener('click', () => {
+        agregarNumero(boton.dataset.numero);
+    });
+});</code></pre>
+      <p class="suave">El <code>? :</code> es un ternario<sup class="cita">[12]</sup>, un <code>if/else</code> en una línea. Si os resulta más claro con <code>if/else</code>, escribidlo así: funciona igual.</p></details>
+      <label class="hecho"><input type="checkbox" data-paso="v1-1"> ¡Hecho! Escribo 123</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Hito 2">
+  <span class="etiqueta">Solución 1 · Paso 2 de 7 · Hito 2</span>
+  <h2>Guardar el primer número al pulsar un operador</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">al pulsar <code>+</code>, se apunta el número y la operación, y el siguiente dígito empieza un número nuevo.</div>
+      <p class="donde"><code>TODO 2.1</code> (función <code>seleccionarOperador</code>) y <code>TODO 2.2</code> (su <code>forEach</code>).</p>
+      <h3>Pistas para <code>seleccionarOperador(nuevoOperador)</code></h3>
+      <ol>
+        <li>Saltaos por ahora el punto «(Opcional por ahora)». Lo haremos en el hito 5.</li>
+        <li><code>operandoAnterior = operandoActual</code></li>
+        <li><code>operacion = nuevoOperador</code></li>
+        <li><code>reiniciarDisplay = true</code></li>
+      </ol>
+      <h3>Pistas para el <code>TODO 2.2</code></h3>
+      <p>Igual que en el hito 1, pero llamando a <code>seleccionarOperador(boton.dataset.operador)</code>.</p>
+    </div>
+    <div>
+      <div class="prueba">escribid <code>12</code>, pulsad <code>+</code>, escribid <code>5</code> → se ve <code>5</code>.<br>En la consola: <code>operandoAnterior</code> → <code>'12'</code> y <code>operacion</code> → <code>'+'</code>.</div>
+      <div class="ojo">si se ve <code>125</code>, la bandera no se está levantando. Si <code>operandoAnterior</code> sale <code>null</code>, revisad que el escuchador llama a la función correcta.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">function seleccionarOperador(nuevoOperador) {
+    operandoAnterior = operandoActual;
+    operacion = nuevoOperador;
+    reiniciarDisplay = true;
+}
+
+botonesOperadores.forEach((boton) => {
+    boton.addEventListener('click', () => {
+        seleccionarOperador(boton.dataset.operador);
+    });
+});</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v1-2"> ¡Hecho! Veo el 5</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Hito 3">
+  <span class="etiqueta">Solución 1 · Paso 3 de 7 · Hito 3</span>
+  <h2>Resolver la suma con el igual</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo"><code>7 + 8 =</code> muestra <code>15</code>. De momento, solo la suma.</div>
+      <p class="donde"><code>TODO 3.1</code> (función <code>calcular</code>) y <code>TODO 3.2</code> (escuchador de <code>botonIgual</code>).</p>
+      <h3>Pistas para <code>calcular()</code></h3>
+      <ol>
+        <li>Primera línea: si <code>operacion</code> o <code>operandoAnterior</code> son <code>null</code>, <code>return</code>. Es el portero: si no hay nada que calcular, fuera.</li>
+        <li>Convertid los dos operandos a número con <code>parseFloat()</code><sup class="cita">[16]</sup> y guardadlos en <code>anterior</code> y <code>actual</code>.</li>
+        <li><code>let resultado;</code> y un <code>switch (operacion)</code> con <code>case '+'</code> y un <code>default: return;</code>.</li>
+        <li>Guardad <code>resultado.toString()</code><sup class="cita">[17]</sup> en <code>operandoActual</code>.</li>
+        <li>Dejadlo todo limpio: <code>operacion = null</code>, <code>operandoAnterior = null</code>, <code>reiniciarDisplay = true</code>.</li>
+        <li><code>actualizarDisplay()</code>.</li>
+      </ol>
+      <p class="suave">Para el <code>TODO 3.2</code>: <code>botonIgual.addEventListener('click', ...)</code> que llame a <code>calcular()</code>. Aquí no hay <code>forEach</code>: es un solo botón.</p>
+    </div>
+    <div>
+      <div class="prueba"><code>7</code> <code>+</code> <code>8</code> <code>=</code> → <code>15</code>. Pulsad <code>=</code> sin operador: no pasa nada.</div>
+      <div class="ojo">si sale <code>78</code>, falta el <code>parseFloat</code>. Si la consola dice <em>Cannot read properties of undefined (reading 'toString')</em>, os falta el <code>default: return;</code> y habéis probado una resta antes de tiempo.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">function calcular() {
+    if (operacion === null || operandoAnterior === null) return;
+
+    const anterior = parseFloat(operandoAnterior);
+    const actual = parseFloat(operandoActual);
+    let resultado;
+
+    switch (operacion) {
+        case '+':
+            resultado = anterior + actual;
+            break;
+        default:
+            return;
+    }
+
+    operandoActual = resultado.toString();
+    operacion = null;
+    operandoAnterior = null;
+    reiniciarDisplay = true;
+    actualizarDisplay();
+}
+
+botonIgual.addEventListener('click', () => {
+    calcular();
+});</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v1-3"> ¡Hecho! 7 + 8 = 15</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Hito 4">
+  <span class="etiqueta">Solución 1 · Paso 4 de 7 · Hito 4</span>
+  <h2>Resta, multiplicación y división</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">que las cuatro operaciones funcionen.</div>
+      <p class="donde">dentro del <code>switch</code> de <code>calcular()</code>, entre el <code>case '+'</code> y el <code>default</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Copiad el <code>case '+'</code> tres veces.</li>
+        <li>Cambiad el símbolo del <code>case</code> y el de la cuenta: <code>'-'</code>, <code>'*'</code> y <code>'/'</code>.</li>
+        <li>No os olvidéis del <code>break</code> en cada uno.</li>
+      </ol>
+      <p>La división entre cero la arreglaremos en el hito 7. Si la probáis ahora, veréis <code>Infinity</code>: JavaScript no da error, devuelve «infinito».</p>
+    </div>
+    <div>
+      <div class="prueba"><code>9 - 4 =</code> → <code>5</code><br><code>6 * 3 =</code> → <code>18</code><br><code>20 / 4 =</code> → <code>5</code></div>
+      <div class="ojo">si <code>9 - 4 =</code> da <code>13</code>, habéis copiado el <code>case</code> pero no habéis cambiado el <code>+</code> de la cuenta.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">    switch (operacion) {
+        case '+':
+            resultado = anterior + actual;
+            break;
+        case '-':
+            resultado = anterior - actual;
+            break;
+        case '*':
+            resultado = anterior * actual;
+            break;
+        case '/':
+            resultado = anterior / actual;
+            break;
+        default:
+            return;
+    }</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v1-4"> ¡Hecho! Salen 5, 18 y 5</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Hito 5">
+  <span class="etiqueta">Solución 1 · Paso 5 de 7 · Hito 5</span>
+  <h2>Operaciones encadenadas</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo"><code>5 + 3 +</code> muestra ya el subtotal <code>8</code>.</div>
+      <p class="donde">el punto «(Opcional por ahora)» del <code>TODO 2.1</code>, al principio de <code>seleccionarOperador</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Antes de las tres líneas que ya tenéis, preguntad: ¿hay una operación pendiente (<code>operacion !== null</code>) <strong>y</strong> el usuario ya ha escrito el segundo número (<code>!reiniciarDisplay</code>)?</li>
+        <li>Si es así, llamad a <code>calcular()</code>. Nada más.</li>
+      </ol>
+      <p>¿Y por qué funciona? Porque <code>calcular()</code> deja el subtotal en <code>operandoActual</code>, y la línea siguiente lo guarda como <code>operandoAnterior</code>. Las piezas encajan solas.</p>
+      <p class="suave">El <code>!</code> significa «no»: <code>!reiniciarDisplay</code> se lee «la bandera no está levantada».</p>
+    </div>
+    <div>
+      <div class="prueba"><code>5</code> <code>+</code> <code>3</code> <code>+</code> → <code>8</code>. Luego <code>2</code> <code>=</code> → <code>10</code>.<br><code>2</code> <code>*</code> <code>3</code> <code>-</code> <code>1</code> <code>=</code> → <code>5</code>.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">function seleccionarOperador(nuevoOperador) {
+    if (operacion !== null && !reiniciarDisplay) {
+        calcular();
+    }
+    operandoAnterior = operandoActual;
+    operacion = nuevoOperador;
+    reiniciarDisplay = true;
+}</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v1-5"> ¡Hecho! 5 + 3 + 2 = 10</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Hito 6">
+  <span class="etiqueta">Solución 1 · Paso 6 de 7 · Hito 6</span>
+  <h2>El botón de borrar</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo"><code>C</code> deja la calculadora como recién encendida.</div>
+      <p class="donde"><code>TODO 6.1</code> (función <code>borrar</code>) y <code>TODO 6.2</code> (escuchador de <code>botonBorrar</code>).</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Poned las cuatro variables como están al principio del archivo: <code>'0'</code>, <code>null</code>, <code>null</code> y <code>false</code>.</li>
+        <li><code>actualizarDisplay()</code>.</li>
+        <li>Conectad <code>botonBorrar</code> con un <code>addEventListener</code> que llame a <code>borrar()</code>.</li>
+      </ol>
+      <p class="suave">Truco: subid al principio del archivo y copiad los valores iniciales. Así no os equivocáis.</p>
+    </div>
+    <div>
+      <div class="prueba"><code>999</code> <code>C</code> → <code>0</code>.<br><code>5</code> <code>+</code> <code>C</code> <code>3</code> <code>=</code> → <code>3</code>.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">function borrar() {
+    operandoActual = '0';
+    operandoAnterior = null;
+    operacion = null;
+    reiniciarDisplay = false;
+    actualizarDisplay();
+}
+
+botonBorrar.addEventListener('click', () => {
+    borrar();
+});</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v1-6"> ¡Hecho! 999 C → 0</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Hito 7">
+  <span class="etiqueta">Solución 1 · Paso 7 de 7 · Hito 7</span>
+  <h2>Errores y decimales</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">dividir entre cero muestra <code>Error</code> y los resultados no salen con quince decimales.</div>
+      <h3>Parte A · División entre cero</h3>
+      <p class="donde">el <code>case '/'</code> de <code>calcular()</code>.</p>
+      <p>Si <code>actual === 0</code>, el resultado es <code>'Error'</code>; si no, dividid. Podéis usar un ternario o un <code>if/else</code>.</p>
+      <h3>Parte B · Redondeo (no viene en la plantilla)</h3>
+      <p class="donde">en <code>calcular()</code>, después del <code>switch</code> y antes de <code>operandoActual = resultado.toString()</code>.</p>
+      <p>Si <code>typeof resultado === 'number'</code><sup class="cita">[13]</sup>, redondeadlo: <code>Math.round(resultado * 100000000) / 100000000</code><sup class="cita">[14]</sup>.</p>
+    </div>
+    <div>
+      <div class="prueba"><code>8 / 0 =</code> → <code>Error</code>.<br><code>10 / 3 =</code> → <code>3.33333333</code>.</div>
+      <div class="ojo aviso">después de un <code>Error</code>, pulsad <code>C</code> antes de seguir. Si pulsáis <code>+ 3 =</code> directamente, veréis <code>NaN</code> («no es un número»). Arreglarlo es un buen reto extra.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">        case '/':
+            resultado = (actual === 0) ? 'Error' : anterior / actual;
+            break;
+        default:
+            return;
+    }
+
+    if (typeof resultado === 'number') {
+        resultado = Math.round(resultado * 100000000) / 100000000;
+    }
+
+    operandoActual = resultado.toString();</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v1-7"> ¡Hecho! Error y 3.33333333</label>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- SOLUCIÓN 2 -->
+<!-- ===================================================================== -->
+<section class="slide v2 portada" data-seccion="Solución 2 · Delegación de eventos" id="s2">
+  <div class="numero">2</div>
+  <span class="etiqueta">Solución 2 · Carpeta version-2-delegacion-eventos</span>
+  <h1>Delegación de eventos</h1>
+  <p class="lead">Las funciones son las mismas que en la Solución 1. La diferencia es que no hay 16 escuchadores: hay <strong>uno solo</strong>, en el contenedor <code>.teclado</code>. Por eso aquí empezamos por el escuchador.</p>
+  <div class="ruta"><span>1 · El conserje</span><span>2 · Hito 1</span><span>3 · Hito 2</span><span>4 · Hito 3</span><span>5 · Hito 4</span><span>6 · Hito 5</span><span>7 · Hito 6</span><span>8 · Hito 7</span></div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · La idea">
+  <span class="etiqueta">Solución 2 · La idea antes del código</span>
+  <h2>El clic sube como una burbuja</h2>
+  <div class="g2">
+    <div>
+      <p>Cuando hacéis clic en un botón, el aviso no se queda en el botón: sube a su padre (<code>.teclado</code>), luego al padre de ese, y así hasta arriba. Se llama <strong>burbujeo</strong><sup class="cita">[18]</sup>.</p>
+      <p>Si ponemos un escuchador en <code>.teclado</code>, se enterará de los clics de <strong>todos</strong> sus botones.</p>
+      <div class="analogia">el conserje de un edificio. Todos los paquetes llegan a la portería; el conserje mira la etiqueta y los sube al piso que toca. No hace falta un vigilante en cada puerta.</div>
+    </div>
+    <div class="caja v2c">
+      <h3 class="t2">Dos cosas que el conserje tiene que averiguar</h3>
+      <ol>
+        <li><strong>¿Qué botón han pulsado?</strong> <code>evento.target</code> es el elemento exacto donde cayó el clic<sup class="cita">[19]</sup>. <code>.closest('button')</code> sube desde ahí hasta encontrar el botón<sup class="cita">[20]</sup>. Si el clic cayó en un hueco entre teclas, devuelve <code>null</code>.</li>
+        <li><strong>¿Qué etiqueta lleva?</strong> Lo leemos de <code>boton.dataset</code>. Las etiquetas que no tiene valen <code>undefined</code>.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Paso 1">
+  <span class="etiqueta">Solución 2 · Paso 1 de 8 · Preparativos</span>
+  <h2>Que el conserje os diga qué ha visto</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">ver en la consola qué botón se ha pulsado, antes de programar nada más.</div>
+      <p class="donde">el bloque final de la plantilla, <code>teclado.addEventListener(...)</code>, debajo de <code>// Escribe las condiciones aquí:</code>.</p>
+      <p>La plantilla ya trae estas líneas:</p>
+<pre><code class="js">const boton = evento.target.closest('button');
+if (!boton) return;
+
+const { numero, operador, accion } = boton.dataset;</code></pre>
+      <p>La última es una <strong>desestructuración</strong><sup class="cita">[21]</sup>: saca tres propiedades de <code>dataset</code> de golpe. Equivale a escribir <code>const numero = boton.dataset.numero;</code> y lo mismo con las otras dos.</p>
+      <h3>Vuestra tarea</h3>
+      <p>Añadid una línea provisional: <code>console.log(numero, operador, accion);</code><sup class="cita">[22]</sup></p>
+    </div>
+    <div>
+      <div class="prueba">con la consola abierta, pulsad:<br><code>7</code> → <code>7 undefined undefined</code><br><code>+</code> → <code>undefined + undefined</code><br><code>=</code> → <code>undefined undefined igual</code><br><code>C</code> → <code>undefined undefined borrar</code></div>
+      <div class="ojo">si no sale nada, comprobad que la consola no tiene filtros y que <code>teclado</code> no es <code>null</code> (escribid <code>teclado</code> en la consola).</div>
+      <p>Fijaos: <strong>un único escuchador</strong> ya «oye» los 16 botones. Eso es la delegación.</p>
+      <label class="hecho"><input type="checkbox" data-paso="v2-1"> ¡Hecho! La consola me lo cuenta todo</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Hito 1">
+  <span class="etiqueta">Solución 2 · Paso 2 de 8 · Hito 1</span>
+  <h2>Escribir números en pantalla</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">al pulsar los números, aparecen en pantalla. Sin <code>07</code>.</div>
+      <p class="donde"><code>TODO 1.1</code> (función <code>agregarNumero</code>) y una condición en el escuchador.</p>
+      <h3>Pistas para <code>agregarNumero(numero)</code></h3>
+      <p>Es idéntica a la de la Solución 1: si la bandera está levantada, sustituid; si hay un <code>'0'</code>, sustituid; si no, pegad. Y <code>actualizarDisplay()</code> al final.</p>
+      <h3>Pistas para el escuchador</h3>
+      <ol>
+        <li>Debajo del <code>console.log</code>, escribid: si <code>numero !== undefined</code>, llamad a <code>agregarNumero(numero)</code>.</li>
+      </ol>
+      <p class="suave">¿Por qué <code>!== undefined</code> y no <code>if (numero)</code>? Porque dice exactamente lo que queremos preguntar: «¿este botón tiene <code>data-numero</code>?». Con un <code>if (numero)</code> a secas, un valor vacío o un <code>0</code> numérico se tratarían como falsos<sup class="cita">[23]</sup>.</p>
+    </div>
+    <div>
+      <div class="prueba"><code>1</code> <code>2</code> <code>3</code> → <code>123</code>. Recargad: <code>0</code> <code>0</code> <code>7</code> → <code>7</code>.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">function agregarNumero(numero) {
+    if (reiniciarDisplay) {
+        operandoActual = numero;
+        reiniciarDisplay = false;
+    } else {
+        operandoActual = (operandoActual === '0')
+            ? numero
+            : operandoActual + numero;
+    }
+    actualizarDisplay();
+}
+
+// Dentro del escuchador del teclado:
+if (numero !== undefined) {
+    agregarNumero(numero);
+}</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v2-2"> ¡Hecho! Escribo 123</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Hito 2">
+  <span class="etiqueta">Solución 2 · Paso 3 de 8 · Hito 2</span>
+  <h2>Guardar el primer número al pulsar un operador</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo"><code>12 + 5</code> muestra <code>5</code> y el <code>12</code> queda apuntado.</div>
+      <p class="donde"><code>TODO 2.1</code> (función <code>seleccionarOperador</code>) y una rama nueva en el escuchador.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>En <code>seleccionarOperador</code>, saltaos de momento el punto «(Opcional por ahora)».</li>
+        <li><code>operandoAnterior = operandoActual</code>, <code>operacion = nuevoOperador</code>, <code>reiniciarDisplay = true</code>.</li>
+        <li>En el escuchador, convertid el <code>if</code> del paso anterior en <code>if … else if</code>: si <code>operador !== undefined</code>, llamad a <code>seleccionarOperador(operador)</code>.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba"><code>12</code> <code>+</code> <code>5</code> → <code>5</code>.<br>En la consola: <code>operandoAnterior</code> → <code>'12'</code>, <code>operacion</code> → <code>'+'</code>.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">function seleccionarOperador(nuevoOperador) {
+    operandoAnterior = operandoActual;
+    operacion = nuevoOperador;
+    reiniciarDisplay = true;
+}
+
+// Dentro del escuchador del teclado:
+if (numero !== undefined) {
+    agregarNumero(numero);
+} else if (operador !== undefined) {
+    seleccionarOperador(operador);
+}</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v2-3"> ¡Hecho! Veo el 5</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Hito 3">
+  <span class="etiqueta">Solución 2 · Paso 4 de 8 · Hito 3</span>
+  <h2>Resolver la suma con el igual</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo"><code>7 + 8 =</code> muestra <code>15</code>.</div>
+      <p class="donde"><code>TODO 3.1</code> (función <code>calcular</code>) y otra rama en el escuchador.</p>
+      <h3>Pistas para <code>calcular()</code></h3>
+      <ol>
+        <li>El portero: si <code>operacion</code> o <code>operandoAnterior</code> son <code>null</code>, <code>return</code>.</li>
+        <li><code>parseFloat()</code><sup class="cita">[16]</sup> a los dos operandos.</li>
+        <li><code>switch</code> con <code>case '+'</code> y <code>default: return;</code>.</li>
+        <li><code>operandoActual = resultado.toString()</code><sup class="cita">[17]</sup>, limpiar <code>operacion</code> y <code>operandoAnterior</code>, levantar la bandera y <code>actualizarDisplay()</code>.</li>
+      </ol>
+      <h3>Pista para el escuchador</h3>
+      <p><code>else if (accion === 'igual')</code> → <code>calcular()</code>.</p>
+    </div>
+    <div>
+      <div class="prueba"><code>7</code> <code>+</code> <code>8</code> <code>=</code> → <code>15</code>.</div>
+      <div class="ojo">si sale <code>78</code>, falta el <code>parseFloat</code>. Si la consola dice <em>Cannot read properties of undefined (reading 'toString')</em>, falta el <code>default: return;</code>.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">function calcular() {
+    if (operacion === null || operandoAnterior === null) return;
+
+    const anterior = parseFloat(operandoAnterior);
+    const actual = parseFloat(operandoActual);
+    let resultado;
+
+    switch (operacion) {
+        case '+':
+            resultado = anterior + actual;
+            break;
+        default:
+            return;
+    }
+
+    operandoActual = resultado.toString();
+    operacion = null;
+    operandoAnterior = null;
+    reiniciarDisplay = true;
+    actualizarDisplay();
+}
+
+// En el escuchador, una rama más:
+if (numero !== undefined) {
+    agregarNumero(numero);
+} else if (operador !== undefined) {
+    seleccionarOperador(operador);
+} else if (accion === 'igual') {
+    calcular();
+}</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v2-4"> ¡Hecho! 7 + 8 = 15</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Hito 4">
+  <span class="etiqueta">Solución 2 · Paso 5 de 8 · Hito 4</span>
+  <h2>Resta, multiplicación y división</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">que las cuatro operaciones funcionen.</div>
+      <p class="donde">el <code>switch</code> de <code>calcular()</code>.</p>
+      <p>Igual que en la Solución 1: copiad el <code>case '+'</code> tres veces y cambiad los símbolos. El escuchador <strong>no se toca</strong>: todos los operadores ya pasan por <code>seleccionarOperador</code>.</p>
+      <p class="suave">La división entre cero dará <code>Infinity</code> hasta el hito 7.</p>
+    </div>
+    <div>
+      <div class="prueba"><code>9 - 4 =</code> → <code>5</code> · <code>6 * 3 =</code> → <code>18</code> · <code>20 / 4 =</code> → <code>5</code></div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">    switch (operacion) {
+        case '+':
+            resultado = anterior + actual;
+            break;
+        case '-':
+            resultado = anterior - actual;
+            break;
+        case '*':
+            resultado = anterior * actual;
+            break;
+        case '/':
+            resultado = anterior / actual;
+            break;
+        default:
+            return;
+    }</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v2-5"> ¡Hecho! Salen 5, 18 y 5</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Hito 5">
+  <span class="etiqueta">Solución 2 · Paso 6 de 8 · Hito 5</span>
+  <h2>Operaciones encadenadas</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo"><code>5 + 3 +</code> muestra ya el subtotal <code>8</code>.</div>
+      <p class="donde">el punto «(Opcional por ahora)» del <code>TODO 2.1</code>, al principio de <code>seleccionarOperador</code>.</p>
+      <p>Exactamente igual que en la Solución 1: si hay operación pendiente <strong>y</strong> la bandera está bajada, llamad a <code>calcular()</code> antes de lo demás.</p>
+    </div>
+    <div>
+      <div class="prueba"><code>5</code> <code>+</code> <code>3</code> <code>+</code> → <code>8</code>. Luego <code>2</code> <code>=</code> → <code>10</code>.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">function seleccionarOperador(nuevoOperador) {
+    if (operacion !== null && !reiniciarDisplay) {
+        calcular();
+    }
+    operandoAnterior = operandoActual;
+    operacion = nuevoOperador;
+    reiniciarDisplay = true;
+}</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v2-6"> ¡Hecho! 5 + 3 + 2 = 10</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Hito 6">
+  <span class="etiqueta">Solución 2 · Paso 7 de 8 · Hito 6</span>
+  <h2>El botón de borrar</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo"><code>C</code> deja la calculadora como recién encendida.</div>
+      <p class="donde"><code>TODO 6.1</code> (función <code>borrar</code>) y la última rama del escuchador.</p>
+      <ol>
+        <li>En <code>borrar()</code>: <code>'0'</code>, <code>null</code>, <code>null</code>, <code>false</code> y <code>actualizarDisplay()</code>.</li>
+        <li>En el escuchador: <code>else if (accion === 'borrar')</code> → <code>borrar()</code>.</li>
+        <li>Ya tenéis las cuatro ramas: <strong>quitad el <code>console.log</code></strong> provisional del paso 1.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba"><code>999</code> <code>C</code> → <code>0</code>.</div>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">function borrar() {
+    operandoActual = '0';
+    operandoAnterior = null;
+    operacion = null;
+    reiniciarDisplay = false;
+    actualizarDisplay();
+}
+
+teclado.addEventListener('click', (evento) => {
+    const boton = evento.target.closest('button');
+    if (!boton) return;
+
+    const { numero, operador, accion } = boton.dataset;
+
+    if (numero !== undefined) {
+        agregarNumero(numero);
+    } else if (operador !== undefined) {
+        seleccionarOperador(operador);
+    } else if (accion === 'igual') {
+        calcular();
+    } else if (accion === 'borrar') {
+        borrar();
+    }
+});</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v2-7"> ¡Hecho! 999 C → 0</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Hito 7">
+  <span class="etiqueta">Solución 2 · Paso 8 de 8 · Hito 7</span>
+  <h2>Errores, decimales… y el superpoder de la delegación</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo"><code>8 / 0 =</code> muestra <code>Error</code> y <code>10 / 3 =</code> muestra <code>3.33333333</code>.</div>
+      <p class="donde">el <code>case '/'</code> de <code>calcular()</code> y, después del <code>switch</code>, el redondeo.</p>
+      <p>Es el mismo código que en el hito 7 de la Solución 1: ternario para el <code>'Error'</code> y <code>Math.round</code><sup class="cita">[14]</sup> si <code>typeof resultado === 'number'</code><sup class="cita">[13]</sup>.</p>
+      <details class="solucion"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">        case '/':
+            resultado = (actual === 0) ? 'Error' : anterior / actual;
+            break;
+        default:
+            return;
+    }
+
+    if (typeof resultado === 'number') {
+        resultado = Math.round(resultado * 100000000) / 100000000;
+    }</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v2-8"> ¡Hecho! Error y 3.33333333</label>
+    </div>
+    <div class="caja v2c">
+      <h3 class="t2">🦸 Prueba extra: botones nuevos sin tocar el JS</h3>
+      <p>Con la calculadora cargada, pegad esto en la consola. Añade una tecla <code>00</code> al teclado:</p>
+<pre><code class="js">teclado.insertAdjacentHTML('beforeend',
+  '&lt;button class="tecla" data-numero="00"&gt;00&lt;/button&gt;');</code></pre>
+      <p>Pulsadla: funciona. El conserje no necesita que nadie le avise de que hay un piso nuevo.</p>
+      <p class="suave">Haced lo mismo en la Solución 1 (cambiando <code>teclado</code> por <code>document.querySelector('.teclado')</code>). La tecla aparece, pero no hace nada: nadie le ha puesto un escuchador.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- CIERRE -->
+<!-- ===================================================================== -->
+<section class="slide fin" data-seccion="Comprobación final" id="final">
+  <span class="etiqueta">Comprobación final · Para las tres soluciones</span>
+  <h2>Antes de entregar, pasad esta lista</h2>
+  <table>
+    <tr><th>Hito</th><th>Teclas</th><th>Debe salir</th><th>✔</th></tr>
+    <tr><td>1</td><td><code>1 2 3</code></td><td><code>123</code></td><td><input type="checkbox" data-paso="f-1"></td></tr>
+    <tr><td>1</td><td><code>0 0 7</code></td><td><code>7</code></td><td><input type="checkbox" data-paso="f-2"></td></tr>
+    <tr><td>2</td><td><code>15 + 4</code></td><td><code>4</code></td><td><input type="checkbox" data-paso="f-3"></td></tr>
+    <tr><td>3</td><td><code>7 + 8 =</code></td><td><code>15</code></td><td><input type="checkbox" data-paso="f-4"></td></tr>
+    <tr><td>4</td><td><code>9 - 4 =</code> · <code>6 * 3 =</code> · <code>20 / 4 =</code></td><td><code>5</code> · <code>18</code> · <code>5</code></td><td><input type="checkbox" data-paso="f-5"></td></tr>
+    <tr><td>5</td><td><code>5 + 3 +</code> y luego <code>2 =</code></td><td><code>8</code> y luego <code>10</code></td><td><input type="checkbox" data-paso="f-6"></td></tr>
+    <tr><td>6</td><td><code>999 C</code></td><td><code>0</code></td><td><input type="checkbox" data-paso="f-7"></td></tr>
+    <tr><td>7</td><td><code>8 / 0 =</code></td><td><code>Error</code></td><td><input type="checkbox" data-paso="f-8"></td></tr>
+    <tr><td>7</td><td><code>10 / 3 =</code></td><td><code>3.33333333</code></td><td><input type="checkbox" data-paso="f-9"></td></tr>
+    <tr><td>—</td><td>Consola abierta durante todas las pruebas</td><td>Ningún error en rojo</td><td><input type="checkbox" data-paso="f-10"></td></tr>
+  </table>
+  <p class="suave">Y quitad los <code>console.log</code> provisionales. Funcionan, sí, pero ensucian la entrega.</p>
+</section>
+
+<section class="slide fin" data-seccion="Mensajes de error" id="errores">
+  <span class="etiqueta">Si algo falla · Traducción de la consola</span>
+  <h2>Lo que os dice la consola y lo que significa</h2>
+  <table>
+    <tr><th>Mensaje en rojo</th><th>Qué significa</th><th>Dónde mirar</th></tr>
+    <tr><td><code>Uncaught ReferenceError: agregarNumro is not defined</code></td><td>Usáis un nombre que no existe. Casi siempre es una errata.</td><td>Copiad el nombre desde donde se declara, no lo escribáis de memoria.</td></tr>
+    <tr><td><code>Uncaught SyntaxError: Unexpected token '}'</code></td><td>Sobra o falta una llave, un paréntesis o una coma.</td><td>La línea que indica la consola o la de justo encima. El editor os marca las parejas de llaves.</td></tr>
+    <tr><td><code>Cannot read properties of null (reading 'addEventListener')</code></td><td>El selector no ha encontrado nada y la variable vale <code>null</code>.</td><td>El selector: ¿<code>data-accion="igual"</code> bien escrito? ¿Comillas dentro de comillas?</td></tr>
+    <tr><td><code>Cannot read properties of undefined (reading 'toString')</code></td><td><code>resultado</code> no tiene valor: ningún <code>case</code> ha coincidido.</td><td>El <code>switch</code> de <code>calcular()</code> y su <code>default: return;</code>.</td></tr>
+    <tr><td><code>Assignment to constant variable</code></td><td>Intentáis cambiar una variable declarada con <code>const</code>.</td><td>Las variables de la memoria van con <code>let</code>.</td></tr>
+    <tr><td>Sin error, pero no cambia nada</td><td>No habéis guardado o no habéis recargado. Lo de siempre.</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd> y <kbd>F5</kbd>.</td></tr>
+  </table>
+  <p>Un consejo que vale para toda vuestra vida programando: leed el mensaje de error entero. Os dice qué ha pasado y en qué línea. Ignorarlo es como ir al médico y taparse los oídos.</p>
+</section>
+
+<section class="slide" data-seccion="Fuentes" id="fuentes">
+  <h2>Fuentes y Documentación Oficial</h2>
+  <ol class="fuentes">
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Learn_web_development/Howto/Tools_and_setup/What_are_browser_developer_tools" target="_blank">¿Cuáles son las herramientas de desarrollo del navegador?</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dataset" target="_blank">HTMLElement: dataset property</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Document/querySelectorAll" target="_blank">Document.querySelectorAll()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Document/querySelector" target="_blank">Document.querySelector()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/NodeList/forEach" target="_blank">NodeList.prototype.forEach()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/EventTarget/addEventListener" target="_blank">element.addEventListener</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Node/textContent" target="_blank">Node.textContent</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Statements/switch" target="_blank">switch</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Statements/if...else" target="_blank">if...else</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Operators/Logical_OR" target="_blank">Operador lógico OR (||)</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank">Number</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Operators/Conditional_operator" target="_blank">Operador condicional (ternario)</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Operators/typeof" target="_blank">typeof</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Math/round" target="_blank">Math.round()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Document/getElementById" target="_blank">document.getElementById</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/parseFloat" target="_blank">parseFloat()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Number/toString" target="_blank">Number.prototype.toString()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Learn_web_development/Core/Scripting/Event_bubbling" target="_blank">Burbujeo de eventos</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Event/target" target="_blank">Event.target</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Element/closest" target="_blank">Element.closest()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Operators/Destructuring" target="_blank">La desestructuración</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/console/log_static" target="_blank">Console.log()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Glossary/Truthy" target="_blank">Truthy</a></li>
+  </ol>
+</section>
+
+</div></main>
+
+<div class="pie-ayuda"><kbd>←</kbd> <kbd>→</kbd> navegar · <kbd>Inicio</kbd>/<kbd>Fin</kbd> · <kbd>F</kbd> pantalla completa · Las casillas «Hecho» se guardan en este navegador</div>
+
+<script>
+// Resaltado de sintaxis sencillo
+(function resaltar() {
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const kws = new Set(['const','let','function','if','else','return','switch','case','break','default','typeof','null','undefined','true','false']);
+  const re = /(\/\/[^\n]*)|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")|\b(\d+)\b|\b([A-Za-z_$][\w$]*)\b(?=\s*\()|\b([A-Za-z_$][\w$]*)\b/g;
+  document.querySelectorAll('pre code.js').forEach(el => {
+    const src = el.textContent;
+    let out = '', last = 0, m;
+    re.lastIndex = 0;
+    while ((m = re.exec(src))) {
+      out += esc(src.slice(last, m.index));
+      if (m[1]) out += '<span class="c">' + esc(m[1]) + '</span>';
+      else if (m[2]) out += '<span class="s">' + esc(m[2]) + '</span>';
+      else if (m[3]) out += '<span class="n">' + m[3] + '</span>';
+      else if (m[4]) out += kws.has(m[4]) ? '<span class="k">' + m[4] + '</span>' : '<span class="f">' + m[4] + '</span>';
+      else out += kws.has(m[5]) ? '<span class="k">' + m[5] + '</span>' : m[5];
+      last = re.lastIndex;
+    }
+    el.innerHTML = out + esc(src.slice(last));
+  });
+  document.querySelectorAll('pre code.js-html').forEach(el => {
+    el.innerHTML = el.innerHTML.replace(/(data-[a-z]+|id|class)=(".*?")/g, '<span class="f">$1</span>=<span class="s">$2</span>');
+  });
+})();
+
+// Navegación
+const slides = [...document.querySelectorAll('.slide')];
+const escenario = document.getElementById('escenario');
+let actual = 0;
+
+function ajustar() {
+  const s = slides[actual];
+  s.style.zoom = 1;
+  const disponible = escenario.clientHeight - 64;
+  if (s.offsetHeight > disponible) s.style.zoom = Math.max(0.55, disponible / s.offsetHeight);
+}
+
+function mostrar(i) {
+  actual = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((s, j) => s.classList.toggle('activa', j === actual));
+  document.getElementById('contador').textContent = (actual + 1) + ' / ' + slides.length;
+  document.getElementById('barra').style.width = ((actual + 1) / slides.length * 100) + '%';
+  document.getElementById('seccionActual').textContent = slides[actual].dataset.seccion || '';
+  escenario.scrollTop = 0;
+  ajustar();
+  history.replaceState(null, '', '#' + (actual + 1));
+}
+
+const irA = id => mostrar(slides.indexOf(document.getElementById(id)));
+document.getElementById('btnSig').addEventListener('click', () => mostrar(actual + 1));
+document.getElementById('btnAnt').addEventListener('click', () => mostrar(actual - 1));
+document.getElementById('btnInicio').addEventListener('click', () => irA('caminos'));
+document.getElementById('btnPantalla').addEventListener('click', pantallaCompleta);
+function pantallaCompleta() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+document.querySelectorAll('[data-ir]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); irA(a.dataset.ir); }));
+document.querySelectorAll('details').forEach(d => d.addEventListener('toggle', ajustar));
+window.addEventListener('resize', ajustar);
+
+window.addEventListener('keydown', e => {
+  if (e.target.closest('input, summary, button, a') && (e.key === ' ' || e.key === 'Enter')) return;
+  switch (e.key) {
+    case 'ArrowRight': case 'PageDown': case ' ': e.preventDefault(); mostrar(actual + 1); break;
+    case 'ArrowLeft': case 'PageUp': e.preventDefault(); mostrar(actual - 1); break;
+    case 'Home': mostrar(0); break;
+    case 'End': mostrar(slides.length - 1); break;
+    case 'f': case 'F': pantallaCompleta(); break;
+  }
+});
+
+// Casillas «Hecho» guardadas en el navegador
+const CLAVE = 'calculadora-guia-alumno';
+let hechos = {};
+try { hechos = JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch (e) { hechos = {}; }
+const casillas = [...document.querySelectorAll('input[data-paso]')];
+
+function pintarProgreso() {
+  ['v0', 'v1', 'v2'].forEach((v, i) => {
+    const suyas = casillas.filter(c => c.dataset.paso.startsWith(v + '-'));
+    const hechas = suyas.filter(c => c.checked).length;
+    document.querySelector('.progreso.p' + i + ' > div').style.width = (hechas / suyas.length * 100) + '%';
+    document.querySelector('[data-progreso="' + v + '"]').textContent = hechas + ' de ' + suyas.length + ' pasos hechos';
+  });
+}
+casillas.forEach(c => {
+  c.checked = !!hechos[c.dataset.paso];
+  c.addEventListener('change', () => {
+    hechos[c.dataset.paso] = c.checked;
+    try { localStorage.setItem(CLAVE, JSON.stringify(hechos)); } catch (e) {}
+    pintarProgreso();
+  });
+});
+pintarProgreso();
+
+const inicial = parseInt(location.hash.slice(1), 10);
+mostrar(Number.isNaN(inicial) ? 0 : inicial - 1);
+</script>
+</body>
+</html>

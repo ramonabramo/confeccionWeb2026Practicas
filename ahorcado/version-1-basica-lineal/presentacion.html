@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V1: El Ahorcado Básico e Imperativo — Ramón Abramo</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --code-bg: #090d16;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--card-border);
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--accent);
+    }
+
+    .brand-badge {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      border: 1px solid var(--accent);
+    }
+
+    .controls-nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background: #2a374a;
+      border-color: var(--accent);
+    }
+
+    .counter {
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      position: relative;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1100px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 36px 48px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      color: #e2e8f0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 8px;
+    }
+
+    p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .tagline {
+      font-size: 1.3rem;
+      color: #cbd5e1;
+      margin-bottom: 24px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 20px;
+    }
+
+    .card-box {
+      background: #151f30;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .card-box h3 {
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .card-box ul {
+      list-style-type: none;
+    }
+
+    .card-box li {
+      margin-bottom: 8px;
+      color: #cbd5e1;
+      font-size: 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .card-box li::before {
+      content: "•";
+      color: var(--accent);
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.95rem;
+      line-height: 1.45;
+      color: #f1f5f9;
+      overflow-x: auto;
+      margin-top: 14px;
+    }
+
+    .kw { color: #f472b6; }
+    .fn { color: #38bdf8; }
+    .str { color: #a3e635; }
+    .cm { color: #64748b; font-style: italic; }
+    .num { color: #fbbf24; }
+
+    .progress-bar {
+      height: 4px;
+      background: var(--card-border);
+      width: 100%;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 16.6%;
+      transition: width 0.25s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span>🎮 El Ahorcado Web</span>
+      <span class="brand-badge">Versión 1: Básica e Imperativa</span>
+    </div>
+    <div class="controls-nav">
+      <button class="btn" id="btn-prev" onclick="cambiarSlide(-1)">◀ Anterior</button>
+      <span class="counter" id="contador-slide">1 / 6</span>
+      <button class="btn" id="btn-next" onclick="cambiarSlide(1)">Siguiente ▶</button>
+      <button class="btn" onclick="togglePantallaCompleta()">⛶ Pantalla Completa</button>
+    </div>
+  </header>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="barra-progreso"></div>
+  </div>
+
+  <main>
+    <!-- Slide 1: Portada -->
+    <section class="slide active">
+      <span class="brand-badge">Fundamentos de JS</span>
+      <h1>🎮 Versión 1: Lógica Básica Lineal</h1>
+      <p class="tagline">Construyendo el juego del ahorcado desde cero con conceptos elementales de programación imperativa.</p>
+      
+      <div class="grid-2">
+        <div class="card-box">
+          <h3>🎯 Objetivos de Aprendizaje</h3>
+          <ul>
+            <li>Manipulación directa del DOM con <code>getElementById</code>.</li>
+            <li>Gestión de estado en memoria mediante variables y arrays.</li>
+            <li>Lectura y validación de datos desde un <code>&lt;input&gt;</code>.</li>
+            <li>Uso de bucles <code>for</code> tradicionales para recorrer cadenas.</li>
+          </ul>
+        </div>
+        <div class="card-box">
+          <h3>🧱 Componentes Principales</h3>
+          <ul>
+            <li><strong>Display:</strong> Muestra la palabra con guiones <code>_ _ _ _</code>.</li>
+            <li><strong>Ahorcado SVG:</strong> Piezas que se destapan con cada error.</li>
+            <li><strong>Entrada:</strong> Caja de texto para probar una letra a la vez.</li>
+            <li><strong>Marcador:</strong> Control de vidas restantes (6 a 0).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 2: Hito 1 y 2 - Estado e Interfaz -->
+    <section class="slide">
+      <h2>Hito 1 y 2: Memoria del Juego y Selectores DOM</h2>
+      <p>Definimos el banco de palabras y las variables globales que registran qué está ocurriendo en la partida:</p>
+
+      <pre><code><span class="kw">const</span> PALABRAS = [<span class="str">'JAVASCRIPT'</span>, <span class="str">'VARIABLE'</span>, <span class="str">'FUNCION'</span>, <span class="str">'OBJETO'</span>];
+<span class="kw">const</span> MAX_FALLOS = <span class="num">6</span>;
+
+<span class="kw">let</span> palabraSecreta = <span class="str">''</span>;    <span class="cm">// Ej: "VARIABLE"</span>
+<span class="kw">let</span> letrasAdivinadas = [];  <span class="cm">// Ej: ['V', '_', 'R', '_', ...]</span>
+<span class="kw">let</span> letrasUsadas = [];      <span class="cm">// Ej: ['A', 'E', 'X']</span>
+<span class="kw">let</span> fallos = <span class="num">0</span>;             <span class="cm">// 0 a 6</span>
+
+<span class="cm">// Referencias a los 6 elementos del ahorcado en el SVG</span>
+<span class="kw">const</span> partesAhorcado = [
+  document.<span class="fn">getElementById</span>(<span class="str">'parte-cabeza'</span>),
+  document.<span class="fn">getElementById</span>(<span class="str">'parte-cuerpo'</span>),
+  document.<span class="fn">getElementById</span>(<span class="str">'parte-brazo-izq'</span>),
+  document.<span class="fn">getElementById</span>(<span class="str">'parte-brazo-der'</span>),
+  document.<span class="fn">getElementById</span>(<span class="str">'parte-pierna-izq'</span>),
+  document.<span class="fn">getElementById</span>(<span class="str">'parte-pierna-der'</span>)
+];</code></pre>
+    </section>
+
+    <!-- Slide 3: Hito 3 - Iniciar Partida -->
+    <section class="slide">
+      <h2>Hito 3: Función iniciarJuego()</h2>
+      <p>Seleccionamos una palabra al azar y preparamos el array de guiones bajos:</p>
+
+      <pre><code><span class="kw">function</span> <span class="fn">iniciarJuego</span>() {
+  <span class="cm">// 1. Elegir palabra aleatoria</span>
+  <span class="kw">const</span> indice = Math.<span class="fn">floor</span>(Math.<span class="fn">random</span>() * PALABRAS.length);
+  palabraSecreta = PALABRAS[indice];
+
+  <span class="cm">// 2. Llenar letrasAdivinadas con tantos '_' como longitud tenga la palabra</span>
+  letrasAdivinadas = [];
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; palabraSecreta.length; i++) {
+    letrasAdivinadas.<span class="fn">push</span>(<span class="str">'_'</span>);
+  }
+
+  <span class="cm">// 3. Resetear contadores y ocultar piezas del ahorcado</span>
+  fallos = <span class="num">0</span>;
+  letrasUsadas = [];
+  partesAhorcado.<span class="fn">forEach</span>(parte =&gt; parte.classList.<span class="fn">remove</span>(<span class="str">'visible'</span>));
+
+  <span class="fn">actualizarPantalla</span>();
+}</code></pre>
+    </section>
+
+    <!-- Slide 4: Hito 4 - Comprobación de Letra -->
+    <section class="slide">
+      <h2>Hito 4: Procesar y Comprobar la Letra</h2>
+      <p>Validamos la letra y comprobamos si está dentro de la palabra secreta:</p>
+
+      <pre><code><span class="kw">function</span> <span class="fn">procesarLetra</span>() {
+  <span class="kw">const</span> letra = inputLetra.value.<span class="fn">trim</span>().<span class="fn">toUpperCase</span>();
+  <span class="kw">if</span> (!letra || letrasUsadas.<span class="fn">includes</span>(letra)) <span class="kw">return</span>;
+
+  letrasUsadas.<span class="fn">push</span>(letra);
+
+  <span class="kw">if</span> (palabraSecreta.<span class="fn">includes</span>(letra)) {
+    <span class="cm">// ACIERTO: Recorremos y revelamos</span>
+    <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; palabraSecreta.length; i++) {
+      <span class="kw">if</span> (palabraSecreta[i] === letra) {
+        letrasAdivinadas[i] = letra;
+      }
+    }
+  } <span class="kw">else</span> {
+    <span class="cm">// FALLO: Mostramos la siguiente pieza del ahorcado</span>
+    fallos++;
+    partesAhorcado[fallos - <span class="num">1</span>].classList.<span class="fn">add</span>(<span class="str">'visible'</span>);
+  }
+
+  <span class="fn">actualizarPantalla</span>();
+  <span class="fn">verificarFinJuego</span>();
+}</code></pre>
+    </section>
+
+    <!-- Slide 5: Hito 5 y 6 - Dibujo y Fin de Partida -->
+    <section class="slide">
+      <h2>Hito 5 y 6: Actualización y Fin de Partida</h2>
+      <p>Comprobamos si el alumno ha ganado (sin guiones) o ha agotado sus vidas (6 fallos):</p>
+
+      <pre><code><span class="kw">function</span> <span class="fn">verificarFinJuego</span>() {
+  <span class="cm">// VICTORIA: ¡Ya no queda ningún guion bajo en el array!</span>
+  <span class="kw">if</span> (!letrasAdivinadas.<span class="fn">includes</span>(<span class="str">'_'</span>)) {
+    juegoTerminado = <span class="kw">true</span>;
+    <span class="fn">mostrarMensaje</span>(<span class="str">'🎉 ¡Has ganado!'</span>, <span class="str">'exito'</span>);
+    <span class="fn">finalizarPartida</span>();
+    <span class="kw">return</span>;
+  }
+
+  <span class="cm">// DERROTA: Se han cometido 6 fallos</span>
+  <span class="kw">if</span> (fallos &gt;= MAX_FALLOS) {
+    juegoTerminado = <span class="kw">true</span>;
+    palabraDisplay.textContent = palabraSecreta.<span class="fn">split</span>(<span class="str">''</span>).<span class="fn">join</span>(<span class="str">' '</span>);
+    <span class="fn">mostrarMensaje</span>(<span class="str">'💀 ¡Game Over!'</span>, <span class="str">'error'</span>);
+    <span class="fn">finalizarPartida</span>();
+  }
+}</code></pre>
+    </section>
+
+    <!-- Slide 6: Resumen Didáctico -->
+    <section class="slide">
+      <h2>Resumen Didáctico de la Versión 1</h2>
+      <div class="grid-2">
+        <div class="card-box">
+          <h3>✅ Puntos Fuertes</h3>
+          <ul>
+            <li>Estructura sumamente fácil de seguir en la pizarra.</li>
+            <li>No requiere conceptos avanzados de objetos ni eventos complejos.</li>
+            <li>Comprensión intuitiva del dibujo progresivo con SVG + CSS.</li>
+          </ul>
+        </div>
+        <div class="card-box">
+          <h3>🚀 Próximo Paso: Versión 2</h3>
+          <ul>
+            <li>Sustituir el <code>&lt;input&gt;</code> por un <strong>teclado virtual interactivo</strong> en pantalla.</li>
+            <li>Añadir <strong>categorías temáticas</strong> y pistas de ayuda.</li>
+            <li>Soporte para teclado físico mediante eventos <code>keydown</code>.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    let slideActual = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const contador = document.getElementById('contador-slide');
+    const barra = document.getElementById('barra-progreso');
+
+    function actualizarSlide() {
+      slides.forEach((s, idx) => {
+        s.classList.toggle('active', idx === slideActual);
+      });
+      contador.textContent = `${slideActual + 1} / ${totalSlides}`;
+      barra.style.width = `${((slideActual + 1) / totalSlides) * 100}%`;
+    }
+
+    function cambiarSlide(direccion) {
+      slideActual = (slideActual + direccion + totalSlides) % totalSlides;
+      actualizarSlide();
+    }
+
+    function togglePantallaCompleta() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') cambiarSlide(1);
+      if (e.key === 'ArrowLeft') cambiarSlide(-1);
+      if (e.key === 'f' || e.key === 'F') togglePantallaCompleta();
+    });
+
+    actualizarSlide();
+  </script>
+</body>
+</html>

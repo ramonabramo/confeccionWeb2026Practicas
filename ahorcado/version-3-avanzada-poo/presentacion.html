@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V3: Arquitectura POO, Audio y Persistencia — Ramón Abramo</title>
+  <style>
+    :root {
+      --bg: #070c18;
+      --card-bg: #0f172a;
+      --card-border: #334155;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --code-bg: #060a14;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--card-border);
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--accent);
+    }
+
+    .brand-badge {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      border: 1px solid var(--accent);
+    }
+
+    .controls-nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background: #1e293b;
+      border-color: var(--accent);
+    }
+
+    .counter {
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      position: relative;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1100px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 36px 48px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      color: #e2e8f0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 8px;
+    }
+
+    p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .tagline {
+      font-size: 1.3rem;
+      color: #cbd5e1;
+      margin-bottom: 24px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 20px;
+    }
+
+    .card-box {
+      background: #090e1a;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .card-box h3 {
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .card-box ul {
+      list-style-type: none;
+    }
+
+    .card-box li {
+      margin-bottom: 8px;
+      color: #cbd5e1;
+      font-size: 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .card-box li::before {
+      content: "•";
+      color: var(--accent);
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      color: #f1f5f9;
+      overflow-x: auto;
+      margin-top: 14px;
+    }
+
+    .kw { color: #f472b6; }
+    .fn { color: #38bdf8; }
+    .str { color: #a3e635; }
+    .cm { color: #64748b; font-style: italic; }
+    .num { color: #fbbf24; }
+
+    .progress-bar {
+      height: 4px;
+      background: var(--card-border);
+      width: 100%;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 16.6%;
+      transition: width 0.25s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span>🎮 El Ahorcado Web</span>
+      <span class="brand-badge">Versión 3: POO, Audio y Persistencia</span>
+    </div>
+    <div class="controls-nav">
+      <button class="btn" id="btn-prev" onclick="cambiarSlide(-1)">◀ Anterior</button>
+      <span class="counter" id="contador-slide">1 / 6</span>
+      <button class="btn" id="btn-next" onclick="cambiarSlide(1)">Siguiente ▶</button>
+      <button class="btn" onclick="togglePantallaCompleta()">⛶ Pantalla Completa</button>
+    </div>
+  </header>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="barra-progreso"></div>
+  </div>
+
+  <main>
+    <!-- Slide 1 -->
+    <section class="slide active">
+      <span class="brand-badge">Nivel Profesional</span>
+      <h1>🎮 Versión 3: Arquitectura POO y Persistencia</h1>
+      <p class="tagline">Estructuración modular de nivel empresarial: clases ES6 desacopladas, Web Audio API y almacenamiento persistente.</p>
+      
+      <div class="grid-2">
+        <div class="card-box">
+          <h3>🏛️ Módulos de la Arquitectura</h3>
+          <ul>
+            <li><code>SoundSynthesizer</code>: Audio nativo sin ficheros externos.</li>
+            <li><code>StatsRepository</code>: Manejo persistente de <code>localStorage</code>.</li>
+            <li><code>AhorcadoEngine</code>: Motor puro desacoplado del DOM.</li>
+            <li><code>AhorcadoUI</code>: Orquestación de eventos y vistas.</li>
+          </ul>
+        </div>
+        <div class="card-box">
+          <h3>⭐ Prestaciones Avanzadas</h3>
+          <ul>
+            <li><strong>3 Niveles de dificultad:</strong> Fácil, Normal y Difícil con temporizador.</li>
+            <li><strong>Partículas de Confeti:</strong> Renderizadas sobre <code>&lt;canvas&gt;</code> a 60 FPS.</li>
+            <li><strong>Estadísticas históricas:</strong> Racha actual, récord y % victorias.</li>
+            <li><strong>Audio sintético:</strong> Acierto, error, fanfarria y game over.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 2 -->
+    <section class="slide">
+      <h2>Módulo de Audio: Web Audio API Puro</h2>
+      <p>Generación de ondas sinusoidales armónicas en tiempo real sin requerir archivos de audio:</p>
+
+      <pre><code><span class="kw">class</span> SoundSynthesizer {
+  <span class="fn">playTone</span>(frequency, type, duration) {
+    <span class="kw">if</span> (this.muted) <span class="kw">return</span>;
+    <span class="kw">const</span> osc = this.audioCtx.<span class="fn">createOscillator</span>();
+    <span class="kw">const</span> gain = this.audioCtx.<span class="fn">createGain</span>();
+
+    osc.type = type; <span class="cm">// 'sine' | 'triangle' | 'sawtooth'</span>
+    osc.frequency.<span class="fn">setValueAtTime</span>(frequency, this.audioCtx.currentTime);
+    gain.gain.<span class="fn">exponentialRampToValueAtTime</span>(<span class="num">0.001</span>, this.audioCtx.currentTime + duration);
+
+    osc.<span class="fn">connect</span>(gain);
+    gain.<span class="fn">connect</span>(this.audioCtx.destination);
+    osc.<span class="fn">start</span>();
+    osc.<span class="fn">stop</span>(this.audioCtx.currentTime + duration);
+  }
+}</code></pre>
+    </section>
+
+    <!-- Slide 3 -->
+    <section class="slide">
+      <h2>Módulo de Persistencia: StatsRepository</h2>
+      <p>Encapsulamos la comunicación con <code>localStorage</code> serializando con JSON:</p>
+
+      <pre><code><span class="kw">class</span> StatsRepository {
+  <span class="fn">recordGame</span>(victory) {
+    this.stats.partidas++;
+    <span class="kw">if</span> (victory) {
+      this.stats.victorias++;
+      this.stats.rachaActual++;
+      <span class="kw">if</span> (this.stats.rachaActual &gt; this.stats.mejorRacha) {
+        this.stats.mejorRacha = this.stats.rachaActual;
+      }
+    } <span class="kw">else</span> {
+      this.stats.derrotas++;
+      this.stats.rachaActual = <span class="num">0</span>;
+    }
+    localStorage.<span class="fn">setItem</span>(<span class="str">'ahorcado_stats'</span>, JSON.<span class="fn">stringify</span>(this.stats));
+  }
+}</code></pre>
+    </section>
+
+    <!-- Slide 4 -->
+    <section class="slide">
+      <h2>El Motor Puro: AhorcadoEngine</h2>
+      <p>Contiene la lógica matemática y de estado sin tocar el DOM (aislamiento de responsabilidades):</p>
+
+      <pre><code><span class="kw">class</span> AhorcadoEngine {
+  <span class="fn">probarLetra</span>(letra) {
+    <span class="kw">if</span> (this.juegoTerminado || this.letrasUsadas.<span class="fn">has</span>(letra)) <span class="kw">return</span> <span class="kw">null</span>;
+    this.letrasUsadas.<span class="fn">add</span>(letra);
+
+    <span class="kw">const</span> acierto = this.itemActual.palabra.<span class="fn">includes</span>(letra);
+    <span class="kw">if</span> (acierto) {
+      <span class="cm">// Revelar posiciones...</span>
+    } <span class="kw">else</span> {
+      this.fallos++;
+    }
+
+    <span class="kw">const</span> victoria = !this.letrasAdivinadas.<span class="fn">includes</span>(<span class="str">''</span>);
+    <span class="kw">const</span> derrota = this.fallos &gt;= this.<span class="fn">getConfig</span>().maxFallos;
+
+    <span class="kw">return</span> { letra, acierto, fallos: this.fallos, victoria, derrota };
+  }
+}</code></pre>
+    </section>
+
+    <!-- Slide 5 -->
+    <section class="slide">
+      <h2>Niveles de Dificultad Dinámicos</h2>
+      <p>Configuraciones adaptativas que modifican la experiencia de juego:</p>
+
+      <div class="grid-2">
+        <div class="card-box">
+          <h3>🟢 Fácil</h3>
+          <ul>
+            <li><strong>8 vidas</strong> (incluye manos del ahorcado).</li>
+            <li>Revela automáticamente <strong>2 letras iniciales</strong>.</li>
+            <li>Pistas ilimitadas y sin presión de tiempo.</li>
+          </ul>
+        </div>
+        <div class="card-box">
+          <h3>🔴 Difícil (Contrarreloj)</h3>
+          <ul>
+            <li><strong>5 vidas</strong> máximas.</li>
+            <li>Sin pistas temáticas.</li>
+            <li><strong>Temporizador regresivo de 45s</strong> con barra animada.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 6 -->
+    <section class="slide">
+      <h2>Resumen del Salto Tecnológico</h2>
+      <div class="grid-2">
+        <div class="card-box">
+          <h3>Versión 1 y 2 (Fundamentos)</h3>
+          <ul>
+            <li>Funciones sueltas en el ámbito global.</li>
+            <li>Sin persistencia de datos (al refrescar se perdía todo).</li>
+            <li>Efectos visuales elementales.</li>
+          </ul>
+        </div>
+        <div class="card-box">
+          <h3>Versión 3 (Producción)</h3>
+          <ul>
+            <li>Clases ES6 con responsabilidades delimitadas (SOLID).</li>
+            <li>Web Audio API nativo + Canvas 2D interactivo.</li>
+            <li>Historial guardado en el navegador del usuario.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    let slideActual = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const contador = document.getElementById('contador-slide');
+    const barra = document.getElementById('barra-progreso');
+
+    function actualizarSlide() {
+      slides.forEach((s, idx) => s.classList.toggle('active', idx === slideActual));
+      contador.textContent = `${slideActual + 1} / ${totalSlides}`;
+      barra.style.width = `${((slideActual + 1) / totalSlides) * 100}%`;
+    }
+
+    function cambiarSlide(direccion) {
+      slideActual = (slideActual + direccion + totalSlides) % totalSlides;
+      actualizarSlide();
+    }
+
+    function togglePantallaCompleta() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') cambiarSlide(1);
+      if (e.key === 'ArrowLeft') cambiarSlide(-1);
+      if (e.key === 'f' || e.key === 'F') togglePantallaCompleta();
+    });
+
+    actualizarSlide();
+  </script>
+</body>
+</html>

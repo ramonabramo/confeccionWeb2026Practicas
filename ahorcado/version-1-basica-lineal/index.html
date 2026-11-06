@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Juego del Ahorcado - Versión 1: Básica e Imperativa</title>
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+
+  <div class="contenedor-principal">
+    <header class="cabecera">
+      <span class="badge">Nivel 1: Iniciación</span>
+      <h1>🎮 El Juego del Ahorcado</h1>
+      <p class="subtitulo">Adivina la palabra secreta letra a letra antes de agotar tus 6 vidas</p>
+    </header>
+
+    <main class="juego-grid">
+      <!-- Panel Izquierdo: Dibujo del Ahorcado -->
+      <section class="panel-grafico" aria-label="Dibujo del ahorcado">
+        <svg id="svg-ahorcado" viewBox="0 0 200 240" class="canvas-ahorcado">
+          <!-- Soporte y Horca (siempre visibles) -->
+          <line x1="20" y1="220" x2="100" y2="220" class="trazo-horca base" />
+          <line x1="50" y1="220" x2="50" y2="20" class="trazo-horca poste" />
+          <line x1="50" y1="20" x2="140" y2="20" class="trazo-horca viga" />
+          <line x1="50" y1="55" x2="85" y2="20" class="trazo-horca escuadra" />
+          <line x1="140" y1="20" x2="140" y2="50" class="trazo-cuerda" />
+
+          <!-- Partes del cuerpo del ahorcado (se muestran con cada fallo) -->
+          <!-- Fallo 1: Cabeza -->
+          <circle id="parte-cabeza" cx="140" cy="70" r="20" class="trazo-cuerpo parte-oculta" />
+          <!-- Fallo 2: Tronco -->
+          <line id="parte-cuerpo" x1="140" y1="90" x2="140" y2="150" class="trazo-cuerpo parte-oculta" />
+          <!-- Fallo 3: Brazo izquierdo -->
+          <line id="parte-brazo-izq" x1="140" y1="105" x2="115" y2="135" class="trazo-cuerpo parte-oculta" />
+          <!-- Fallo 4: Brazo derecho -->
+          <line id="parte-brazo-der" x1="140" y1="105" x2="165" y2="135" class="trazo-cuerpo parte-oculta" />
+          <!-- Fallo 5: Pierna izquierda -->
+          <line id="parte-pierna-izq" x1="140" y1="150" x2="120" y2="195" class="trazo-cuerpo parte-oculta" />
+          <!-- Fallo 6: Pierna derecha -->
+          <line id="parte-pierna-der" x1="140" y1="150" x2="160" y2="195" class="trazo-cuerpo parte-oculta" />
+          <!-- Ojos en cruz al perder -->
+          <g id="parte-cara-derrota" class="parte-oculta">
+            <line x1="132" y1="65" x2="138" y2="71" class="trazo-cara" />
+            <line x1="138" y1="65" x2="132" y2="71" class="trazo-cara" />
+            <line x1="142" y1="65" x2="148" y2="71" class="trazo-cara" />
+            <line x1="148" y1="65" x2="142" y2="71" class="trazo-cara" />
+          </g>
+        </svg>
+
+        <div class="marcador-fallos">
+          <span class="etiqueta-marcador">Vidas restantes:</span>
+          <span id="vidas-restantes" class="vidas-valor">6</span> / 6
+        </div>
+      </section>
+
+      <!-- Panel Derecho: Interacción y Palabra -->
+      <section class="panel-juego">
+        <!-- Palabra Oculta con Guiones -->
+        <div class="caja-palabra">
+          <span class="pista-etiqueta">Palabra a adivinar:</span>
+          <div id="palabra-display" class="palabra-display" aria-live="polite">_ _ _ _ _</div>
+        </div>
+
+        <!-- Entrada de letras -->
+        <div class="caja-entrada">
+          <label for="input-letra" class="etiqueta-input">Introduce una letra:</label>
+          <div class="grupo-input">
+            <input 
+              type="text" 
+              id="input-letra" 
+              maxlength="1" 
+              autocomplete="off" 
+              placeholder="A" 
+              aria-label="Introduce una sola letra"
+            >
+            <button id="btn-probar" class="btn btn-primario">Probar Letra</button>
+          </div>
+        </div>
+
+        <!-- Registro de letras ya probadas -->
+        <div class="caja-letras-usadas">
+          <span class="etiqueta-usadas">Letras probadas:</span>
+          <div id="letras-usadas-display" class="letras-usadas-lista">Ninguna aún</div>
+        </div>
+
+        <!-- Mensajes de Estado (Acierto, Fallo, Fin de Partida) -->
+        <div id="mensaje-estado" class="mensaje-alerta">Escribe una letra y pulsa 'Probar Letra' o presiona Enter.</div>
+
+        <!-- Botón Reiniciar / Siguiente partida -->
+        <div class="acciones-partida">
+          <button id="btn-reiniciar" class="btn btn-secundario">🔄 Nueva Palabra</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="pie-pagina">
+      <p>Práctica de JavaScript • <strong>Versión 1: Lógica Básica Lineal</strong> • Profesor Ramón Abramo</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

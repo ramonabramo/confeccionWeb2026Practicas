@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Un Juego del Ahorcado, Tres Caminos Técnicos — Ramón Abramo</title>
+<style>
+  :root {
+    --bg: #090e1a;
+    --card: #141d30;
+    --borde: #283754;
+    --texto: #f1f5f9;
+    --suave: #94a3b8;
+    --code-bg: #060a12;
+    --v1: #38bdf8;   /* V1: Básica (Cian) */
+    --v2: #a78bfa;   /* V2: Teclado Eventos (Violeta) */
+    --v3: #34d399;   /* V3: POO & Audio (Esmeralda) */
+    --ok: #10b981;
+    --mal: #f43f5e;
+    --acento: #38bdf8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--texto);
+    display: flex; flex-direction: column; overflow: hidden;
+    font-size: 18px;
+  }
+
+  /* Cabecera */
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 24px; border-bottom: 1px solid var(--borde);
+    background: rgba(15,23,42,.95); gap: 16px;
+  }
+  .marca { font-weight: 700; color: var(--acento); font-size: .95rem; white-space: nowrap; }
+  .seccion-actual { font-size: .85rem; color: var(--suave); flex: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    background: var(--card); border: 1px solid var(--borde); color: var(--texto);
+    padding: 6px 12px; border-radius: 8px; font-size: .85rem; cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn:hover { border-color: var(--acento); }
+  .contador { font-size: .85rem; color: var(--suave); min-width: 64px; text-align: center; font-variant-numeric: tabular-nums; }
+  .barra { height: 4px; background: var(--borde); }
+  .barra > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--v1), var(--v2), var(--v3)); transition: width .3s; }
+
+  main { flex: 1; display: flex; overflow: hidden; }
+  .escenario { flex: 1; display: flex; align-items: center; justify-content: center; padding: 22px; overflow-y: auto; }
+
+  /* Diapositivas */
+  .slide {
+    display: none; width: 100%; max-width: 1180px;
+    background: var(--card); border: 1px solid var(--borde); border-radius: 18px;
+    padding: 30px 40px; box-shadow: 0 25px 50px -12px rgba(0,0,0,.6);
+    animation: entra .3s ease-out; margin: auto 0;
+  }
+  .slide.activa { display: block; }
+  @keyframes entra { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .etiqueta {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 20px; font-size: .75rem;
+    font-weight: 700; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 12px;
+  }
+  .etiqueta.v1 { background: rgba(56,189,248,.15); color: var(--v1); border: 1px solid var(--v1); }
+  .etiqueta.v2 { background: rgba(167,139,250,.15); color: var(--v2); border: 1px solid var(--v2); }
+  .etiqueta.v3 { background: rgba(52,211,153,.15); color: var(--v3); border: 1px solid var(--v3); }
+  .etiqueta.general { background: rgba(241,245,249,.1); color: var(--texto); border: 1px solid var(--borde); }
+
+  h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; line-height: 1.2; }
+  h2 { font-size: 1.55rem; font-weight: 700; margin-bottom: 14px; color: var(--texto); display: flex; align-items: center; gap: 10px; }
+  p.lead { font-size: 1.05rem; color: var(--suave); line-height: 1.5; margin-bottom: 20px; }
+
+  /* Rejillas */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+
+  .tarjeta {
+    background: #0d1527; border: 1px solid var(--borde); border-radius: 12px;
+    padding: 18px 20px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .tarjeta.borde-v1 { border-top: 3.5px solid var(--v1); }
+  .tarjeta.borde-v2 { border-top: 3.5px solid var(--v2); }
+  .tarjeta.borde-v3 { border-top: 3.5px solid var(--v3); }
+
+  .tarjeta h3 { font-size: 1.15rem; color: var(--texto); margin-bottom: 4px; }
+  .tarjeta p { font-size: .9rem; color: var(--suave); line-height: 1.45; }
+  .tarjeta ul { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .tarjeta li { font-size: .88rem; color: #cbd5e1; display: flex; gap: 6px; }
+  .tarjeta li::before { content: "•"; color: var(--acento); font-size: 1.1rem; line-height: 1; }
+
+  /* Tablas comparativas */
+  table.comp {
+    width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .88rem;
+  }
+  table.comp th, table.comp td {
+    padding: 10px 14px; border: 1px solid var(--borde); text-align: left;
+  }
+  table.comp th { background: #0c1424; font-weight: 700; color: #e2e8f0; }
+  table.comp tr:nth-child(even) td { background: rgba(13,21,39,.5); }
+  .th-v1 { color: var(--v1) !important; }
+  .th-v2 { color: var(--v2) !important; }
+  .th-v3 { color: var(--v3) !important; }
+
+  pre {
+    background: var(--code-bg); border: 1px solid var(--borde); border-radius: 10px;
+    padding: 14px 18px; font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: .85rem; line-height: 1.42; color: #f1f5f9; overflow-x: auto;
+  }
+  .kw { color: #f472b6; }
+  .fn { color: #38bdf8; }
+  .str { color: #a3e635; }
+  .cm { color: #64748b; font-style: italic; }
+  .num { color: #fbbf24; }
+
+  footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 24px; border-top: 1px solid var(--borde);
+    background: rgba(15,23,42,.95); font-size: .78rem; color: var(--suave);
+  }
+  kbd {
+    background: #0f172a; border: 1px solid var(--borde); border-radius: 4px;
+    padding: 1px 5px; font-family: monospace; font-size: .75rem; color: var(--acento);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="marca">🎮 Práctica: El Ahorcado en JavaScript</div>
+  <div class="seccion-actual" id="titulo-seccion">Introducción al Proyecto</div>
+  <div class="nav">
+    <button class="btn" id="btn-ant" onclick="ir(-1)">◀ Anterior</button>
+    <div class="contador" id="contador">1 / 10</div>
+    <button class="btn" id="btn-sig" onclick="ir(1)">Siguiente ▶</button>
+    <button class="btn" onclick="toggleFS()">⛶ Pantalla Completa</button>
+  </div>
+</header>
+
+<div class="barra"><div id="progreso"></div></div>
+
+<main>
+<div class="escenario">
+
+  <!-- SLIDE 1: Portada General -->
+  <section class="slide activa">
+    <div class="etiqueta general">Clase Magistral • Confección Web 2026</div>
+    <h1>Un Enunciado, Tres Caminos Técnicos</h1>
+    <p class="lead">Cómo resolver el clásico <strong>Juego del Ahorcado</strong> desde la programación secuencial más elemental hasta una arquitectura orientada a objetos moderna con Web Audio API y persistencia.</p>
+    <div class="grid-3">
+      <div class="tarjeta borde-v1">
+        <div class="etiqueta v1">Versión 1: Básica</div>
+        <h3>Lógica Lineal e Imperativa</h3>
+        <p>Variables globales directas, bucles tradicionales, <code>&lt;input&gt;</code> clásico y manipulación elemental con <code>getElementById</code>.</p>
+      </div>
+      <div class="tarjeta borde-v2">
+        <div class="etiqueta v2">Versión 2: Intermedia</div>
+        <h3>Teclado Virtual & Delegación</h3>
+        <p>Inyección dinámica en el DOM, delegación de eventos con <em>Event Bubbling</em>, banco de objetos con pistas y sincronización de teclado físico.</p>
+      </div>
+      <div class="tarjeta borde-v3">
+        <div class="etiqueta v3">Versión 3: Avanzada</div>
+        <h3>Arquitectura POO & Audio</h3>
+        <p>Clases ES6 desacopladas, Web Audio API nativo, confeti Canvas, dificultades adaptativas y persistencia en <code>localStorage</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 2: El Enunciado y los 6 Hitos -->
+  <section class="slide">
+    <div class="etiqueta general">Requisitos del Proyecto</div>
+    <h2>Los 6 Hitos de Desarrollo del Ahorcado</h2>
+    <p class="lead">Todo el alumnado debe construir el ejercicio de forma incremental validando cada etapa en pantalla:</p>
+    <table class="comp">
+      <tr>
+        <th style="width: 10%;">Hito</th>
+        <th style="width: 25%;">Nombre</th>
+        <th style="width: 40%;">Comportamiento Esperado</th>
+        <th style="width: 25%;">Validación en Aula</th>
+      </tr>
+      <tr>
+        <td><strong>Hito 1</strong></td>
+        <td>Palabra aleatoria & display</td>
+        <td>Elegir palabra del banco y mostrar guiones bajos según su longitud.</td>
+        <td>Palabra de 6 letras ➔ <code>_ _ _ _ _ _</code></td>
+      </tr>
+      <tr>
+        <td><strong>Hito 2</strong></td>
+        <td>Lectura y validación de letra</td>
+        <td>Comprobar que sea una letra válida (A-Z) y que no haya sido ya intentada.</td>
+        <td>Intentar letra repetida ➔ Aviso visual</td>
+      </tr>
+      <tr>
+        <td><strong>Hito 3</strong></td>
+        <td>Destape de aciertos</td>
+        <td>Sustituir guiones bajos por la letra en todas las posiciones coincidentes.</td>
+        <td>Letra 'A' en 'PANTALLA' ➔ <code>_ A _ _ A _ _ A</code></td>
+      </tr>
+      <tr>
+        <td><strong>Hito 4</strong></td>
+        <td>Dibujo progresivo del ahorcado</td>
+        <td>Si la letra no está, restar una vida y mostrar la siguiente parte en el SVG.</td>
+        <td>Fallo 1 ➔ Cabeza, Fallo 2 ➔ Tronco...</td>
+      </tr>
+      <tr>
+        <td><strong>Hito 5</strong></td>
+        <td>Condición de Victoria</td>
+        <td>Si ya no quedan guiones bajos en pantalla, declarar victoria inmediata.</td>
+        <td>Palabra completa ➔ 🎉 Mensaje ganador</td>
+      </tr>
+      <tr>
+        <td><strong>Hito 6</strong></td>
+        <td>Condición de Derrota</td>
+        <td>Al llegar al máximo de fallos, mostrar cara de derrota y revelar la palabra.</td>
+        <td>6 fallos ➔ 💀 Game Over y solución</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- SLIDE 3: La Representación Gráfica (SVG) -->
+  <section class="slide">
+    <div class="etiqueta general">Gráficos Vectoriales</div>
+    <h2>Cómo Funciona el Dibujo del Ahorcado en SVG</h2>
+    <p class="lead">Para lograr un dibujo nítido, escalable y ligero sin dependencias externas, empleamos un lienzo SVG vectorial:</p>
+    <div class="grid-2">
+      <div>
+        <pre><code><span class="cm">&lt;!-- Soporte y Horca (Fijos) --&gt;</span>
+&lt;<span class="kw">line</span> x1=<span class="str">"20"</span> y1=<span class="str">"220"</span> x2=<span class="str">"100"</span> y2=<span class="str">"220"</span> /&gt;
+&lt;<span class="kw">line</span> x1=<span class="str">"50"</span> y1=<span class="str">"220"</span> x2=<span class="str">"50"</span> y2=<span class="str">"20"</span> /&gt;
+&lt;<span class="kw">line</span> x1=<span class="str">"50"</span> y1=<span class="str">"20"</span> x2=<span class="str">"140"</span> y2=<span class="str">"20"</span> /&gt;
+
+<span class="cm">&lt;!-- Partes del cuerpo (Inicialmente ocultas) --&gt;</span>
+&lt;<span class="kw">circle</span> id=<span class="str">"parte-cabeza"</span> class=<span class="str">"parte-oculta"</span> /&gt;
+&lt;<span class="kw">line</span> id=<span class="str">"parte-cuerpo"</span> class=<span class="str">"parte-oculta"</span> /&gt;
+&lt;<span class="kw">line</span> id=<span class="str">"parte-brazo-izq"</span> class=<span class="str">"parte-oculta"</span> /&gt;
+&lt;<span class="kw">line</span> id=<span class="str">"parte-brazo-der"</span> class=<span class="str">"parte-oculta"</span> /&gt;
+&lt;<span class="kw">line</span> id=<span class="str">"parte-pierna-izq"</span> class=<span class="str">"parte-oculta"</span> /&gt;
+&lt;<span class="kw">line</span> id=<span class="str">"parte-pierna-der"</span> class=<span class="str">"parte-oculta"</span> /&gt;</code></pre>
+      </div>
+      <div class="tarjeta">
+        <h3>💡 El Secreto Pedagógico</h3>
+        <p>En JavaScript, indexamos las partes en un array ordenado:</p>
+        <pre><code><span class="kw">const</span> partes = [cabeza, cuerpo, brazoIzq, ...];
+
+<span class="cm">// Al cometer el fallo N:</span>
+partes[fallos - <span class="num">1</span>].classList.<span class="fn">add</span>(<span class="str">'visible'</span>);</code></pre>
+        <p>Con solo 2 líneas de CSS (<code>opacity: 0</code> y <code>opacity: 1</code>), el muñeco cobra vida paso a paso.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 4: Análisis de la Versión 1 -->
+  <section class="slide">
+    <div class="etiqueta v1">Opción 1 • Iniciación</div>
+    <h2>Versión 1: Lógica Básica Lineal</h2>
+    <p class="lead">La mejor opción para alumnos que están afianzando variables, bucles y condiciones:</p>
+    <div class="grid-2">
+      <div class="tarjeta">
+        <h3>Características Clave</h3>
+        <ul>
+          <li><strong>Banco de palabras:</strong> Array simple de cadenas de texto.</li>
+          <li><strong>Entrada:</strong> Campo <code>&lt;input type="text" maxlength="1"&gt;</code>.</li>
+          <li><strong>Búsqueda:</strong> Recorrido con bucle <code>for (let i = 0; i &lt; longitud; i++)</code>.</li>
+          <li><strong>Display:</strong> Texto formateado con <code>letrasAdivinadas.join(' ')</code>.</li>
+        </ul>
+      </div>
+      <div>
+        <pre><code><span class="cm">// Lógica de comprobación directa</span>
+<span class="kw">if</span> (palabraSecreta.<span class="fn">includes</span>(letra)) {
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; palabraSecreta.length; i++) {
+    <span class="kw">if</span> (palabraSecreta[i] === letra) {
+      letrasAdivinadas[i] = letra;
+    }
+  }
+} <span class="kw">else</span> {
+  fallos++;
+  partesAhorcado[fallos - <span class="num">1</span>].classList.<span class="fn">add</span>(<span class="str">'visible'</span>);
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 5: Análisis de la Versión 2 -->
+  <section class="slide">
+    <div class="etiqueta v2">Opción 2 • Intermedia</div>
+    <h2>Versión 2: Teclado Virtual y Categorías</h2>
+    <p class="lead">Avanza en la experiencia de usuario (UX) generando la botonera con JavaScript y capturando eventos eficientemente:</p>
+    <div class="grid-2">
+      <div>
+        <pre><code><span class="cm">// 1. Delegación en el contenedor padre (Event Bubbling)</span>
+tecladoVirtual.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, e =&gt; {
+  <span class="kw">const</span> btn = e.target.<span class="fn">closest</span>(<span class="str">'.tecla'</span>);
+  <span class="kw">if</span> (btn &amp;&amp; !btn.disabled) <span class="fn">jugarLetra</span>(btn.dataset.letra);
+});
+
+<span class="cm">// 2. Escuchador de teclado físico en tiempo real</span>
+window.<span class="fn">addEventListener</span>(<span class="str">'keydown'</span>, e =&gt; {
+  <span class="kw">const</span> l = e.key.<span class="fn">toUpperCase</span>();
+  <span class="kw">if</span> (ALFABETO.<span class="fn">includes</span>(l)) <span class="fn">jugarLetra</span>(l);
+});</code></pre>
+      </div>
+      <div class="tarjeta">
+        <h3>Mejoras Introducidas</h3>
+        <ul>
+          <li><strong>Objetos semánticos:</strong> <code>{ palabra, categoria, pista }</code>.</li>
+          <li><strong>Teclas con estado:</strong> <code>.acierto</code> (verde) y <code>.fallo</code> (rojo).</li>
+          <li><strong>Casillas individuales:</strong> Cajas animadas en CSS para cada letra.</li>
+          <li><strong>Marcador de corazones:</strong> Feedback emocional de vidas restantes.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 6: Análisis de la Versión 3 -->
+  <section class="slide">
+    <div class="etiqueta v3">Opción 3 • Profesional</div>
+    <h2>Versión 3: Arquitectura POO, Audio y Persistencia</h2>
+    <p class="lead">Desarrollo basado en clases y diseño de software modular para proyectos grandes:</p>
+    <div class="grid-2">
+      <div class="tarjeta">
+        <h3>Módulos Orientados a Objetos</h3>
+        <ul>
+          <li><code>SoundSynthesizer</code>: Sintetizador Web Audio API puro (Do-Mi, arpegios, fanfarrias).</li>
+          <li><code>StatsRepository</code>: Persistencia histórica en <code>localStorage</code> (rachas y % victorias).</li>
+          <li><code>AhorcadoEngine</code>: Motor lógico matemático sin acoplamiento al DOM.</li>
+          <li><code>ConfettiAnimation</code>: Partículas en <code>&lt;canvas&gt;</code> al ganar.</li>
+        </ul>
+      </div>
+      <div>
+        <pre><code><span class="kw">class</span> AhorcadoEngine {
+  <span class="fn">probarLetra</span>(letra) {
+    <span class="cm">// Lógica pura e inmutable</span>
+    <span class="kw">const</span> acierto = this.palabra.<span class="fn">includes</span>(letra);
+    <span class="kw">if</span> (!acierto) this.fallos++;
+    
+    <span class="kw">return</span> {
+      letra, acierto, fallos: this.fallos,
+      victoria: !this.adivinadas.<span class="fn">includes</span>(<span class="str">''</span>),
+      derrota: this.fallos &gt;= this.maxFallos
+    };
+  }
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 7: Comparativa de Código lado a lado -->
+  <section class="slide">
+    <div class="etiqueta general">Comparativa Técnica</div>
+    <h2>Evolución del Manejo de la Entrada del Usuario</h2>
+    <p class="lead">Observa cómo la misma necesidad evoluciona a medida que madura la técnica de programación:</p>
+    <div class="grid-3">
+      <div class="tarjeta borde-v1">
+        <h3 style="color: var(--v1)">V1: Input de Texto</h3>
+        <pre><code><span class="cm">// Requiere teclear y pulsar botón</span>
+<span class="kw">const</span> l = input.value.<span class="fn">toUpperCase</span>();
+input.value = <span class="str">''</span>;
+<span class="kw">if</span> (usadas.<span class="fn">includes</span>(l)) <span class="kw">return</span>;
+usadas.<span class="fn">push</span>(l);</code></pre>
+      </div>
+      <div class="tarjeta borde-v2">
+        <h3 style="color: var(--v2)">V2: Teclado Delegado</h3>
+        <pre><code><span class="cm">// Delegación en padre + Set</span>
+teclado.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, e =&gt; {
+  <span class="kw">const</span> b = e.target.<span class="fn">closest</span>(<span class="str">'.tecla'</span>);
+  <span class="kw">if</span> (b &amp;&amp; !usadas.<span class="fn">has</span>(b.dataset.l)) {
+    usadas.<span class="fn">add</span>(b.dataset.l);
+    b.disabled = <span class="kw">true</span>;
+  }
+});</code></pre>
+      </div>
+      <div class="tarjeta borde-v3">
+        <h3 style="color: var(--v3)">V3: Desacoplamiento POO</h3>
+        <pre><code><span class="cm">// La vista delega en el motor</span>
+<span class="fn">manejarJugada</span>(letra) {
+  <span class="kw">const</span> res = this.engine.<span class="fn">probar</span>(letra);
+  <span class="kw">if</span> (!res) <span class="kw">return</span>;
+  this.audio.<span class="fn">playFeedback</span>(res.acierto);
+  this.ui.<span class="fn">render</span>(res);
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 8: Cuadro Comparativo Global -->
+  <section class="slide">
+    <div class="etiqueta general">Matriz Técnica</div>
+    <h2>Comparativa Integral de las Tres Soluciones</h2>
+    <table class="comp">
+      <tr>
+        <th>Criterio</th>
+        <th class="th-v1">Versión 1: Básica</th>
+        <th class="th-v2">Versión 2: Teclado</th>
+        <th class="th-v3">Versión 3: POO</th>
+      </tr>
+      <tr>
+        <td><strong>Paradigma</strong></td>
+        <td>Imperativo / Secuencial</td>
+        <td>Basado en Eventos / Modular</td>
+        <td>Orientado a Objetos (POO)</td>
+      </tr>
+      <tr>
+        <td><strong>Entrada de usuario</strong></td>
+        <td><code>&lt;input&gt;</code> de texto clásico</td>
+        <td>Teclado virtual + físico</td>
+        <td>Teclado virtual + físico accesible</td>
+      </tr>
+      <tr>
+        <td><strong>Estructura de datos</strong></td>
+        <td>Array de cadenas (strings)</td>
+        <td>Array de objetos + <code>Set</code></td>
+        <td>Modelo de datos encapsulado</td>
+      </tr>
+      <tr>
+        <td><strong>Persistencia</strong></td>
+        <td>Ninguna (volátil en memoria)</td>
+        <td>Ninguna</td>
+        <td><strong><code>localStorage</code> persistente</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Efectos sonoros</strong></td>
+        <td>Sin sonido</td>
+        <td>Sin sonido</td>
+        <td><strong>Web Audio API sintético</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Niveles de dificultad</strong></td>
+        <td>Fija (6 vidas)</td>
+        <td>Fija (6 vidas)</td>
+        <td><strong>3 niveles + Contrarreloj</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Recomendación docente</strong></td>
+        <td><strong>Primer contacto en clase</strong></td>
+        <td><strong>Práctica estándar guiada</strong></td>
+        <td><strong>Reto avanzado / Portafolio</strong></td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- SLIDE 9: Guía de Corrección Docente -->
+  <section class="slide">
+    <div class="etiqueta general">Para el Docente</div>
+    <h2>Cómo Evaluar y Calificar la Práctica</h2>
+    <div class="grid-2">
+      <div class="tarjeta">
+        <h3>Rúbrica de Validación</h3>
+        <ul>
+          <li><strong>Control de errores:</strong> Que una letra repetida o vacía no descuente vidas.</li>
+          <li><strong>Destape exhaustivo:</strong> Si la letra aparece varias veces (ej. 'A' en 'PANTALLA'), deben desvelarse todas a la vez.</li>
+          <li><strong>Sincronización gráfica:</strong> El número de fallos debe coincidir exactamente con las piezas visibles en el SVG.</li>
+          <li><strong>Bloqueo final:</strong> Tras ganar o perder, no debe permitirse seguir jugando hasta reiniciar.</li>
+        </ul>
+      </div>
+      <div class="tarjeta">
+        <h3>Estructura de Entrega al Alumno</h3>
+        <ul>
+          <li>Entrega la plantilla <code>app.alumnos.js</code> con los bloques <code>TODO</code>.</li>
+          <li>Permite que consulten el archivo <code>GUIA_PASO_A_PASO.md</code>.</li>
+          <li>Utiliza el archivo <code>app.solucion.js</code> como tu clave canónica de corrección.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 10: Conclusión y Cierre -->
+  <section class="slide">
+    <div class="etiqueta general">Conclusión</div>
+    <h1>¡A Programar el Ahorcado!</h1>
+    <p class="lead">Cada versión demuestra que en el desarrollo de software no existe una única respuesta correcta, sino diferentes arquitecturas adaptadas al nivel y requerimientos de cada proyecto.</p>
+    <div class="tarjeta" style="text-align: center; padding: 25px;">
+      <h3 style="color: var(--acento); font-size: 1.35rem; margin-bottom: 8px;">Recursos Listos en este Repositorio</h3>
+      <p style="font-size: 1rem; color: #cbd5e1;">
+        📁 3 carpetas completas (código maestro, plantilla de alumnos y solución limpia)<br>
+        📘 4 Guías Detalladas en formato PDF listas para imprimir o enviar<br>
+        🖥️ 3 Presentaciones interactivas autónomas para proyectar en pantalla completa
+      </p>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<footer>
+  <div>Profesor: <strong>Ramón Abramo</strong> • Curso 2026</div>
+  <div>Usa las teclas <kbd>→</kbd> y <kbd>←</kbd> para navegar • <kbd>F</kbd> para pantalla completa</div>
+</footer>
+
+<script>
+  let actual = 0;
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const contador = document.getElementById('contador');
+  const progreso = document.getElementById('progreso');
+  const seccion = document.getElementById('titulo-seccion');
+
+  const titulos = [
+    "Portada: Tres Soluciones Técnicas",
+    "Los 6 Hitos Obligatorios",
+    "El Lienzo Vectorial SVG",
+    "Versión 1: Lógica Básica Lineal",
+    "Versión 2: Teclado Virtual & Delegación",
+    "Versión 3: Arquitectura POO & Audio",
+    "Comparativa de Código",
+    "Matriz Técnica Comparativa",
+    "Guía de Evaluación Docente",
+    "Conclusiones y Entrega"
+  ];
+
+  function render() {
+    slides.forEach((s, i) => s.classList.toggle('activa', i === actual));
+    contador.textContent = `${actual + 1} / ${total}`;
+    progreso.style.width = `${((actual + 1) / total) * 100}%`;
+    seccion.textContent = titulos[actual] || "";
+  }
+
+  function ir(dir) {
+    actual = (actual + dir + total) % total;
+    render();
+  }
+
+  function toggleFS() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+  }
+
+  window.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') ir(1);
+    if (e.key === 'ArrowLeft') ir(-1);
+    if (e.key.toLowerCase() === 'f') toggleFS();
+  });
+
+  render();
+</script>
+</body>
+</html>
