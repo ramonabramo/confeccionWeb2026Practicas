@@ -1,55 +1,57 @@
 # 🎮 Práctica: El Juego del Ahorcado en JavaScript
 
-Bienvenido/a al repositorio maestro de la práctica del **Juego del Ahorcado**. En este proyecto se proporciona el **enunciado completo del ejercicio para el alumnado** y la **explicación detallada de tres soluciones técnicas progresivas** (de la más sencilla a la más avanzada), cada una en su propia carpeta con su interfaz, código maestro, plantilla para alumnos, solución canónica, presentación interactiva autónoma y **documento PDF detallado**.
+Bienvenido/a al repositorio maestro de la práctica del **Juego del Ahorcado**. En este proyecto se proporciona el **enunciado completo del ejercicio para el alumnado** y la **explicación detallada de tres soluciones técnicas progresivas** (de la más sencilla a la más avanzada), cada una en su propia carpeta con su interfaz, código maestro, plantilla para alumnos y solución canónica. Las presentaciones y los PDF están reunidos en la carpeta `documentacion/`.
 
 ---
 
-## 📄 Colección de Documentos en PDF
+## 📚 Documentación (carpeta `documentacion/`)
 
-* 📘 **[Guía General del Proyecto (PDF)](Guia_General_Ahorcado_JS_Ramon_Abramo.pdf)**: Enunciado oficial, objetivos, arquitectura, los 6 hitos de desarrollo, comparativa técnica de las 3 opciones y consejos docentes de Ramón Abramo.
-* 👨‍🏫 **[Guía Detallada Versión 1 - Básica Lineal (PDF)](version-1-basica-lineal/Guia_Detallada_Solucion_1_Basica_Lineal.pdf)**: Desglose paso a paso con variables globales, `getElementById`, bucles `for` y entrada mediante `<input>` tradicional.
-* 🛠️ **[Guía Detallada Versión 2 - Teclado Virtual (PDF)](version-2-teclado-eventos/Guia_Detallada_Solucion_2_Teclado_Eventos.pdf)**: Desglose de la solución interactiva con teclado en pantalla generado dinámicamente, delegación de eventos (`Event Bubbling`), pistas temáticas y soporte para teclado físico.
-* 🚀 **[Guía Detallada Versión 3 - POO & Audio (PDF)](version-3-avanzada-poo/Guia_Detallada_Solucion_3_Avanzada_POO.pdf)**: Arquitectura avanzada basada en clases ES6 desacopladas, Web Audio API nativo, confeti Canvas, dificultades adaptativas y persistencia en `localStorage`.
+Todas las presentaciones HTML y los PDF están en la carpeta [`documentacion/`](documentacion/). El índice con el objetivo de cada archivo y el orden de uso recomendado está en **[documentacion.pdf](documentacion/documentacion.pdf)**.
+
+**PDF**
+* 📘 **[Guía General del Proyecto](documentacion/Guia_General_Ahorcado_JS_Ramon_Abramo.pdf)**: Enunciado oficial, objetivos, arquitectura, los 6 hitos de desarrollo, comparativa técnica de las 3 opciones y consejos docentes de Ramón Abramo.
+* 🧭 **[Guía del Alumno Paso a Paso](documentacion/Guia_Alumno_Paso_a_Paso_Ahorcado.pdf)**: Un paso por página para programar cada solución, con pruebas y las soluciones en un anexo.
+* ⚖️ **[Explicación de las Tres Soluciones](documentacion/Explicacion_Tres_Soluciones_Ahorcado.pdf)**: Las tres opciones explicadas con analogías sencillas y comparadas.
+* 👨‍🏫 **[Guía Detallada Solución 1 - Básica Lineal](documentacion/Guia_Detallada_Solucion_1_Basica_Lineal.pdf)**: Variables globales, `getElementById`, bucles `for` y entrada mediante `<input>` tradicional.
+* 🛠️ **[Guía Detallada Solución 2 - Teclado Virtual](documentacion/Guia_Detallada_Solucion_2_Teclado_Eventos.pdf)**: Teclado generado dinámicamente, delegación de eventos (`Event Bubbling`), pistas temáticas y teclado físico.
+* 🚀 **[Guía Detallada Solución 3 - POO & Audio](documentacion/Guia_Detallada_Solucion_3_Avanzada_POO.pdf)**: Clases ES6 desacopladas, Web Audio API, dificultades adaptativas y persistencia en `localStorage`.
+
+**Presentaciones HTML** (se abren en el navegador)
+* `presentacion_solucion_1_basica.html`, `presentacion_solucion_2_teclado.html` y `presentacion_solucion_3_poo.html`: una presentación por solución.
+* `presentacion_tres_soluciones.html`: las tres soluciones explicadas y comparadas, con guion del profesor (tecla <kbd>N</kbd>) y demo en vivo de la delegación de eventos.
+* `guia_alumno_paso_a_paso.html`: guía interactiva para el alumnado, con soluciones ocultas y progreso guardado.
 
 ---
 
-## 📁 Las Tres Opciones Técnicas
+## 📁 Estructura del Proyecto
 
 ```
 ahorcado/
-├── Guia_General_Ahorcado_JS_Ramon_Abramo.pdf            # [PDF GENERAL] Visión global y enunciado
-├── presentacion_tres_soluciones.html                   # Presentación interactiva global para el aula
-├── README.md                                           # Este índice general de la práctica
+├── README.md                                                # Este índice general
 │
-├── 📁 version-1-basica-lineal/                         # [OPCIÓN 1] Iniciación y lógica imperativa
-│   ├── Guia_Detallada_Solucion_1_Basica_Lineal.pdf     # [PDF DETALLADO V1 - 6 págs]
-│   ├── index.html                                      # Interfaz visual con SVG del ahorcado
-│   ├── main.css                                        # Estilos y animaciones del dibujo
-│   ├── app.js                                          # Código maestro comentado paso a paso
-│   ├── app.alumnos.js                                  # Plantilla con bloques TODO para el alumnado
-│   ├── app.solucion.js                                 # Solución limpia canónica para el profesor
-│   ├── presentacion.html                               # Diapositivas interactivas para proyectar en clase
-│   └── GUIA_PASO_A_PASO.md                             # Guía en formato Markdown
+├── 📁 documentacion/                                        # Presentaciones HTML y PDF
+│   ├── documentacion.pdf                                    # Índice: objetivo de cada archivo
+│   ├── Guia_General_Ahorcado_JS_Ramon_Abramo.pdf            # Enunciado y visión global
+│   ├── Guia_Alumno_Paso_a_Paso_Ahorcado.pdf                 # Guía guiada del alumno (papel)
+│   ├── Explicacion_Tres_Soluciones_Ahorcado.pdf             # Las tres soluciones explicadas
+│   ├── Guia_Detallada_Solucion_1_Basica_Lineal.pdf          # PDF detallado V1
+│   ├── Guia_Detallada_Solucion_2_Teclado_Eventos.pdf        # PDF detallado V2
+│   ├── Guia_Detallada_Solucion_3_Avanzada_POO.pdf           # PDF detallado V3
+│   ├── presentacion_solucion_1_basica.html                  # Diapositivas V1
+│   ├── presentacion_solucion_2_teclado.html                 # Diapositivas V2
+│   ├── presentacion_solucion_3_poo.html                     # Diapositivas V3
+│   ├── presentacion_tres_soluciones.html                    # Diapositivas comparativas
+│   └── guia_alumno_paso_a_paso.html                         # Guía interactiva del alumno
 │
-├── 📁 version-2-teclado-eventos/                       # [OPCIÓN 2] Intermedia: Teclado virtual dinámico
-│   ├── Guia_Detallada_Solucion_2_Teclado_Eventos.pdf   # [PDF DETALLADO V2 - 6 págs]
-│   ├── index.html
-│   ├── main.css
-│   ├── app.js                                          # Código maestro comentado
-│   ├── app.alumnos.js                                  # Plantilla para entregar a los alumnos
-│   ├── app.solucion.js                                 # Solución limpia canónica
-│   ├── presentacion.html                               # Diapositivas interactivas para clase
-│   └── GUIA_PASO_A_PASO.md                             # Guía en Markdown
-│
-└── 📁 version-3-avanzada-poo/                          # [OPCIÓN 3] Profesional: POO, Web Audio y LocalStorage
-    ├── Guia_Detallada_Solucion_3_Avanzada_POO.pdf      # [PDF DETALLADO V3 - 6 págs]
-    ├── index.html
-    ├── main.css
-    ├── app.js                                          # Código maestro modular con clases ES6
-    ├── app.alumnos.js                                  # Plantilla guiada con TODOs de arquitectura
-    ├── app.solucion.js                                 # Solución limpia canónica
-    ├── presentacion.html                               # Diapositivas interactivas para clase
-    └── GUIA_PASO_A_PASO.md                             # Guía en Markdown
+├── 📁 version-1-basica-lineal/                              # [OPCIÓN 1] Iniciación y lógica imperativa
+├── 📁 version-2-teclado-eventos/                            # [OPCIÓN 2] Teclado virtual y delegación de eventos
+└── 📁 version-3-avanzada-poo/                               # [OPCIÓN 3] POO, Web Audio y LocalStorage
+    ├── index.html                                           # Interfaz visual con SVG del ahorcado
+    ├── main.css                                             # Estilos y animaciones del dibujo
+    ├── app.js                                               # Código maestro comentado
+    ├── app.alumnos.js                                       # Plantilla para entregar a los alumnos
+    ├── app.solucion.js                                      # Solución limpia canónica
+    └── GUIA_PASO_A_PASO.md                                  # Guía en Markdown
 ```
 
 ---
@@ -85,7 +87,7 @@ El jugador irá proponiendo letras una a una:
 | Criterio | Versión 1: Básica Lineal | Versión 2: Teclado & Eventos | Versión 3: Avanzada POO |
 | :--- | :--- | :--- | :--- |
 | **Carpeta** | `version-1-basica-lineal/` | `version-2-teclado-eventos/` | `version-3-avanzada-poo/` |
-| **PDF de Detalle** | `Guia_Detallada_Solucion_1_Basica_Lineal.pdf` | `Guia_Detallada_Solucion_2_Teclado_Eventos.pdf` | `Guia_Detallada_Solucion_3_Avanzada_POO.pdf` |
+| **PDF de Detalle** | `documentacion/Guia_Detallada_Solucion_1_Basica_Lineal.pdf` | `documentacion/Guia_Detallada_Solucion_2_Teclado_Eventos.pdf` | `documentacion/Guia_Detallada_Solucion_3_Avanzada_POO.pdf` |
 | **Paradigma** | Imperativo / Secuencial | Basado en Eventos / Modular | **Orientado a Objetos (POO)** |
 | **Entrada del jugador** | `<input type="text" maxlength="1">` | Teclado virtual dinámico + Teclado físico | Teclado virtual + Físico con feedback |
 | **Estructura del Banco** | Array simple de cadenas | Array de objetos (`palabra`, `categoria`, `pista`) | Banco categorizado con pistas pro |
@@ -101,7 +103,8 @@ El jugador irá proponiendo letras una a una:
 
 ## 🖥️ Cómo Impartir la Práctica en Clase
 
-1. **Para proyectar en el aula:** Abre en cualquier navegador `presentacion_tres_soluciones.html` para la comparativa global, o el `presentacion.html` dentro de cada carpeta para explicar la versión elegida (usa las teclas <kbd>→</kbd> y <kbd>←</kbd> para navegar y <kbd>F</kbd> para pantalla completa).
+1. **Para proyectar en el aula:** Abre en cualquier navegador `documentacion/presentacion_tres_soluciones.html` para la comparativa global (tecla <kbd>N</kbd> para el guion del profesor), o la `presentacion_solucion_*.html` de la versión elegida (usa las teclas <kbd>→</kbd> y <kbd>←</kbd> para navegar y <kbd>F</kbd> para pantalla completa).
 2. **Para entregar al alumnado:** Proporciona la carpeta de la versión deseada con el archivo `app.alumnos.js` (renombrado a `app.js`), que contiene los esqueletos y bloques `TODO` ordenados hito a hito.
 3. **Para corrección del docente:** Utiliza el archivo `app.solucion.js` de cada carpeta como solución canónica de referencia.
-4. **Documentación impresa o digital:** Entrega los PDFs generados a tus alumnos como material de consulta y estudio autónomo.
+4. **Trabajo autónomo del alumnado:** `documentacion/guia_alumno_paso_a_paso.html` (o su PDF) guía cada solución paso a paso, con pruebas y soluciones ocultas.
+5. **Documentación impresa o digital:** Entrega los PDF de `documentacion/` como material de consulta; `documentacion.pdf` explica para qué sirve cada uno.

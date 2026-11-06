@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Un ahorcado, tres caminos — Ramón Abramo</title>
+<style>
+  :root {
+    --bg: #0f172a; --card: #1e293b; --borde: #334155; --texto: #f1f5f9; --suave: #94a3b8;
+    --code-bg: #0a0f1c;
+    --v1: #f59e0b;   /* Solución 1: ámbar */
+    --v2: #a78bfa;   /* Solución 2: violeta */
+    --v3: #38bdf8;   /* Solución 3: azul */
+    --ok: #10b981; --mal: #f43f5e; --acento: #38bdf8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--texto); display: flex; flex-direction: column; overflow: hidden; font-size: 18px; }
+
+  /* ---------- Cabecera y navegación ---------- */
+  header { display: flex; justify-content: space-between; align-items: center; padding: 10px 24px; border-bottom: 1px solid var(--borde); background: rgba(15,23,42,.9); gap: 16px; }
+  .marca { font-weight: 700; color: var(--acento); font-size: .95rem; white-space: nowrap; }
+  .seccion-actual { font-size: .85rem; color: var(--suave); flex: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav { display: flex; gap: 8px; align-items: center; }
+  .btn { background: var(--card); border: 1px solid var(--borde); color: var(--texto); padding: 6px 12px; border-radius: 8px; font-size: .85rem; cursor: pointer; text-decoration: none; display: inline-block; }
+  .btn:hover { border-color: var(--acento); }
+  .contador { font-size: .85rem; color: var(--suave); min-width: 64px; text-align: center; font-variant-numeric: tabular-nums; }
+  .barra { height: 4px; background: var(--borde); }
+  .barra > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--v1), var(--v2), var(--v3)); transition: width .3s; }
+
+  main { flex: 1; display: flex; overflow: hidden; }
+  .escenario { flex: 1; display: flex; align-items: center; justify-content: center; padding: 22px; overflow-y: auto; }
+
+  /* ---------- Diapositivas ---------- */
+  .slide { display: none; width: 100%; max-width: 1200px; background: var(--card); border: 1px solid var(--borde); border-radius: 18px; padding: 28px 38px; box-shadow: 0 25px 50px -12px rgba(0,0,0,.5); animation: entra .25s ease-out; margin: auto 0; }
+  .slide.activa { display: block; }
+  @keyframes entra { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .slide.v1 { border-top: 6px solid var(--v1); } .slide.v2 { border-top: 6px solid var(--v2); } .slide.v3 { border-top: 6px solid var(--v3); }
+  .slide.fin, .slide.cmp { border-top: 6px solid var(--ok); }
+
+  .etiqueta { display: inline-block; font-size: .72rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; color: var(--suave); }
+  .v1 .etiqueta { color: var(--v1); } .v2 .etiqueta { color: var(--v2); } .v3 .etiqueta { color: var(--v3); } .fin .etiqueta, .cmp .etiqueta { color: var(--ok); }
+  h1 { font-size: 2.5rem; line-height: 1.15; margin-bottom: 14px; }
+  h2 { font-size: 1.75rem; margin-bottom: 14px; line-height: 1.2; }
+  h3 { font-size: 1.05rem; margin: 8px 0 8px; }
+  p { line-height: 1.55; margin-bottom: 10px; }
+  .lead { font-size: 1.15rem; color: #cbd5e1; }
+  .suave { color: var(--suave); }
+  strong { color: #fff; }
+  code { font-variant-ligatures: none; font-family: "Cascadia Code", Consolas, "Courier New", monospace; background: rgba(148,163,184,.15); padding: 1px 6px; border-radius: 5px; font-size: .9em; }
+  sup.cita { color: var(--acento); font-size: .7em; font-weight: 700; }
+  ul, ol { margin: 0 0 10px 22px; line-height: 1.5; }
+  li { margin-bottom: 5px; }
+
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
+  .g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: start; }
+  .g2-ancho { display: grid; grid-template-columns: 1.25fr 1fr; gap: 22px; align-items: start; }
+  .caja { background: rgba(15,23,42,.6); border: 1px solid var(--borde); border-radius: 12px; padding: 14px 18px; }
+  .caja h3 { margin-top: 0; }
+  .caja.v1c { border-color: var(--v1); } .caja.v2c { border-color: var(--v2); } .caja.v3c { border-color: var(--v3); }
+  .t1 { color: var(--v1); font-weight: 700; } .t2 { color: var(--v2); font-weight: 700; } .t3 { color: var(--v3); font-weight: 700; }
+
+  .objetivo { background: rgba(56,189,248,.1); border-left: 5px solid var(--acento); border-radius: 8px; padding: 10px 14px; margin-bottom: 10px; }
+  .objetivo::before { content: "🎯 Objetivo: "; font-weight: 700; color: var(--acento); }
+  .donde { font-size: .92rem; color: #cbd5e1; margin-bottom: 8px; }
+  .donde::before { content: "📍 Dónde: "; font-weight: 700; color: #fff; }
+  .analogia { background: rgba(245,158,11,.1); border-left: 5px solid var(--v1); border-radius: 8px; padding: 10px 14px; margin: 10px 0; }
+  .analogia::before { content: "🍳 Para entenderlo: "; font-weight: 700; color: var(--v1); }
+  .ojo { background: rgba(244,63,94,.12); border-left: 5px solid var(--mal); border-radius: 8px; padding: 10px 14px; margin: 10px 0; font-size: .95rem; }
+  .ojo::before { content: "🆘 Si no funciona: "; font-weight: 700; color: #fda4af; }
+  .ojo.aviso::before { content: "⚠️ Ojo: "; }
+  .prueba { background: rgba(16,185,129,.12); border-left: 5px solid var(--ok); border-radius: 8px; padding: 10px 14px; margin: 10px 0; font-size: .95rem; }
+  .prueba::before { content: "✅ Comprobadlo: "; font-weight: 700; color: #6ee7b7; }
+  .prueba.probadlo::before { content: "✅ Probadlo: "; }
+
+  pre { background: var(--code-bg); border: 1px solid #1e293b; border-radius: 12px; padding: 12px 14px; overflow-x: auto; font-size: .8rem; line-height: 1.5; margin-bottom: 10px; }
+  pre code { background: none; padding: 0; font-size: 1em; color: #e2e8f0; }
+  .k { color: #c084fc; } .s { color: #86efac; } .c { color: #64748b; font-style: italic; } .n { color: #fbbf24; } .f { color: #7dd3fc; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; margin-bottom: 10px; }
+  th, td { padding: 7px 10px; border-bottom: 1px solid var(--borde); text-align: left; vertical-align: top; }
+  th { background: rgba(15,23,42,.8); color: var(--acento); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+  td code { font-size: .85em; }
+
+  .chip { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .8rem; font-weight: 700; margin: 0 6px 6px 0; }
+  .chip.v1b { background: rgba(245,158,11,.2); color: var(--v1); }
+  .chip.v2b { background: rgba(167,139,250,.2); color: var(--v2); }
+  .chip.v3b { background: rgba(56,189,248,.2); color: var(--v3); }
+
+  .portada { text-align: center; padding: 46px 40px; }
+  .portada .numero { font-size: 5.5rem; font-weight: 900; line-height: 1; }
+  .v1 .numero { color: var(--v1); } .v2 .numero { color: var(--v2); } .v3 .numero { color: var(--v3); }
+  .portada p.lead { max-width: 780px; margin: 10px auto 0; }
+  .ruta { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px; }
+  .ruta span { background: rgba(15,23,42,.7); border: 1px solid var(--borde); border-radius: 999px; padding: 4px 12px; font-size: .85rem; }
+
+  .indice, .camino { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 14px; }
+  .indice a, .camino a { text-decoration: none; color: inherit; display: block; }
+  .indice .caja:hover, .camino .caja:hover { transform: translateY(-2px); transition: .15s; }
+
+  .pie-ayuda { font-size: .75rem; color: var(--suave); text-align: center; padding: 6px; border-top: 1px solid var(--borde); }
+  kbd { background: #334155; border-radius: 4px; padding: 1px 6px; font-size: .75rem; font-family: inherit; }
+  .fuentes li { font-size: .86rem; margin-bottom: 3px; }
+  .fuentes a { color: var(--acento); word-break: break-all; }
+
+  .solo-impresion { display: none; }
+
+  @media (max-width: 900px) { .g2, .g3, .g2-ancho, .indice, .camino { grid-template-columns: 1fr; } body { font-size: 16px; } }
+
+  body { font-size: 19px; }
+  .slide { max-width: 1180px; padding: 30px 40px; }
+  h1 { font-size: 2.6rem; } h2 { font-size: 1.85rem; }
+  .lead { font-size: 1.2rem; }
+  pre { font-size: .82rem; }
+  .analogia::before { content: "🍳 Para entenderlo: "; }
+  .ojo::before { content: "⚠️ Ojo: "; }
+  .portada { padding: 60px 44px; }
+  .portada .numero { font-size: 6rem; }
+
+  /* Diagrama burbujeo */
+  .burbuja { display: flex; flex-direction: column-reverse; gap: 6px; }
+  .capa { border: 2px dashed var(--borde); border-radius: 10px; padding: 8px 12px; font-family: Consolas, monospace; font-size: .9rem; }
+  .capa.destino { border-color: var(--v2); border-style: solid; background: rgba(167,139,250,.12); }
+  .flecha-sube { text-align: center; color: var(--v2); font-weight: 800; }
+
+  /* Demo en vivo */
+  .demo { display: grid; grid-template-columns: 330px 1fr; gap: 20px; align-items: start; }
+  .mini { background: #020617; border: 1px solid var(--borde); border-radius: 14px; padding: 12px; }
+  .mini .casillas { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; }
+  .mini .casillas span { width: 34px; height: 40px; border-bottom: 3px solid var(--suave); font: 700 1.4rem Consolas, monospace; display: flex; align-items: center; justify-content: center; }
+  .mini .teclado-demo { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; padding: 6px; border: 2px dashed transparent; border-radius: 8px; transition: border-color .2s; }
+  .mini .teclado-demo.destello { border-color: var(--v2); }
+  .mini .tecla { padding: 8px 0; font-size: .9rem; font-weight: 700; border: none; border-radius: 6px; background: #334155; color: #fff; cursor: pointer; }
+  .mini .tecla:disabled { cursor: default; opacity: .9; }
+  .mini .tecla.acierto { background: #047857; } .mini .tecla.fallo { background: #be123c; }
+  .log { background: var(--code-bg); border: 1px solid var(--borde); border-radius: 12px; padding: 12px 14px; font-family: Consolas, monospace; font-size: .82rem; line-height: 1.6; min-height: 240px; }
+  .log .paso { opacity: .35; } .log .paso.on { opacity: 1; }
+  .log b { color: var(--v2); }
+
+  /* Notas del profesor */
+  aside.notas-panel { width: 0; overflow: hidden; background: #111827; border-left: 1px solid var(--borde); transition: width .25s; font-size: .95rem; }
+  body.con-notas aside.notas-panel { width: 400px; }
+  .notas-dentro { padding: 18px 20px; width: 400px; height: 100%; overflow-y: auto; }
+  .notas-dentro h4 { color: var(--v1); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; }
+  .notas-dentro p { color: #e5e7eb; }
+  .slide .notas { display: none; }
+  @media (max-width: 900px) { .demo { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="marca">🎮 Ahorcado JS · Ramón Abramo</div>
+  <div class="seccion-actual" id="seccionActual"></div>
+  <div class="nav">
+    <button class="btn" id="btnNotas" title="Mostrar u ocultar el guion (N)">📝 Guion</button>
+    <button class="btn" id="btnPantalla" title="Pantalla completa (F)">⛶</button>
+    <button class="btn" id="btnAnt">◀</button>
+    <span class="contador" id="contador">1 / 1</span>
+    <button class="btn" id="btnSig">▶</button>
+  </div>
+</header>
+<div class="barra"><div id="barra"></div></div>
+
+<main>
+<div class="escenario" id="escenario">
+
+<!-- ===================================================================== -->
+<!-- INTRODUCCIÓN -->
+<!-- ===================================================================== -->
+<section class="slide portada" data-seccion="Introducción">
+  <span class="etiqueta">Práctica · JavaScript en el navegador</span>
+  <h1>Un ahorcado,<br>tres caminos</h1>
+  <p class="lead">Buenas, soy Ramón Abramo, profesor con más de 25 años de experiencia docente. Hoy os voy a explicar tres formas de programar el mismo juego del ahorcado. Las reglas no cambian; lo que cambia es cómo se organiza el código, desde lo más directo hasta una estructura de profesional.</p>
+  <p style="margin-top:22px">
+    <span class="chip v1b">Solución 1 · Básica lineal</span>
+    <span class="chip v2b">Solución 2 · Teclado y eventos</span>
+    <span class="chip v3b">Solución 3 · Avanzada con clases</span>
+  </p>
+  <div class="notas">
+    <p>Presentarse y lanzar la idea central: las tres soluciones hacen lo mismo de cara al jugador. Si les enseño las tres pantallas, la diferencia está en la presentación, no en las reglas.</p>
+    <p>Pregunta para arrancar: «¿Quién ha jugado al ahorcado en papel?». Todos. Pues ya conocen el algoritmo; hoy solo vamos a traducirlo.</p>
+  </div>
+</section>
+
+<section class="slide" data-seccion="Introducción">
+  <span class="etiqueta">Mapa de la sesión</span>
+  <h2>¿Qué vamos a hacer hoy?</h2>
+  <p class="lead solo-pantalla">Pulsad en cualquier tarjeta para saltar directamente a esa parte.</p>
+  <p class="lead solo-impresion">Este es el recorrido, en este orden.</p>
+  <div class="indice">
+    <a href="#" data-ir="base"><div class="caja"><h3>🧱 Lo común</h3><p class="suave">Las reglas, el dibujo escondido en el SVG, la memoria del juego y las herramientas que comparten las tres.</p></div></a>
+    <a href="#" data-ir="s1"><div class="caja v1c"><h3 class="t1">1 · Básica lineal</h3><p class="suave">Una caja de texto, un botón y variables globales. La lógica del juego, sin adornos.</p></div></a>
+    <a href="#" data-ir="s2"><div class="caja v2c"><h3 class="t2">2 · Teclado y eventos</h3><p class="suave">Teclado fabricado con JavaScript, un solo escuchador para 27 teclas y teclado físico.</p></div></a>
+    <a href="#" data-ir="s3"><div class="caja v3c"><h3 class="t3">3 · Avanzada con clases</h3><p class="suave">Motor, interfaz, sonido y estadísticas, cada uno en su clase.</p></div></a>
+    <a href="#" data-ir="cmp"><div class="caja"><h3 style="color:var(--ok)">⚖️ Comparativa</h3><p class="suave">Las tres frente a frente, trampas típicas y preguntas de repaso.</p></div></a>
+    <a href="#" data-ir="fuentes"><div class="caja"><h3>📚 Fuentes</h3><p class="suave">Documentación oficial para ampliar en casa.</p></div></a>
+  </div>
+  <div class="notas">
+    <p>Esta diapositiva hace de índice. Si alguien pregunta por la 3 mientras estamos en la 1, vuelvo aquí y salto.</p>
+    <p>Tecla N: abre y cierra este guion. Tecla F: pantalla completa.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- LO COMÚN -->
+<!-- ===================================================================== -->
+<section class="slide" data-seccion="Lo común" id="base">
+  <span class="etiqueta">Lo común · Las reglas</span>
+  <h2>Seis hitos que cumplen las tres soluciones</h2>
+  <table>
+    <tr><th>#</th><th>Hito</th><th>Cómo se comprueba</th></tr>
+    <tr><td>1</td><td>Palabra al azar y tapada</td><td>Para <code>HTML</code> se ven cuatro huecos</td></tr>
+    <tr><td>2</td><td>Validar la letra</td><td>Una letra repetida no quita vidas</td></tr>
+    <tr><td>3</td><td>Destapar aciertos</td><td><code>A</code> en <code>PANTALLA</code> → <code>_ A _ _ A _ _ A</code></td></tr>
+    <tr><td>4</td><td>Dibujar el muñeco con cada fallo</td><td>Cabeza, tronco, brazo izq., brazo der., pierna izq., pierna der.</td></tr>
+    <tr><td>5</td><td>Victoria</td><td>Sin huecos → mensaje y juego bloqueado</td></tr>
+    <tr><td>6</td><td>Derrota y revelación</td><td>Sexto fallo → ojos en cruz y palabra a la vista</td></tr>
+  </table>
+  <p>Se construye por hitos, uno detrás de otro, probando cada uno antes de pasar al siguiente. Si intentáis escribirlo todo de golpe, cuando falle no sabréis dónde.</p>
+  <div class="notas">
+    <p>Insistir en el método: hito, prueba, hito, prueba. Es la misma forma de trabajar que en la calculadora.</p>
+    <p>La columna de la derecha es la que voy a usar para corregir. Que la apunten.</p>
+  </div>
+</section>
+
+<section class="slide" data-seccion="Lo común">
+  <span class="etiqueta">Lo común · El dibujo</span>
+  <h2>El muñeco ya está dibujado… y escondido</h2>
+  <div class="g2">
+    <div>
+<pre><code class="js-html">&lt;svg id="svg-ahorcado" viewBox="0 0 200 240"&gt;
+  &lt;line ... class="trazo-horca" /&gt;
+  &lt;circle id="parte-cabeza" class="parte-oculta" /&gt;
+  &lt;line id="parte-cuerpo" class="parte-oculta" /&gt;
+  &lt;line id="parte-brazo-izq" class="parte-oculta" /&gt;
+  &lt;line id="parte-brazo-der" class="parte-oculta" /&gt;
+  &lt;line id="parte-pierna-izq" class="parte-oculta" /&gt;
+  &lt;line id="parte-pierna-der" class="parte-oculta" /&gt;
+  &lt;g id="parte-cara-derrota" class="parte-oculta"&gt;...&lt;/g&gt;
+&lt;/svg&gt;</code></pre>
+    </div>
+    <div>
+      <p>Ninguna de las tres soluciones dibuja nada. Todas las piezas están en el HTML desde el principio, con la clase <code>parte-oculta</code>. Para que aparezca una, basta con añadirle la clase <code>visible</code><sup class="cita">[1]</sup>.</p>
+<pre><code class="js">partesAhorcado[fallos - 1].classList.add('visible');</code></pre>
+      <div class="analogia">un teatro de sombras con todas las figuras detrás de la cortina. Con cada fallo encendéis un foco más.</div>
+      <p>El «menos uno» sale porque el primer fallo es el 1 y la primera posición del array es la 0.</p>
+    </div>
+  </div>
+  <div class="notas">
+    <p>Abrir el index.html de la versión 1, F12, y escribir en la consola document.getElementById('parte-cabeza').classList.add('visible'). Que vean aparecer la cabeza sin tocar el juego.</p>
+    <p>En la versión 3 hay ocho piezas (con manos) porque el modo fácil da ocho vidas.</p>
+  </div>
+</section>
+
+<section class="slide" data-seccion="Lo común">
+  <span class="etiqueta">Lo común · La memoria</span>
+  <h2>¿Qué tiene que recordar el juego?</h2>
+  <div class="g2">
+    <div>
+      <p>Haced la prueba mental: estáis jugando con papel y alguien ha dicho ya la A, la L y la E. ¿Qué tenéis apuntado?</p>
+      <table>
+        <tr><th>Dato</th><th>Ejemplo</th></tr>
+        <tr><td>Palabra secreta</td><td><code>'PANTALLA'</code></td></tr>
+        <tr><td>Tablero</td><td><code>['_','A','_','_','A','L','L','A']</code></td></tr>
+        <tr><td>Letras probadas</td><td><code>A, L, E</code></td></tr>
+        <tr><td>Fallos</td><td><code>1</code></td></tr>
+        <tr><td>¿Ha terminado?</td><td><code>false</code></td></tr>
+      </table>
+    </div>
+    <div>
+      <p>Las tres soluciones guardan exactamente esto. Cambia el envoltorio:</p>
+      <ul>
+        <li><span class="t1">1:</span> variables globales sueltas.</li>
+        <li><span class="t2">2:</span> variables globales, pero la palabra es un objeto con categoría y pista, y las letras probadas van en un <code>Set</code><sup class="cita">[2]</sup>.</li>
+        <li><span class="t3">3:</span> todo dentro de un objeto de la clase <code>AhorcadoEngine</code><sup class="cita">[3]</sup>.</li>
+      </ul>
+      <div class="analogia">el tablero es un calendario de adviento: todas las ventanitas cerradas al principio, y cada acierto abre las que llevan esa letra.</div>
+    </div>
+  </div>
+  <div class="notas">
+    <p>Dibujar en la pizarra la tabla con PANTALLA. La voy a reutilizar en la traza de la Solución 1.</p>
+  </div>
+</section>
+
+<section class="slide" data-seccion="Lo común">
+  <span class="etiqueta">Lo común · Herramientas que vais a ver</span>
+  <h2>Cuatro piezas de JavaScript que salen en las tres</h2>
+  <div class="g2">
+    <div class="caja">
+      <h3>Elegir al azar</h3>
+<pre><code class="js">const i = Math.floor(Math.random() * lista.length);</code></pre>
+      <p class="suave"><code>Math.random()</code> da un decimal entre 0 y 1, sin llegar a 1<sup class="cita">[4]</sup>. Multiplicado por la longitud y redondeado hacia abajo con <code>Math.floor()</code><sup class="cita">[5]</sup>, da una posición válida.</p>
+    </div>
+    <div class="caja">
+      <h3>¿Está dentro?</h3>
+<pre><code class="js">'PANTALLA'.includes('A');  // true</code></pre>
+      <p class="suave"><code>includes()</code> funciona con textos<sup class="cita">[6]</sup> y con arrays<sup class="cita">[7]</sup>.</p>
+    </div>
+    <div class="caja">
+      <h3>El bucle que destapa</h3>
+<pre><code class="js">for (let i = 0; i &lt; palabra.length; i++) {
+  if (palabra[i] === letra) tablero[i] = letra;
+}</code></pre>
+      <p class="suave">Recorre la palabra entera, así destapa todas las apariciones y no solo la primera.</p>
+    </div>
+    <div class="caja">
+      <h3>Escuchar al jugador</h3>
+<pre><code class="js">boton.addEventListener('click', jugar);</code></pre>
+      <p class="suave">«Cuando pase esto, llama a esta función»<sup class="cita">[8]</sup>. Lo que cambia entre soluciones es <em>dónde</em> se pone.</p>
+    </div>
+  </div>
+  <div class="notas">
+    <p>Probar en la consola Math.random() varias veces y luego Math.floor(Math.random() * 8). Que vean que nunca sale 8.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- SOLUCIÓN 1 -->
+<!-- ===================================================================== -->
+<section class="slide v1 portada" data-seccion="Solución 1 · Básica lineal" id="s1">
+  <div class="numero">1</div>
+  <span class="etiqueta">Solución 1</span>
+  <h1>Básica lineal</h1>
+  <p class="lead">Una caja de texto, un botón «Probar» y las reglas escritas de arriba abajo, tal y como las diríais en voz alta. La mejor para entender el juego antes de complicarlo.</p>
+  <p class="solo-pantalla" style="margin-top:18px"><a class="btn" href="../version-1-basica-lineal/index.html" target="_blank">▶ Abrir 1</a></p>
+  <div class="notas">
+    <p>Abrir la versión 1 y jugar una partida en voz alta, fallando a propósito para que vean el muñeco.</p>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Básica lineal">
+  <span class="etiqueta">Solución 1 · Hito 1</span>
+  <h2>Sacar una palabra y taparla</h2>
+  <div class="g2">
+    <div>
+<pre><code class="js">function iniciarJuego() {
+  const indice = Math.floor(Math.random() * PALABRAS.length);
+  palabraSecreta = PALABRAS[indice];
+
+  letrasAdivinadas = [];
+  for (let i = 0; i &lt; palabraSecreta.length; i++) {
+    letrasAdivinadas.push('_');
+  }
+
+  letrasUsadas = [];
+  fallos = 0;
+  juegoTerminado = false;
+  // ... esconder piezas, activar la caja y pintar
+}</code></pre>
+    </div>
+    <div>
+      <p>Tres bloques, tres ideas: sortear, tapar y poner el marcador a cero.</p>
+      <p>El tablero se pinta con <code>letrasAdivinadas.join(' ')</code><sup class="cita">[9]</sup>, que convierte <code>['_', '_', '_']</code> en el texto <code>_ _ _</code>.</p>
+      <div class="analogia">sacáis una papeleta de la bolsa y dibujáis en la pizarra tantas rayitas como letras tiene.</div>
+      <p><code>iniciarJuego()</code> se usa al cargar y cada vez que se pulsa «Nueva Palabra». Por eso pone todo a cero: la segunda partida no puede heredar nada de la primera.</p>
+    </div>
+  </div>
+  <div class="notas">
+    <p>Preguntar qué pasaría si no se pusiera fallos = 0 aquí. Respuesta: la segunda partida empezaría con los fallos de la primera.</p>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Básica lineal">
+  <span class="etiqueta">Solución 1 · Hito 2</span>
+  <h2>El portero de la discoteca</h2>
+  <div class="g2">
+    <div>
+<pre><code class="js">function procesarLetra() {
+  if (juegoTerminado) return;
+
+  const letra = inputLetra.value.trim().toUpperCase();
+  inputLetra.value = '';
+
+  if (!/^[A-ZÑ]$/.test(letra)) {
+    mostrarMensaje('Introduce una letra válida (A-Z).', 'aviso');
+    return;
+  }
+  if (letrasUsadas.includes(letra)) {
+    mostrarMensaje(`La letra "${letra}" ya está probada.`, 'aviso');
+    return;
+  }
+  letrasUsadas.push(letra);
+  // ... acierto o fallo
+}</code></pre>
+    </div>
+    <div>
+      <p>Antes de jugar la letra, se limpia: <code>trim()</code> quita espacios<sup class="cita">[10]</sup> y <code>toUpperCase()</code> la pasa a mayúscula<sup class="cita">[11]</sup>, porque las palabras del banco están en mayúsculas.</p>
+      <p>Después, dos filtros. La expresión <code>/^[A-ZÑ]$/</code> con <code>test()</code><sup class="cita">[12]</sup> solo deja pasar <strong>una</strong> letra de la A a la Z o la Ñ. Y <code>includes</code> descarta las repetidas.</p>
+      <div class="analogia">un portero que mira primero el DNI y luego la lista de invitados. Si falla cualquiera de las dos cosas, <code>return</code>, a la calle, y el juego se queda como estaba.</div>
+    </div>
+  </div>
+  <div class="notas">
+    <p>El return temprano es la idea importante de esta diapositiva. Sin él, una letra repetida contaría como fallo.</p>
+    <p>Si preguntan por la expresión regular: ^ es «empieza», $ es «termina», y entre medias un solo carácter de la lista.</p>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Básica lineal">
+  <span class="etiqueta">Solución 1 · Hitos 3 y 4</span>
+  <h2>¿Está o no está?</h2>
+  <div class="g2">
+    <div>
+<pre><code class="js">if (palabraSecreta.includes(letra)) {
+  for (let i = 0; i &lt; palabraSecreta.length; i++) {
+    if (palabraSecreta[i] === letra) {
+      letrasAdivinadas[i] = letra;
+    }
+  }
+  mostrarMensaje(`¡Acierto! ...`, 'exito');
+} else {
+  fallos++;
+  dibujarSiguienteParte(fallos);
+  mostrarMensaje(`¡Fallo! ...`, 'error');
+}
+
+actualizarPantalla();
+verificarFinJuego();</code></pre>
+    </div>
+    <div>
+      <p>Un <code>if / else</code> y nada más. Si está, el bucle recorre la palabra entera y destapa cada posición que coincide. Si no está, se suma un fallo y se enciende una pieza.</p>
+      <p>Las dos últimas líneas se ejecutan siempre: repintar la pantalla y preguntar al árbitro si el partido ha terminado.</p>
+      <div class="ojo">un <code>break</code> dentro del bucle, o usar <code>indexOf</code>, destapa solo la primera A de <code>PANTALLA</code>. Es el fallo más típico de este hito.</div>
+    </div>
+  </div>
+  <div class="notas">
+    <p>Pedir a alguien que lea el código en voz alta como si fuera castellano. Es la gracia de la versión 1: se lee como la regla.</p>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Básica lineal">
+  <span class="etiqueta">Solución 1 · Traza en la pizarra</span>
+  <h2>Seguimos a mano una partida con <code>PANTALLA</code></h2>
+  <table>
+    <tr><th>Escribe</th><th>Filtro</th><th>¿Está?</th><th>Tablero</th><th>Probadas</th><th>Fallos</th></tr>
+    <tr><td><code>a</code></td><td>pasa como <code>A</code></td><td>sí</td><td><code>_ A _ _ A _ _ A</code></td><td>A</td><td>0</td></tr>
+    <tr><td><code>e</code></td><td>pasa como <code>E</code></td><td>no</td><td><code>_ A _ _ A _ _ A</code></td><td>A, E</td><td>1 → cabeza</td></tr>
+    <tr><td><code>a</code></td><td>repetida → <code>return</code></td><td>—</td><td>sin cambios</td><td>A, E</td><td>1</td></tr>
+    <tr><td><code>7</code></td><td>no es letra → <code>return</code></td><td>—</td><td>sin cambios</td><td>A, E</td><td>1</td></tr>
+    <tr><td><code>l</code></td><td>pasa como <code>L</code></td><td>sí</td><td><code>_ A _ _ A L L A</code></td><td>A, E, L</td><td>1</td></tr>
+    <tr><td><code>p</code>, <code>n</code>, <code>t</code></td><td>pasan</td><td>sí</td><td><code>P A N T A L L A</code></td><td>A, E, L, P, N, T</td><td>1 → ¡victoria!</td></tr>
+  </table>
+  <p>Fijaos en las filas 3 y 4: ni el tablero ni los fallos cambian. Eso es exactamente el hito 2.</p>
+  <div class="notas">
+    <p>Hacer la traza en la pizarra con ellos, fila a fila, antes de enseñar la tabla completa. Tapar las columnas de la derecha con la mano si se proyecta.</p>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Básica lineal">
+  <span class="etiqueta">Solución 1 · Balance</span>
+  <h2>Lo bueno y lo mejorable</h2>
+  <div class="g2">
+    <div class="caja" style="border-color:var(--ok)">
+      <h3>👍 Lo que hace bien</h3>
+      <ul>
+        <li>Se lee de arriba abajo, como la regla del juego.</li>
+        <li>Pocas herramientas: arrays, <code>for</code>, <code>if</code> y <code>getElementById</code><sup class="cita">[13]</sup>.</li>
+        <li>Ideal para aprender a depurar: cada variable se ve en la consola.</li>
+      </ul>
+    </div>
+    <div class="caja" style="border-color:var(--mal)">
+      <h3>👎 Lo mejorable</h3>
+      <ul>
+        <li>Escribir en una caja y pulsar «Probar» es incómodo para jugar.</li>
+        <li>Todo son variables globales: cualquier función puede cambiar cualquier cosa.</li>
+        <li>El jugador no ve qué letras le quedan por probar.</li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:12px">La Solución 2 ataca justo la primera y la tercera queja: un teclado en pantalla que se va apagando.</p>
+  <div class="notas">
+    <p>Preguntar a la clase qué cambiarían para jugar más cómodo. Alguien dirá «botones con las letras». Perfecto: es la siguiente solución.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- SOLUCIÓN 2 -->
+<!-- ===================================================================== -->
+<section class="slide v2 portada" data-seccion="Solución 2 · Teclado y eventos" id="s2">
+  <div class="numero">2</div>
+  <span class="etiqueta">Solución 2</span>
+  <h1>Teclado y eventos</h1>
+  <p class="lead">Las reglas son las mismas. Cambia la forma de jugar: un teclado de 27 botones que fabrica el propio JavaScript, un único escuchador para todos y el teclado del ordenador funcionando a la vez.</p>
+  <p class="solo-pantalla" style="margin-top:18px"><a class="btn" href="../version-2-teclado-eventos/index.html" target="_blank">▶ Abrir 2</a></p>
+  <div class="notas">
+    <p>Abrir la versión 2. Jugar primero con el ratón y luego con el teclado físico, sin decir nada. Preguntar: ¿cuántos addEventListener creéis que hay para las teclas?</p>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Teclado y eventos">
+  <span class="etiqueta">Solución 2 · Los datos</span>
+  <h2>Palabras con ficha y un <code>Set</code> para las usadas</h2>
+  <div class="g2">
+    <div>
+<pre><code class="js">const BANCO_PALABRAS = [
+  { palabra: 'CSS', categoria: 'Diseño Web',
+    pista: 'Hojas de estilo en cascada...' },
+  // ...
+];
+
+let partidaActual = null;
+let letrasAdivinadas = [];      // ['', 'S', 'S']
+let letrasUsadas = new Set();</code></pre>
+    </div>
+    <div>
+      <p>Cada palabra viaja con su categoría y su pista. Al sortear, se guarda la ficha entera en <code>partidaActual</code> y se usa <code>partidaActual.palabra</code>, <code>partidaActual.pista</code>…</p>
+      <p>Las letras probadas van en un <code>Set</code><sup class="cita">[2]</sup>: una colección que no admite repetidos. Se trabaja con <code>add</code>, <code>has</code> y <code>clear</code>.</p>
+      <p>Y el tablero se rellena con <code>Array(n).fill('')</code><sup class="cita">[14]</sup>: huecos vacíos en vez de guiones, porque cada letra se pinta en su propia casilla.</p>
+      <div class="ojo">por eso la victoria se comprueba con <code>!letrasAdivinadas.includes('')</code>, no con <code>'_'</code>. Quien copia de la Solución 1 gana nada más empezar.</div>
+    </div>
+  </div>
+  <div class="notas">
+    <p>Comparar new Set() con un array en la consola: s.add('A'); s.add('A'); s.size da 1.</p>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Teclado y eventos">
+  <span class="etiqueta">Solución 2 · El teclado</span>
+  <h2>27 botones que no están en el HTML</h2>
+  <div class="g2">
+    <div>
+<pre><code class="js">function renderizarTecladoVirtual() {
+  tecladoVirtual.innerHTML = '';
+  LETRAS_ALFABETO.forEach(letra => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'tecla';
+    btn.textContent = letra;
+    btn.dataset.letra = letra;
+    tecladoVirtual.appendChild(btn);
+  });
+}</code></pre>
+    </div>
+    <div>
+      <p>En el <code>index.html</code> el teclado es un <code>div</code> vacío. Los botones los crea JavaScript con <code>createElement</code><sup class="cita">[15]</sup> y los mete dentro con <code>appendChild</code><sup class="cita">[16]</sup>.</p>
+      <p>Cada botón lleva su letra apuntada en <code>dataset.letra</code><sup class="cita">[17]</sup>, que en el HTML aparece como <code>data-letra="A"</code>.</p>
+      <div class="analogia">la etiqueta con el nombre en la taquilla del gimnasio. Lo de dentro da igual: la etiqueta dice de quién es.</div>
+      <p>¿La ventaja? Si mañana queréis añadir la Ç, se cambia una cadena de texto, no el HTML.</p>
+    </div>
+  </div>
+  <div class="notas">
+    <p>Inspeccionar el teclado con F12 para que vean los data-letra generados. Recalcar que no están en el index.html original.</p>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Teclado y eventos">
+  <span class="etiqueta">Solución 2 · Delegación de eventos</span>
+  <h2>Un solo conserje para 27 teclas</h2>
+  <div class="g2">
+    <div>
+<pre><code class="js">tecladoVirtual.addEventListener('click', evento => {
+  const tecla = evento.target.closest('.tecla');
+  if (tecla &amp;&amp; !tecla.disabled) {
+    jugarLetra(tecla.dataset.letra);
+  }
+});</code></pre>
+      <p>Cuando hacéis clic en una tecla, el evento no se queda en ella: sube por sus padres. Es el burbujeo<sup class="cita">[18]</sup>. Así que basta un escuchador en el contenedor.</p>
+      <p><code>evento.target</code><sup class="cita">[19]</sup> dice dónde se hizo clic; <code>closest('.tecla')</code><sup class="cita">[20]</sup> sube hasta la tecla, o da <code>null</code> si se pulsó en un hueco.</p>
+    </div>
+    <div>
+      <div class="burbuja">
+        <div class="capa">&lt;button class="tecla" data-letra="L"&gt; ← clic aquí</div>
+        <div class="flecha-sube">⬆ el clic sube</div>
+        <div class="capa destino">&lt;div id="teclado-virtual"&gt; ← aquí escucha el conserje</div>
+        <div class="flecha-sube">⬆</div>
+        <div class="capa">&lt;section class="panel-juego"&gt;</div>
+        <div class="flecha-sube">⬆</div>
+        <div class="capa">&lt;body&gt;</div>
+      </div>
+      <div class="analogia">el conserje de un edificio. En vez de un portero por piso, uno solo en la entrada pregunta «¿a qué piso va?».</div>
+    </div>
+  </div>
+  <div class="notas">
+    <p>Leer el diagrama de abajo arriba: el clic nace en el botón y sube. Es la idea más importante de la Solución 2.</p>
+    <p>Pregunta: ¿qué pasa con las teclas que se crean al empezar otra partida? Nada, el escuchador está en el contenedor, que no se borra nunca.</p>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Teclado y eventos">
+  <span class="etiqueta">Solución 2 · Lo que piensa el conserje</span>
+  <h2 class="solo-pantalla">Probadlo en directo: la palabra secreta es <code>BUCLE</code></h2>
+  <h2 class="solo-impresion">Seguimos a mano un clic en la tecla <code>L</code></h2>
+  <div class="demo solo-pantalla">
+    <div class="mini">
+      <div class="casillas" id="demoCasillas"></div>
+      <div class="teclado-demo" id="demoTeclado"></div>
+      <p class="suave" style="font-size:.75rem;margin-top:8px">Pulsad una tecla o un hueco entre teclas.</p>
+      <button class="btn" id="demoReiniciar" style="margin-top:4px">↺ Reiniciar demo</button>
+    </div>
+    <div class="log" id="demoLog">
+      <div class="paso">evento.target → <b id="lgTarget">—</b></div>
+      <div class="paso">evento.target.closest('.tecla') → <b id="lgTecla">—</b></div>
+      <div class="paso">tecla.dataset.letra → <b id="lgLetra">—</b></div>
+      <div class="paso">letrasUsadas.has(letra) antes → <b id="lgHas">—</b></div>
+      <div class="paso">'BUCLE'.includes(letra) → <b id="lgIncl">—</b></div>
+      <div class="paso">letrasAdivinadas → <b id="lgAdiv">—</b></div>
+      <div class="paso">letrasUsadas → <b id="lgSet">—</b></div>
+      <div class="paso">fallos → <b id="lgFallos">0</b></div>
+    </div>
+  </div>
+  <div class="solo-impresion">
+    <p>En clase lo veis funcionando con un teclado de verdad. Aquí tenéis lo que «piensa» el escuchador del contenedor cuando la palabra es <code>BUCLE</code> y pulsáis la <code>L</code>:</p>
+    <table>
+      <tr><th>Paso</th><th>Expresión</th><th>Valor</th></tr>
+      <tr><td>1</td><td><code>evento.target</code></td><td>el botón <code>&lt;button class="tecla" data-letra="L"&gt;</code></td></tr>
+      <tr><td>2</td><td><code>evento.target.closest('.tecla')</code></td><td>el mismo botón (ya es una tecla)</td></tr>
+      <tr><td>3</td><td><code>tecla.dataset.letra</code></td><td><code>'L'</code></td></tr>
+      <tr><td>4</td><td><code>letrasUsadas.has('L')</code></td><td><code>false</code> → se juega</td></tr>
+      <tr><td>5</td><td><code>'BUCLE'.includes('L')</code></td><td><code>true</code> → tecla verde</td></tr>
+      <tr><td>6</td><td><code>letrasAdivinadas</code></td><td><code>['', '', '', 'L', '']</code></td></tr>
+      <tr><td>7</td><td><code>letrasUsadas</code></td><td><code>Set {'L'}</code></td></tr>
+    </table>
+    <p>Si en vez de en una tecla pulsáis en el hueco entre dos, <code>evento.target</code> es el propio contenedor, <code>closest('.tecla')</code> devuelve <code>null</code> y el <code>if</code> no deja pasar nada.</p>
+  </div>
+  <div class="notas">
+    <p>Demo en vivo: pulsar L (acierto), luego K (fallo), luego otra vez L (has da true, no se juega: la tecla está desactivada y ni siquiera entra). Por último, pulsar en un hueco: closest da null.</p>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Teclado y eventos">
+  <span class="etiqueta">Solución 2 · Teclado físico</span>
+  <h2>Dos puertas, un mismo pasillo</h2>
+  <div class="g2">
+    <div>
+<pre><code class="js">window.addEventListener('keydown', evento => {
+  if (evento.ctrlKey || evento.altKey || evento.metaKey) return;
+  const letra = evento.key.toUpperCase();
+  if (LETRAS_ALFABETO.includes(letra)) {
+    jugarLetra(letra);
+  }
+});</code></pre>
+    </div>
+    <div>
+      <p>El evento <code>keydown</code><sup class="cita">[21]</sup> en <code>window</code> se entera de cualquier tecla pulsada en la página. <code>evento.key</code><sup class="cita">[22]</sup> trae el carácter.</p>
+      <p>Lo bonito es la última línea: llama a la <strong>misma</strong> <code>jugarLetra()</code> que el ratón. Toda la lógica está en un solo sitio; las entradas son solo puertas.</p>
+      <div class="ojo">sin la primera línea, <kbd>Ctrl</kbd>+<kbd>R</kbd> para recargar contaría como haber pulsado la R.</div>
+    </div>
+  </div>
+  <div class="notas">
+    <p>Remarcar el principio: separar «cómo me llega la letra» de «qué hago con la letra». Es la semilla de la Solución 3.</p>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Teclado y eventos">
+  <span class="etiqueta">Solución 2 · Balance</span>
+  <h2>Lo bueno y lo mejorable</h2>
+  <div class="g2">
+    <div class="caja" style="border-color:var(--ok)">
+      <h3>👍 Lo que hace bien</h3>
+      <ul>
+        <li>Mucho más cómoda de jugar: ratón, dedo o teclado.</li>
+        <li>Un solo escuchador para 27 teclas, aunque se regeneren en cada partida.</li>
+        <li>Toda la lógica de una jugada en una función: <code>jugarLetra()</code>.</li>
+      </ul>
+    </div>
+    <div class="caja" style="border-color:var(--mal)">
+      <h3>👎 Lo mejorable</h3>
+      <ul>
+        <li><code>jugarLetra()</code> decide las reglas <em>y</em> pinta la pantalla. Mezcla dos trabajos.</li>
+        <li>Siguen siendo variables globales.</li>
+        <li>Al recargar, se pierde todo: no hay historial de partidas.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="notas">
+    <p>Preguntar: si quisiéramos hacer una versión del juego para consola, sin HTML, ¿qué parte de jugarLetra podríamos aprovechar? Casi nada, porque está mezclada con el DOM. Esa es la puerta a la Solución 3.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- SOLUCIÓN 3 -->
+<!-- ===================================================================== -->
+<section class="slide v3 portada" data-seccion="Solución 3 · Avanzada con clases" id="s3">
+  <div class="numero">3</div>
+  <span class="etiqueta">Solución 3</span>
+  <h1>Avanzada con clases</h1>
+  <p class="lead">Cada responsabilidad en su clase: un motor que sabe las reglas y no toca la pantalla, una interfaz que pinta y no decide, y dos ayudantes para el sonido y las estadísticas. Con niveles de dificultad de propina.</p>
+  <p class="solo-pantalla" style="margin-top:18px"><a class="btn" href="../version-3-avanzada-poo/index.html" target="_blank">▶ Abrir 3</a></p>
+  <div class="notas">
+    <p>Abrir la versión 3, cambiar la dificultad, jugar una partida con sonido y enseñar las estadísticas. Recargar la página y volver a abrirlas: siguen ahí.</p>
+  </div>
+</section>
+
+<section class="slide v3" data-seccion="Solución 3 · Avanzada con clases">
+  <span class="etiqueta">Solución 3 · El reparto</span>
+  <h2>Cuatro clases, cuatro trabajos</h2>
+  <table>
+    <tr><th>Clase</th><th>Su trabajo</th><th>Lo que no hace nunca</th></tr>
+    <tr><td><code>AhorcadoEngine</code></td><td>Sortear, comprobar letras, contar fallos, decidir victoria o derrota.</td><td>Tocar el HTML.</td></tr>
+    <tr><td><code>AhorcadoUI</code></td><td>Pintar teclado, casillas, salud y ventanas; escuchar al jugador.</td><td>Decidir si una letra es acierto.</td></tr>
+    <tr><td><code>SoundSynthesizer</code></td><td>Generar pitidos con la Web Audio API<sup class="cita">[23]</sup>, sin archivos de sonido.</td><td>Saber nada del juego.</td></tr>
+    <tr><td><code>StatsRepository</code></td><td>Guardar partidas y rachas en <code>localStorage</code><sup class="cita">[24]</sup>.</td><td>Saber nada de la pantalla.</td></tr>
+  </table>
+  <div class="analogia">un partido de fútbol. El árbitro (motor) aplica el reglamento; el marcador del estadio (interfaz) enseña el resultado; la megafonía (sonido) pita; y la federación (estadísticas) apunta los resultados en su libro.</div>
+  <div class="notas">
+    <p>La columna de la derecha es la clave. Si una clase hace algo de esa columna, el reparto está mal hecho.</p>
+  </div>
+</section>
+
+<section class="slide v3" data-seccion="Solución 3 · Avanzada con clases">
+  <span class="etiqueta">Solución 3 · El motor</span>
+  <h2>El árbitro devuelve un informe, no pinta nada</h2>
+  <div class="g2">
+    <div>
+<pre><code class="js">probarLetra(letra) {
+  if (this.juegoTerminado || this.letrasUsadas.has(letra)) return null;
+
+  this.letrasUsadas.add(letra);
+  const acierto = this.itemActual.palabra.includes(letra);
+
+  if (acierto) { /* rellenar this.letrasAdivinadas */ }
+  else { this.fallos++; }
+
+  const max = this.configDificultades[this.dificultad].maxFallos;
+  const victoria = !this.letrasAdivinadas.includes('');
+  const derrota = this.fallos >= max;
+  if (victoria || derrota) this.juegoTerminado = true;
+
+  return { letra, acierto, fallos: this.fallos, maxFallos: max,
+           victoria, derrota, palabraSecreta: this.itemActual.palabra };
+}</code></pre>
+    </div>
+    <div>
+      <p>Las reglas son las de siempre, pero todo lo «del objeto» lleva <code>this.</code> delante<sup class="cita">[25]</sup>: <code>this.fallos</code>, <code>this.letrasUsadas</code>…</p>
+      <p>Y en vez de pintar, <strong>devuelve un objeto</strong> con el resultado de la jugada. Quien lo llame decidirá qué hacer con él.</p>
+      <p>Las vidas dependen de la dificultad: 8 en fácil, 6 en normal, 5 en difícil. Y en difícil hay además un reloj de 45 segundos: la interfaz lo descuenta con <code>setInterval</code><sup class="cita">[26]</sup> y, al llegar a cero, el motor da la partida por perdida con <code>tiempoAgotado()</code>.</p>
+      <div class="prueba probadlo">el motor funciona sin pantalla. En la consola: <code>const m = new AhorcadoEngine(); m.iniciarNuevaPartida(); m.probarLetra('A');</code></div>
+    </div>
+  </div>
+  <div class="notas">
+    <p>Hacer la prueba de la consola en directo. Es la mejor demostración de que el motor está desacoplado: juega sin HTML.</p>
+  </div>
+</section>
+
+<section class="slide v3" data-seccion="Solución 3 · Avanzada con clases">
+  <span class="etiqueta">Solución 3 · La interfaz</span>
+  <h2>El marcador lee el informe y pinta</h2>
+  <div class="g2">
+    <div>
+<pre><code class="js">jugar(letra) {
+  const res = this.engine.probarLetra(letra);
+  if (!res) return;
+
+  const tecla = this.dom.teclado.querySelector(`[data-letra="${letra}"]`);
+  tecla.disabled = true;
+  tecla.classList.add(res.acierto ? 'acierto' : 'fallo');
+
+  if (res.acierto) {
+    this.audio.playSuccess();
+    this.renderPalabra();
+  } else {
+    this.audio.playError();
+    this.dom.partesSvg[res.fallos - 1].classList.add('visible');
+    this.actualizarSalud();
+  }
+  if (res.victoria || res.derrota) this.finPartida(res);
+}</code></pre>
+    </div>
+    <div>
+      <p>Fijaos en lo que <strong>no</strong> hay: ni un <code>includes</code>, ni un bucle sobre la palabra. La interfaz pregunta al motor y obedece.</p>
+      <p>Los escuchadores se escriben con funciones flecha<sup class="cita">[27]</sup>:</p>
+<pre><code class="js">this.dom.teclado.addEventListener('click', evento => {
+  const tecla = evento.target.closest('.tecla');
+  if (tecla) this.jugar(tecla.dataset.letra);
+});</code></pre>
+      <div class="ojo">con <code>function (evento) {...}</code>, dentro del escuchador <code>this</code> sería el teclado, no la interfaz, y <code>this.jugar</code> no existiría.</div>
+    </div>
+  </div>
+  <div class="notas">
+    <p>Este es el error número uno de la Solución 3. Mostrarlo en directo: cambiar la flecha por function y enseñar el error en la consola.</p>
+  </div>
+</section>
+
+<section class="slide v3" data-seccion="Solución 3 · Avanzada con clases">
+  <span class="etiqueta">Solución 3 · Los ayudantes</span>
+  <h2>Memoria entre visitas y sonido sin archivos</h2>
+  <div class="g2">
+    <div class="caja v3c">
+      <h3>📒 <code>StatsRepository</code></h3>
+<pre><code class="js">save() {
+  localStorage.setItem(this.STORAGE_KEY,
+    JSON.stringify(this.stats));
+}</code></pre>
+      <p><code>localStorage</code> solo guarda texto<sup class="cita">[24]</sup>. Por eso el objeto de estadísticas se convierte con <code>JSON.stringify</code> al guardar y con <code>JSON.parse</code> al leer<sup class="cita">[28]</sup>.</p>
+      <div class="analogia">una libreta que el navegador deja en un cajón. Cerráis la página y la libreta sigue ahí.</div>
+    </div>
+    <div class="caja v3c">
+      <h3>🔊 <code>SoundSynthesizer</code></h3>
+<pre><code class="js">const osc = this.audioCtx.createOscillator();
+osc.frequency.setValueAtTime(587.33, ...);
+osc.start();</code></pre>
+      <p>La Web Audio API<sup class="cita">[23]</sup> fabrica el sonido con un oscilador: una frecuencia, una forma de onda y una duración. No hay ni un MP3 en la carpeta.</p>
+      <p>Y el botón de silencio también se recuerda en <code>localStorage</code>.</p>
+    </div>
+  </div>
+  <div class="notas">
+    <p>Abrir F12, pestaña Aplicación, Almacenamiento local, y enseñar la clave ahorcado_stats_pro_2026 con su JSON.</p>
+  </div>
+</section>
+
+<section class="slide v3" data-seccion="Solución 3 · Avanzada con clases">
+  <span class="etiqueta">Solución 3 · Balance</span>
+  <h2>Lo bueno y lo mejorable</h2>
+  <div class="g2">
+    <div class="caja" style="border-color:var(--ok)">
+      <h3>👍 Lo que hace bien</h3>
+      <ul>
+        <li>Cada clase se entiende y se prueba por separado.</li>
+        <li>El motor podría usarse en otro diseño de pantalla sin tocar una línea.</li>
+        <li>Estadísticas que sobreviven a la recarga y niveles de dificultad.</li>
+      </ul>
+    </div>
+    <div class="caja" style="border-color:var(--mal)">
+      <h3>👎 Lo mejorable</h3>
+      <ul>
+        <li>Mucho más código para el mismo juego: hay que conocer clases, <code>this</code> y flechas.</li>
+        <li>Para un ejercicio pequeño puede ser matar moscas a cañonazos.</li>
+        <li>Más piezas, más sitios donde equivocarse con un nombre.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="notas">
+    <p>Mensaje final del bloque: la 3 no es «la buena» y las otras «las malas». Es la que escala mejor cuando el proyecto crece.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- COMPARATIVA -->
+<!-- ===================================================================== -->
+<section class="slide cmp" data-seccion="Comparativa" id="cmp">
+  <span class="etiqueta">Comparativa · Frente a frente</span>
+  <h2>Las tres soluciones en una tabla</h2>
+  <table>
+    <tr><th>Criterio</th><th class="t1">1 · Básica</th><th class="t2">2 · Teclado</th><th class="t3">3 · Clases</th></tr>
+    <tr><td>Cómo entra la letra</td><td>Caja de texto + botón o <kbd>Enter</kbd></td><td>Teclado en pantalla + teclado físico</td><td>Igual que la 2</td></tr>
+    <tr><td>Escuchadores de letras</td><td>2 (botón y caja)</td><td>1 en el contenedor + 1 en <code>window</code></td><td>Igual que la 2, dentro de la clase</td></tr>
+    <tr><td>Banco de palabras</td><td>Array de textos</td><td>Array de objetos con categoría y pista</td><td>Igual que la 2</td></tr>
+    <tr><td>Letras probadas</td><td>Array</td><td><code>Set</code></td><td><code>Set</code> dentro del motor</td></tr>
+    <tr><td>Dónde están las reglas</td><td>En <code>procesarLetra()</code></td><td>En <code>jugarLetra()</code>, mezcladas con la pantalla</td><td>Solo en <code>AhorcadoEngine</code></td></tr>
+    <tr><td>Vidas</td><td>6</td><td>6</td><td>8, 6 o 5 según dificultad, y 45 s de reloj en difícil</td></tr>
+    <tr><td>Extras</td><td>—</td><td>Pista y corazones</td><td>Sonido, estadísticas, ventana de fin</td></tr>
+    <tr><td>Para quién</td><td>Iniciación</td><td>Práctica estándar de clase</td><td>Reto y portafolio</td></tr>
+  </table>
+  <div class="notas">
+    <p>Leer la fila «Dónde están las reglas». Es el resumen de toda la sesión en una línea.</p>
+  </div>
+</section>
+
+<section class="slide cmp" data-seccion="Comparativa">
+  <span class="etiqueta">Comparativa · El mismo momento, tres códigos</span>
+  <h2>¿Cómo se entera cada una de que habéis jugado una letra?</h2>
+  <div class="g3">
+    <div class="caja v1c">
+      <h3 class="t1">Solución 1</h3>
+<pre><code class="js">btnProbar.addEventListener(
+  'click', procesarLetra);
+inputLetra.addEventListener(
+  'keydown', e => {
+    if (e.key === 'Enter')
+      procesarLetra();
+  });</code></pre>
+      <p class="suave">La letra se lee de la caja dentro de <code>procesarLetra()</code>.</p>
+    </div>
+    <div class="caja v2c">
+      <h3 class="t2">Solución 2</h3>
+<pre><code class="js">tecladoVirtual.addEventListener(
+  'click', e => {
+    const t = e.target
+      .closest('.tecla');
+    if (t) jugarLetra(
+      t.dataset.letra);
+  });</code></pre>
+      <p class="suave">La letra llega como parámetro, venga del ratón o del teclado.</p>
+    </div>
+    <div class="caja v3c">
+      <h3 class="t3">Solución 3</h3>
+<pre><code class="js">this.dom.teclado
+  .addEventListener(
+  'click', e => {
+    const t = e.target
+      .closest('.tecla');
+    if (t) this.jugar(
+      t.dataset.letra);
+  });</code></pre>
+      <p class="suave">Igual que la 2, pero llama a un método y este pregunta al motor.</p>
+    </div>
+  </div>
+  <div class="notas">
+    <p>Que señalen las diferencias entre la 2 y la 3. Solo son this. y que jugar() no decide nada.</p>
+  </div>
+</section>
+
+<section class="slide cmp" data-seccion="Comparativa">
+  <span class="etiqueta">Comparativa · Trampas típicas</span>
+  <h2>Los fallos que más veo en esta práctica</h2>
+  <table>
+    <tr><th>Síntoma en pantalla</th><th>Causa</th><th>Arreglo</th></tr>
+    <tr><td>Solo se destapa la primera A</td><td><code>indexOf</code> o un <code>break</code> en el bucle</td><td>Recorrer la palabra entera con <code>for</code></td></tr>
+    <tr><td>El primer fallo dibuja el tronco</td><td>Índice sin el <code>- 1</code>, o <code>fallos++</code> después de dibujar</td><td><code>partes[fallos - 1]</code> tras sumar el fallo</td></tr>
+    <tr><td>Una letra repetida quita vida</td><td>Falta el <code>return</code> tras el aviso</td><td>Salir de la función en cuanto falla un filtro</td></tr>
+    <tr><td>«Victoria» nada más empezar (Solución 2 y 3)</td><td>Se busca <code>'_'</code> en vez de <code>''</code></td><td><code>!letrasAdivinadas.includes('')</code></td></tr>
+    <tr><td>La segunda partida empieza con piezas</td><td><code>iniciarJuego()</code> no quita la clase <code>visible</code></td><td>Recorrer las piezas con <code>classList.remove</code></td></tr>
+    <tr><td><code>this.jugar is not a function</code></td><td>Escuchador escrito con <code>function</code></td><td>Función flecha</td></tr>
+  </table>
+  <div class="notas">
+    <p>Preguntar antes de enseñar la columna de causas: ¿por qué creéis que pasa esto? Que piensen un minuto.</p>
+  </div>
+</section>
+
+<section class="slide cmp" data-seccion="Comparativa">
+  <span class="etiqueta">Comprobad lo aprendido</span>
+  <h2>Cinco preguntas rápidas</h2>
+  <ol>
+    <li>¿Qué cinco cosas tiene que recordar el juego durante una partida?</li>
+    <li>¿Por qué el primer fallo enciende <code>partesAhorcado[0]</code> y no <code>partesAhorcado[1]</code>?</li>
+    <li>En la Solución 2, ¿por qué basta un escuchador para las 27 teclas aunque se creen de nuevo en cada partida?</li>
+    <li>¿Qué devuelve <code>probarLetra()</code> en la Solución 3 y por qué no pinta nada en pantalla?</li>
+    <li>¿Por qué hay que usar <code>JSON.stringify</code> antes de guardar las estadísticas en <code>localStorage</code>?</li>
+  </ol>
+  <p class="suave">Si alguna os cuesta, volved a su bloque. Las respuestas están todas en esta presentación.</p>
+  <div class="notas">
+    <p>Respuestas: 1) palabra, tablero, letras probadas, fallos y si ha terminado. 2) los arrays empiezan en 0. 3) el escuchador está en el contenedor y el clic sube por burbujeo. 4) un objeto con el resultado; porque las reglas no deben depender de la pantalla. 5) localStorage solo guarda texto.</p>
+  </div>
+</section>
+
+<!-- FUENTES -->
+<section class="slide" data-seccion="Fuentes" id="fuentes">
+  <h2>Fuentes y Documentación Oficial</h2>
+  <ol class="fuentes">
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Element/classList" target="_blank">Element.classList</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Set" target="_blank">Set</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Classes" target="_blank">Clases</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Math/random" target="_blank">Math.random()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Math/floor" target="_blank">Math.floor()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/String/includes" target="_blank">String.prototype.includes()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Array/includes" target="_blank">Array.prototype.includes()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/EventTarget/addEventListener" target="_blank">EventTarget.addEventListener()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Array/join" target="_blank">Array.prototype.join()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/String/trim" target="_blank">String.prototype.trim()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/String/toUpperCase" target="_blank">String.prototype.toUpperCase()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test" target="_blank">RegExp.prototype.test()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Document/getElementById" target="_blank">Document.getElementById()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Array/fill" target="_blank">Array.prototype.fill()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Document/createElement" target="_blank">Document.createElement()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Node/appendChild" target="_blank">Node.appendChild()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dataset" target="_blank">HTMLElement: dataset property</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Learn_web_development/Core/Scripting/Event_bubbling" target="_blank">Burbujeo de eventos</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Event/target" target="_blank">Event.target</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Element/closest" target="_blank">Element.closest()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/keydown_event" target="_blank">Element: keydown event</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key" target="_blank">KeyboardEvent: key property</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Web_Audio_API" target="_blank">Web Audio API</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Window/localStorage" target="_blank">Window.localStorage</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Operators/this" target="_blank">this</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Window/setInterval" target="_blank">setInterval()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Functions/Arrow_functions" target="_blank">Funciones flecha</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/JSON" target="_blank">JSON</a></li>
+  </ol>
+  <div class="notas">
+    <p>Recomendar la página de burbujeo de eventos para quien quiera profundizar en la Solución 2, y la de clases para la 3.</p>
+  </div>
+</section>
+
+</div>
+
+<aside class="notas-panel"><div class="notas-dentro"><h4>📝 Guion del profesor</h4><div id="notasTexto"></div></div></aside>
+</main>
+
+<div class="pie-ayuda"><kbd>←</kbd> <kbd>→</kbd> o <kbd>Espacio</kbd> navegar · <kbd>Inicio</kbd>/<kbd>Fin</kbd> · <kbd>N</kbd> guion · <kbd>F</kbd> pantalla completa</div>
+
+<script>
+// ------------------------------------------------------------
+// Resaltado de sintaxis sencillo para los bloques de código
+// ------------------------------------------------------------
+(function resaltar() {
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const kws = new Set(['const','let','function','if','else','return','for','of','new','class','this','switch','case','break','default','typeof','null','undefined','true','false','try','catch']);
+  const re = /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|('(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\.)*`)|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_$][\w$]*)\b(?=\s*\()|\b([A-Za-z_$][\w$]*)\b/g;
+  document.querySelectorAll('pre code.js').forEach(el => {
+    const src = el.textContent;
+    let out = '', last = 0, m;
+    re.lastIndex = 0;
+    while ((m = re.exec(src))) {
+      out += esc(src.slice(last, m.index));
+      if (m[1]) out += '<span class="c">' + esc(m[1]) + '</span>';
+      else if (m[2]) out += '<span class="s">' + esc(m[2]) + '</span>';
+      else if (m[3]) out += '<span class="n">' + m[3] + '</span>';
+      else if (m[4]) out += kws.has(m[4]) ? '<span class="k">' + m[4] + '</span>' : '<span class="f">' + m[4] + '</span>';
+      else out += kws.has(m[5]) ? '<span class="k">' + m[5] + '</span>' : m[5];
+      last = re.lastIndex;
+    }
+    el.innerHTML = out + esc(src.slice(last));
+  });
+  document.querySelectorAll('pre code.js-html').forEach(el => {
+    el.innerHTML = el.innerHTML
+      .replace(/\b(data-[a-z]+|id|class|viewBox)=(".*?")/g, '<span class="f">$1</span>=<span class="s">$2</span>')
+      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<i class="c">$1</i>');
+  });
+})();
+
+// ------------------------------------------------------------
+// Navegación entre diapositivas
+// ------------------------------------------------------------
+const slides = [...document.querySelectorAll('.slide')];
+const contador = document.getElementById('contador');
+const barra = document.getElementById('barra');
+const seccionActual = document.getElementById('seccionActual');
+const notasTexto = document.getElementById('notasTexto');
+const escenario = document.getElementById('escenario');
+let actual = 0;
+
+function mostrar(i) {
+  actual = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((s, j) => s.classList.toggle('activa', j === actual));
+  contador.textContent = (actual + 1) + ' / ' + slides.length;
+  barra.style.width = ((actual + 1) / slides.length * 100) + '%';
+  seccionActual.textContent = slides[actual].dataset.seccion || '';
+  const n = slides[actual].querySelector('.notas');
+  notasTexto.innerHTML = n ? n.innerHTML : '<p class="suave">Sin notas en esta diapositiva.</p>';
+  escenario.scrollTop = 0;
+  ajustar();
+  history.replaceState(null, '', '#' + (actual + 1));
+}
+
+// Encoge la diapositiva activa si no cabe (proyectores de poca resolución)
+function ajustar() {
+  const s = slides[actual];
+  s.style.zoom = 1;
+  const disponible = escenario.clientHeight - 56;
+  const alto = s.offsetHeight;
+  if (alto > disponible) s.style.zoom = Math.max(0.6, disponible / alto);
+}
+window.addEventListener('resize', ajustar);
+
+document.getElementById('btnSig').addEventListener('click', () => mostrar(actual + 1));
+document.getElementById('btnAnt').addEventListener('click', () => mostrar(actual - 1));
+document.getElementById('btnNotas').addEventListener('click', () => document.body.classList.toggle('con-notas'));
+document.getElementById('btnPantalla').addEventListener('click', pantallaCompleta);
+
+function pantallaCompleta() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+
+document.querySelectorAll('[data-ir]').forEach(a => a.addEventListener('click', e => {
+  e.preventDefault();
+  mostrar(slides.indexOf(document.getElementById(a.dataset.ir)));
+}));
+
+window.addEventListener('keydown', e => {
+  if (e.target.closest && e.target.closest('input, textarea, select')) return;
+  switch (e.key) {
+    case 'ArrowRight': case 'PageDown': case ' ': e.preventDefault(); mostrar(actual + 1); break;
+    case 'ArrowLeft': case 'PageUp': e.preventDefault(); mostrar(actual - 1); break;
+    case 'Home': mostrar(0); break;
+    case 'End': mostrar(slides.length - 1); break;
+    case 'n': case 'N': document.body.classList.toggle('con-notas'); break;
+    case 'f': case 'F': pantallaCompleta(); break;
+  }
+});
+
+const inicial = parseInt(location.hash.slice(1), 10);
+mostrar(Number.isNaN(inicial) ? 0 : inicial - 1);
+
+// ------------------------------------------------------------
+// Demo en vivo: la delegación de la Solución 2 funcionando de verdad
+// ------------------------------------------------------------
+(function demo() {
+  const PALABRA = 'BUCLE';
+  const ALFABETO = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('');
+  const teclado = document.getElementById('demoTeclado');
+  const casillas = document.getElementById('demoCasillas');
+  const $ = id => document.getElementById(id);
+  const pasos = [...document.querySelectorAll('#demoLog .paso')];
+  let letrasAdivinadas, letrasUsadas, fallos;
+
+  function pintarCasillas() {
+    casillas.innerHTML = '';
+    letrasAdivinadas.forEach(l => {
+      const s = document.createElement('span');
+      s.textContent = l;
+      casillas.appendChild(s);
+    });
+  }
+
+  function reiniciar() {
+    letrasAdivinadas = Array(PALABRA.length).fill('');
+    letrasUsadas = new Set();
+    fallos = 0;
+    teclado.innerHTML = '';
+    ALFABETO.forEach(letra => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'tecla';
+      btn.textContent = letra;
+      btn.dataset.letra = letra;
+      teclado.appendChild(btn);
+    });
+    pintarCasillas();
+    pasos.forEach(p => p.classList.remove('on'));
+    ['lgTarget', 'lgTecla', 'lgLetra', 'lgHas', 'lgIncl', 'lgAdiv', 'lgSet'].forEach(id => $(id).textContent = '—');
+    $('lgFallos').textContent = '0';
+  }
+
+  const describir = el => el === teclado ? 'div#teclado-virtual (hueco entre teclas)'
+    : el ? `&lt;button class="tecla" data-letra="${el.dataset.letra}"&gt;` : 'null';
+  const verArray = a => '[' + a.map(x => "'" + x + "'").join(', ') + ']';
+  const verSet = s => 'Set {' + [...s].map(x => "'" + x + "'").join(', ') + '}';
+
+  teclado.addEventListener('click', evento => {
+    teclado.classList.add('destello');
+    setTimeout(() => teclado.classList.remove('destello'), 250);
+    pasos.forEach(p => p.classList.remove('on'));
+
+    $('lgTarget').innerHTML = describir(evento.target);
+    const tecla = evento.target.closest('.tecla');
+    $('lgTecla').innerHTML = tecla ? describir(tecla) : 'null → no se hace nada';
+    pasos.slice(0, 2).forEach(p => p.classList.add('on'));
+    if (!tecla || tecla.disabled) return;
+
+    const letra = tecla.dataset.letra;
+    $('lgLetra').textContent = "'" + letra + "'";
+    $('lgHas').textContent = String(letrasUsadas.has(letra));
+    letrasUsadas.add(letra);
+    tecla.disabled = true;
+
+    const acierto = PALABRA.includes(letra);
+    $('lgIncl').textContent = String(acierto);
+    if (acierto) {
+      tecla.classList.add('acierto');
+      for (let i = 0; i < PALABRA.length; i++) if (PALABRA[i] === letra) letrasAdivinadas[i] = letra;
+    } else {
+      tecla.classList.add('fallo');
+      fallos++;
+    }
+    pintarCasillas();
+    $('lgAdiv').textContent = verArray(letrasAdivinadas);
+    $('lgSet').textContent = verSet(letrasUsadas);
+    $('lgFallos').textContent = String(fallos);
+    pasos.forEach(p => p.classList.add('on'));
+  });
+
+  $('demoReiniciar').addEventListener('click', reiniciar);
+  reiniciar();
+})();
+</script>
+</body>
+</html>

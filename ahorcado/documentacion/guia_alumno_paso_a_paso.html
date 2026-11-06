@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía del alumno · Ahorcado paso a paso — Ramón Abramo</title>
+<style>
+  :root {
+    --bg: #0f172a; --card: #1e293b; --borde: #334155; --texto: #f1f5f9; --suave: #94a3b8;
+    --code-bg: #0a0f1c;
+    --v1: #f59e0b;   /* Solución 1: ámbar */
+    --v2: #a78bfa;   /* Solución 2: violeta */
+    --v3: #38bdf8;   /* Solución 3: azul */
+    --ok: #10b981; --mal: #f43f5e; --acento: #38bdf8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--texto); display: flex; flex-direction: column; overflow: hidden; font-size: 18px; }
+
+  /* ---------- Cabecera y navegación ---------- */
+  header { display: flex; justify-content: space-between; align-items: center; padding: 10px 24px; border-bottom: 1px solid var(--borde); background: rgba(15,23,42,.9); gap: 16px; }
+  .marca { font-weight: 700; color: var(--acento); font-size: .95rem; white-space: nowrap; }
+  .seccion-actual { font-size: .85rem; color: var(--suave); flex: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav { display: flex; gap: 8px; align-items: center; }
+  .btn { background: var(--card); border: 1px solid var(--borde); color: var(--texto); padding: 6px 12px; border-radius: 8px; font-size: .85rem; cursor: pointer; text-decoration: none; display: inline-block; }
+  .btn:hover { border-color: var(--acento); }
+  .contador { font-size: .85rem; color: var(--suave); min-width: 64px; text-align: center; font-variant-numeric: tabular-nums; }
+  .barra { height: 4px; background: var(--borde); }
+  .barra > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--v1), var(--v2), var(--v3)); transition: width .3s; }
+
+  main { flex: 1; display: flex; overflow: hidden; }
+  .escenario { flex: 1; display: flex; align-items: center; justify-content: center; padding: 22px; overflow-y: auto; }
+
+  /* ---------- Diapositivas ---------- */
+  .slide { display: none; width: 100%; max-width: 1200px; background: var(--card); border: 1px solid var(--borde); border-radius: 18px; padding: 28px 38px; box-shadow: 0 25px 50px -12px rgba(0,0,0,.5); animation: entra .25s ease-out; margin: auto 0; }
+  .slide.activa { display: block; }
+  @keyframes entra { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .slide.v1 { border-top: 6px solid var(--v1); } .slide.v2 { border-top: 6px solid var(--v2); } .slide.v3 { border-top: 6px solid var(--v3); }
+  .slide.fin, .slide.cmp { border-top: 6px solid var(--ok); }
+
+  .etiqueta { display: inline-block; font-size: .72rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; color: var(--suave); }
+  .v1 .etiqueta { color: var(--v1); } .v2 .etiqueta { color: var(--v2); } .v3 .etiqueta { color: var(--v3); } .fin .etiqueta, .cmp .etiqueta { color: var(--ok); }
+  h1 { font-size: 2.5rem; line-height: 1.15; margin-bottom: 14px; }
+  h2 { font-size: 1.75rem; margin-bottom: 14px; line-height: 1.2; }
+  h3 { font-size: 1.05rem; margin: 8px 0 8px; }
+  p { line-height: 1.55; margin-bottom: 10px; }
+  .lead { font-size: 1.15rem; color: #cbd5e1; }
+  .suave { color: var(--suave); }
+  strong { color: #fff; }
+  code { font-variant-ligatures: none; font-family: "Cascadia Code", Consolas, "Courier New", monospace; background: rgba(148,163,184,.15); padding: 1px 6px; border-radius: 5px; font-size: .9em; }
+  sup.cita { color: var(--acento); font-size: .7em; font-weight: 700; }
+  ul, ol { margin: 0 0 10px 22px; line-height: 1.5; }
+  li { margin-bottom: 5px; }
+
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
+  .g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: start; }
+  .g2-ancho { display: grid; grid-template-columns: 1.25fr 1fr; gap: 22px; align-items: start; }
+  .caja { background: rgba(15,23,42,.6); border: 1px solid var(--borde); border-radius: 12px; padding: 14px 18px; }
+  .caja h3 { margin-top: 0; }
+  .caja.v1c { border-color: var(--v1); } .caja.v2c { border-color: var(--v2); } .caja.v3c { border-color: var(--v3); }
+  .t1 { color: var(--v1); font-weight: 700; } .t2 { color: var(--v2); font-weight: 700; } .t3 { color: var(--v3); font-weight: 700; }
+
+  .objetivo { background: rgba(56,189,248,.1); border-left: 5px solid var(--acento); border-radius: 8px; padding: 10px 14px; margin-bottom: 10px; }
+  .objetivo::before { content: "🎯 Objetivo: "; font-weight: 700; color: var(--acento); }
+  .donde { font-size: .92rem; color: #cbd5e1; margin-bottom: 8px; }
+  .donde::before { content: "📍 Dónde: "; font-weight: 700; color: #fff; }
+  .analogia { background: rgba(245,158,11,.1); border-left: 5px solid var(--v1); border-radius: 8px; padding: 10px 14px; margin: 10px 0; }
+  .analogia::before { content: "🍳 Para entenderlo: "; font-weight: 700; color: var(--v1); }
+  .ojo { background: rgba(244,63,94,.12); border-left: 5px solid var(--mal); border-radius: 8px; padding: 10px 14px; margin: 10px 0; font-size: .95rem; }
+  .ojo::before { content: "🆘 Si no funciona: "; font-weight: 700; color: #fda4af; }
+  .ojo.aviso::before { content: "⚠️ Ojo: "; }
+  .prueba { background: rgba(16,185,129,.12); border-left: 5px solid var(--ok); border-radius: 8px; padding: 10px 14px; margin: 10px 0; font-size: .95rem; }
+  .prueba::before { content: "✅ Comprobadlo: "; font-weight: 700; color: #6ee7b7; }
+  .prueba.probadlo::before { content: "✅ Probadlo: "; }
+
+  pre { background: var(--code-bg); border: 1px solid #1e293b; border-radius: 12px; padding: 12px 14px; overflow-x: auto; font-size: .8rem; line-height: 1.5; margin-bottom: 10px; }
+  pre code { background: none; padding: 0; font-size: 1em; color: #e2e8f0; }
+  .k { color: #c084fc; } .s { color: #86efac; } .c { color: #64748b; font-style: italic; } .n { color: #fbbf24; } .f { color: #7dd3fc; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; margin-bottom: 10px; }
+  th, td { padding: 7px 10px; border-bottom: 1px solid var(--borde); text-align: left; vertical-align: top; }
+  th { background: rgba(15,23,42,.8); color: var(--acento); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+  td code { font-size: .85em; }
+
+  .chip { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .8rem; font-weight: 700; margin: 0 6px 6px 0; }
+  .chip.v1b { background: rgba(245,158,11,.2); color: var(--v1); }
+  .chip.v2b { background: rgba(167,139,250,.2); color: var(--v2); }
+  .chip.v3b { background: rgba(56,189,248,.2); color: var(--v3); }
+
+  .portada { text-align: center; padding: 46px 40px; }
+  .portada .numero { font-size: 5.5rem; font-weight: 900; line-height: 1; }
+  .v1 .numero { color: var(--v1); } .v2 .numero { color: var(--v2); } .v3 .numero { color: var(--v3); }
+  .portada p.lead { max-width: 780px; margin: 10px auto 0; }
+  .ruta { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px; }
+  .ruta span { background: rgba(15,23,42,.7); border: 1px solid var(--borde); border-radius: 999px; padding: 4px 12px; font-size: .85rem; }
+
+  .indice, .camino { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 14px; }
+  .indice a, .camino a { text-decoration: none; color: inherit; display: block; }
+  .indice .caja:hover, .camino .caja:hover { transform: translateY(-2px); transition: .15s; }
+
+  .pie-ayuda { font-size: .75rem; color: var(--suave); text-align: center; padding: 6px; border-top: 1px solid var(--borde); }
+  kbd { background: #334155; border-radius: 4px; padding: 1px 6px; font-size: .75rem; font-family: inherit; }
+  .fuentes li { font-size: .86rem; margin-bottom: 3px; }
+  .fuentes a { color: var(--acento); word-break: break-all; }
+
+  .solo-impresion { display: none; }
+
+  @media (max-width: 900px) { .g2, .g3, .g2-ancho, .indice, .camino { grid-template-columns: 1fr; } body { font-size: 16px; } }
+
+  details.solucion { border: 1px dashed var(--borde); border-radius: 10px; padding: 8px 12px; margin: 10px 0; }
+  details.solucion summary { cursor: pointer; font-weight: 700; color: var(--v1); list-style: none; }
+  details.solucion summary::-webkit-details-marker { display: none; }
+  details.solucion summary::before { content: "👀 "; }
+  details.solucion[open] summary { margin-bottom: 8px; }
+  details.solucion pre { max-height: 44vh; overflow: auto; }
+  details.solucion[open] summary::after { content: " (pulsad para ocultar)"; color: var(--suave); font-weight: 400; }
+  label.hecho { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; background: rgba(16,185,129,.1); border: 1px solid var(--ok); border-radius: 999px; padding: 6px 14px; font-weight: 600; font-size: .9rem; margin-top: 6px; }
+  label.hecho input { width: 18px; height: 18px; accent-color: var(--ok); }
+  .progreso { height: 8px; background: var(--borde); border-radius: 999px; overflow: hidden; margin-top: 8px; }
+  .progreso > div { height: 100%; width: 0; transition: width .3s; }
+  .progreso.p1 > div { background: var(--v1); } .progreso.p2 > div { background: var(--v2); } .progreso.p3 > div { background: var(--v3); }
+  .ciclo { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 10px 0; }
+  .ciclo span { background: rgba(15,23,42,.7); border: 1px solid var(--acento); border-radius: 10px; padding: 8px 14px; font-weight: 700; }
+  .ciclo b { color: var(--acento); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="marca">🎮 Guía del alumno · Ahorcado JS</div>
+  <div class="seccion-actual" id="seccionActual"></div>
+  <div class="nav">
+    <button class="btn" id="btnInicio" title="Volver a «Elige tu camino»">🧭 Caminos</button>
+    <button class="btn" id="btnPantalla" title="Pantalla completa (F)">⛶</button>
+    <button class="btn" id="btnAnt">◀</button>
+    <span class="contador" id="contador">1 / 1</span>
+    <button class="btn" id="btnSig">▶</button>
+  </div>
+</header>
+<div class="barra"><div id="barra"></div></div>
+
+<main><div class="escenario" id="escenario">
+
+<!-- ===================================================================== -->
+<!-- PORTADA Y PREPARACIÓN -->
+<!-- ===================================================================== -->
+<section class="slide portada" data-seccion="Antes de empezar">
+  <span class="etiqueta">Guía del alumno · JavaScript en el navegador</span>
+  <h1>Vuestro ahorcado,<br>paso a paso</h1>
+  <p class="lead">Buenas, soy Ramón Abramo, profesor con más de 25 años de experiencia docente. Esta guía os lleva de la mano para programar el juego del ahorcado de tres formas, de la más sencilla a la más profesional. Un paso por diapositiva, una prueba al final de cada paso y la solución escondida por si os atascáis.</p>
+  <p class="suave solo-pantalla" style="margin-top:18px">Avanzad con <kbd>→</kbd> o con los botones de arriba.</p>
+</section>
+
+<section class="slide" data-seccion="Antes de empezar">
+  <span class="etiqueta">Antes de empezar · Preparad el sitio de trabajo</span>
+  <h2>Lo que necesitáis tener abierto</h2>
+  <div class="g2">
+    <div>
+      <ol>
+        <li>Abrid la carpeta de la solución que vayáis a hacer (<code>version-1-basica-lineal</code>, <code>version-2-teclado-eventos</code> o <code>version-3-avanzada-poo</code>) en vuestro editor.</li>
+        <li>El <code>index.html</code> carga un archivo llamado <code>app.js</code>. Si os he dado la plantilla como <code>app.alumnos.js</code>, renombradla a <code>app.js</code> antes de empezar. Ese es el archivo que vais a rellenar.</li>
+        <li>Abrid el <code>index.html</code> en el navegador.</li>
+        <li>Pulsad <kbd>F12</kbd> y quedaos en la pestaña <strong>Consola</strong><sup class="cita">[1]</sup>. Ahí veréis los errores en rojo y podréis probar cosas a mano.</li>
+      </ol>
+      <div class="ojo aviso">no toquéis el <code>index.html</code> ni el <code>main.css</code>. Todo el trabajo va en <code>app.js</code>. Si cambiáis un <code>id</code> del HTML, vuestro JavaScript dejará de encontrarlo.</div>
+    </div>
+    <div>
+      <h3>El ciclo de trabajo, siempre el mismo</h3>
+      <div class="ciclo"><span>✍️ Escribir</span><b>→</b><span>💾 Guardar <kbd>Ctrl</kbd>+<kbd>S</kbd></span><b>→</b><span>🔄 Recargar <kbd>F5</kbd></span><b>→</b><span>🧪 Probar</span></div>
+      <p>Parece una tontería, pero la mitad de los «no funciona» que veo en clase son archivos sin guardar o páginas sin recargar.</p>
+      <div class="analogia">el ahorcado es como un examen tipo test con un único aspirante. Hay una respuesta secreta, el aspirante va marcando letras y alguien lleva la cuenta de los errores. Vuestro código es ese «alguien».</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-seccion="Antes de empezar">
+  <span class="etiqueta">Antes de empezar · Cómo se usa esta guía</span>
+  <h2>Así está organizado cada paso</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">qué tiene que conseguir el paso, en una frase.</div>
+      <p class="donde">en qué bloque <code>TODO</code> de vuestro <code>app.js</code> se escribe.</p>
+      <h3>Pistas, en orden</h3>
+      <p>Lo que tenéis que escribir, contado poco a poco. Intentadlo primero solo con las pistas.</p>
+      <div class="prueba">la prueba concreta que tiene que salir bien antes de pasar al siguiente paso.</div>
+    </div>
+    <div>
+      <div class="ojo">los fallos más típicos de ese paso y cómo arreglarlos.</div>
+      <p>Al final de cada paso está la solución, escondida. Abridla solo después de intentarlo. Copiar sin entender es como ver la respuesta de un crucigrama: rellena la casilla, pero no aprendéis nada.</p>
+      <p>Cuando el paso funcione, marcad la casilla <strong>«¡Hecho!»</strong>. Se queda guardada en vuestro navegador y os sirve para ver cuánto os queda.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-seccion="Antes de empezar">
+  <span class="etiqueta">Antes de empezar · El HTML que ya tenéis</span>
+  <h2>El dibujo del ahorcado está escondido desde el principio</h2>
+  <div class="g2">
+    <div>
+<pre><code class="js-html">&lt;svg id="svg-ahorcado" viewBox="0 0 200 240"&gt;
+  &lt;!-- La horca: siempre visible --&gt;
+  &lt;line ... class="trazo-horca" /&gt;
+
+  &lt;!-- El muñeco: una pieza por fallo --&gt;
+  &lt;circle id="parte-cabeza" class="parte-oculta" /&gt;
+  &lt;line id="parte-cuerpo" class="parte-oculta" /&gt;
+  &lt;line id="parte-brazo-izq" class="parte-oculta" /&gt;
+  &lt;line id="parte-brazo-der" class="parte-oculta" /&gt;
+  &lt;line id="parte-pierna-izq" class="parte-oculta" /&gt;
+  &lt;line id="parte-pierna-der" class="parte-oculta" /&gt;
+
+  &lt;g id="parte-cara-derrota" class="parte-oculta"&gt;...&lt;/g&gt;
+&lt;/svg&gt;</code></pre>
+    </div>
+    <div>
+      <p>Fijaos en el truco: el muñeco entero ya está dibujado en el HTML, pieza a pieza. Lo que pasa es que cada pieza lleva la clase <code>parte-oculta</code> y el CSS la deja invisible.</p>
+      <p>Para «dibujar» una pieza no hay que pintar nada. Basta con añadirle la clase <code>visible</code><sup class="cita">[2]</sup>:</p>
+<pre><code class="js">document.getElementById('parte-cabeza').classList.add('visible');</code></pre>
+      <div class="analogia">es un teatro de sombras con todas las figuras ya colocadas detrás de la cortina. Vosotros solo vais encendiendo focos.</div>
+      <div class="prueba">pegad esa línea en la consola. La cabeza aparece al momento. Recargad y vuelve a desaparecer.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-seccion="Antes de empezar">
+  <span class="etiqueta">Antes de empezar · La memoria del juego</span>
+  <h2>Cuatro cosas que el juego tiene que recordar</h2>
+  <div class="g2">
+    <div>
+      <p>Pensad en lo que haríais jugando con papel y boli. ¿Qué apuntáis?</p>
+      <table>
+        <tr><th>Qué recuerda</th><th>Ejemplo a media partida</th></tr>
+        <tr><td>La palabra secreta</td><td><code>'PANTALLA'</code></td></tr>
+        <tr><td>Lo que se ve en el tablero</td><td><code>['_', 'A', '_', '_', 'A', 'L', 'L', 'A']</code></td></tr>
+        <tr><td>Las letras ya probadas</td><td><code>['A', 'L', 'E']</code></td></tr>
+        <tr><td>Los fallos que lleva</td><td><code>1</code> (la <code>E</code>)</td></tr>
+      </table>
+      <p>Y una quinta, de propina: si la partida ya ha terminado, para no seguir aceptando letras.</p>
+    </div>
+    <div>
+      <p>Las tres soluciones guardan exactamente esta información. Lo que cambia es dónde:</p>
+      <ul>
+        <li><span class="t1">Solución 1:</span> en variables sueltas (<code>palabraSecreta</code>, <code>letrasAdivinadas</code>, <code>letrasUsadas</code>, <code>fallos</code>).</li>
+        <li><span class="t2">Solución 2:</span> igual, pero las letras usadas van en un <code>Set</code><sup class="cita">[3]</sup>, una colección que no admite repetidos.</li>
+        <li><span class="t3">Solución 3:</span> dentro de un objeto de la clase <code>AhorcadoEngine</code><sup class="cita">[4]</sup>, el «motor» del juego.</li>
+      </ul>
+      <div class="analogia">el tablero es un array del mismo tamaño que la palabra. Cada casilla empieza tapada y se destapa cuando acertáis su letra. Como un calendario de adviento.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-seccion="Antes de empezar">
+  <span class="etiqueta">Antes de empezar · Las herramientas</span>
+  <h2>Las piezas de JavaScript que vais a usar</h2>
+  <div class="g3">
+    <div class="caja">
+      <h3>Elegir al azar</h3>
+<pre><code class="js">Math.floor(Math.random() * 8)
+// → un entero del 0 al 7</code></pre>
+      <p class="suave"><code>Math.random()</code> da un decimal entre 0 y 1 (sin llegar a 1)<sup class="cita">[5]</sup>; <code>Math.floor()</code> le quita los decimales<sup class="cita">[6]</sup>.</p>
+    </div>
+    <div class="caja">
+      <h3>¿Está dentro?</h3>
+<pre><code class="js">'PANTALLA'.includes('A')   // true
+['A', 'L'].includes('E')  // false</code></pre>
+      <p class="suave"><code>includes()</code> existe para textos<sup class="cita">[7]</sup> y para arrays<sup class="cita">[8]</sup>. Devuelve <code>true</code> o <code>false</code>.</p>
+    </div>
+    <div class="caja">
+      <h3>Array → texto</h3>
+<pre><code class="js">['_', 'A', '_'].join(' ')
+// → '_ A _'</code></pre>
+      <p class="suave"><code>join()</code> pega los elementos de un array con el separador que le digáis<sup class="cita">[9]</sup>.</p>
+    </div>
+    <div class="caja">
+      <h3>Escribir en pantalla</h3>
+<pre><code class="js">elemento.textContent = 'Hola';</code></pre>
+      <p class="suave">Cambia el texto de una etiqueta<sup class="cita">[10]</sup>.</p>
+    </div>
+    <div class="caja">
+      <h3>Clases CSS</h3>
+<pre><code class="js">el.classList.add('visible');
+el.classList.remove('visible');</code></pre>
+      <p class="suave">Pone y quita clases sin tocar las demás<sup class="cita">[2]</sup>.</p>
+    </div>
+    <div class="caja">
+      <h3>Escuchar eventos</h3>
+<pre><code class="js">boton.addEventListener('click', jugar);</code></pre>
+      <p class="suave">«Cuando pase esto, llama a esta función»<sup class="cita">[11]</sup>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-seccion="Elige tu camino" id="caminos">
+  <span class="etiqueta">Elige tu camino</span>
+  <h2>Tres soluciones, el mismo juego</h2>
+  <p class="lead">Elegid la que vayáis a hacer. Mi consejo: empezad por la 1, seguid con la 2 y dejad la 3 para el final. Cada una sube un escalón respecto a la anterior.</p>
+  <div class="camino">
+    <a href="#" data-ir="s1"><div class="caja v1c"><h3 class="t1">1 · Básica lineal</h3><p class="suave">Una caja de texto, un botón «Probar» y variables globales. Lo justo para entender la lógica del juego.</p><div class="progreso p1"><div></div></div><p class="suave" style="font-size:.8rem;margin-top:4px" data-progreso="v1"></p></div></a>
+    <a href="#" data-ir="s2"><div class="caja v2c"><h3 class="t2">2 · Teclado y eventos</h3><p class="suave">Un teclado en pantalla creado con JavaScript, delegación de eventos, teclado físico y pistas.</p><div class="progreso p2"><div></div></div><p class="suave" style="font-size:.8rem;margin-top:4px" data-progreso="v2"></p></div></a>
+    <a href="#" data-ir="s3"><div class="caja v3c"><h3 class="t3">3 · Avanzada con clases</h3><p class="suave">El juego repartido en clases: motor, sonido, estadísticas e interfaz. Con niveles de dificultad.</p><div class="progreso p3"><div></div></div><p class="suave" style="font-size:.8rem;margin-top:4px" data-progreso="v3"></p></div></a>
+  </div>
+  <p class="solo-pantalla" style="margin-top:14px"><a href="#" class="btn" data-ir="final">🧪 Ir a la lista de comprobación final</a> <a href="#" class="btn" data-ir="errores">🆘 Mensajes de error de la consola</a></p>
+</section>
+
+<!-- ===================================================================== -->
+<!-- SOLUCIÓN 1 -->
+<!-- ===================================================================== -->
+<section class="slide v1 portada" data-seccion="Solución 1 · Básica lineal" id="s1">
+  <div class="numero">1</div>
+  <span class="etiqueta">Solución 1 · Carpeta version-1-basica-lineal</span>
+  <h1>Básica lineal</h1>
+  <p class="lead">El jugador escribe una letra en una caja de texto y pulsa «Probar» o <kbd>Enter</kbd>. Vosotros elegís la palabra, la tapáis con guiones, comprobáis cada letra, dibujáis el muñeco y decidís quién gana.</p>
+  <div class="ruta"><span>Ya escrito</span><span>1 · Elegir palabra</span><span>2 · Pintar tablero</span><span>3 · Escuchadores</span><span>4 · Validar</span><span>5 · Aciertos</span><span>6 · Fallos</span><span>7 · Fin</span></div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Preparativos">
+  <span class="etiqueta">Solución 1 · Preparativos (ya escritos)</span>
+  <h2>Lo que ya tenéis en la plantilla</h2>
+  <div class="g2">
+    <div>
+<pre><code class="js">const PALABRAS = ['JAVASCRIPT', 'PROGRAMACION', ...];
+const MAX_FALLOS = 6;
+
+let palabraSecreta = '';
+let letrasAdivinadas = [];
+let letrasUsadas = [];
+let fallos = 0;
+let juegoTerminado = false;
+
+const palabraDisplay = document.getElementById('palabra-display');
+const inputLetra = document.getElementById('input-letra');
+// ... y el resto de elementos
+
+const partesAhorcado = [
+  document.getElementById('parte-cabeza'),
+  // ... las 6 piezas, en orden de aparición
+];</code></pre>
+    </div>
+    <div>
+      <p>Los bloques <code>TODO 1</code> y <code>TODO 2</code> vienen resueltos: el banco de palabras, las variables de memoria y los elementos de la página cogidos con <code>getElementById</code><sup class="cita">[12]</sup>.</p>
+      <p>Fijaos en <code>partesAhorcado</code>. Es un array con las seis piezas del muñeco <strong>en el orden en que deben aparecer</strong>. Así, el fallo número 1 enciende <code>partesAhorcado[0]</code>, el 2 enciende <code>partesAhorcado[1]</code>… Ese «menos uno» os va a salir más adelante.</p>
+      <p>También están escritas <code>mostrarMensaje()</code> y <code>finalizarPartida()</code>. Usadlas, no las reescribáis.</p>
+      <div class="prueba">escribid en la consola <code>partesAhorcado.length</code>. Tiene que salir <code>6</code>. Si sale algún <code>null</code> al escribir <code>partesAhorcado</code>, algún <code>id</code> está mal escrito.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Paso 1">
+  <span class="etiqueta">Solución 1 · Paso 1 de 7 · Hito 1</span>
+  <h2>Elegir la palabra y taparla con guiones</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">al empezar la partida, coger una palabra al azar del banco y preparar un array con un guion por cada letra.</div>
+      <p class="donde">bloques <code>TODO 3.1</code>, <code>TODO 3.2</code> y <code>TODO 3.3</code>, dentro de <code>function iniciarJuego()</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Calculad un índice al azar: <code>Math.floor(Math.random() * PALABRAS.length)</code><sup class="cita">[5]</sup>.</li>
+        <li>Guardad en <code>palabraSecreta</code> la palabra de esa posición.</li>
+        <li>Vaciad <code>letrasAdivinadas</code> y, con un bucle <code>for</code> que vaya de <code>0</code> a <code>palabraSecreta.length</code>, meted un <code>'_'</code> en cada vuelta con <code>push</code>.</li>
+        <li>Dejad la memoria limpia: <code>letrasUsadas</code> vacío, <code>fallos</code> a <code>0</code> y <code>juegoTerminado</code> a <code>false</code>.</li>
+      </ol>
+      <div class="analogia">sacáis una papeleta de una bolsa (el índice) y dibujáis en la pizarra tantas rayitas como letras tiene.</div>
+    </div>
+    <div>
+      <div class="prueba">en pantalla todavía no se ve nada, y es normal. Recargad y escribid en la consola <code>palabraSecreta</code> y luego <code>letrasAdivinadas</code>. Para <code>'ARRAY'</code> tiene que salir <code>['_', '_', '_', '_', '_']</code>. Escribid <code>iniciarJuego()</code> varias veces: la palabra debe ir cambiando.</div>
+      <div class="ojo">si <code>palabraSecreta</code> sale <code>undefined</code>, habéis multiplicado por un número fijo mayor que 7 o habéis olvidado el <code>Math.floor</code>. Si el array tiene una casilla de más, el bucle lleva <code>&lt;=</code> en vez de <code>&lt;</code>.</div>
+      <details class="solucion" data-id="S1-1"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">// TODO 3.1
+const indice = Math.floor(Math.random() * PALABRAS.length);
+palabraSecreta = PALABRAS[indice];
+
+// TODO 3.2
+letrasAdivinadas = [];
+for (let i = 0; i &lt; palabraSecreta.length; i++) {
+  letrasAdivinadas.push('_');
+}
+
+// TODO 3.3
+letrasUsadas = [];
+fallos = 0;
+juegoTerminado = false;</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v1-1"> ¡Hecho! La palabra cambia en la consola</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Paso 2">
+  <span class="etiqueta">Solución 1 · Paso 2 de 7 · Hito 1</span>
+  <h2>Pintar el tablero en pantalla</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">que al cargar la página se vean los guiones, las 6 vidas y la lista de letras probadas, con el muñeco escondido.</div>
+      <p class="donde">la función <code>actualizarPantalla()</code> (<code>TODO 5.1</code> a <code>5.3</code>) y el final de <code>iniciarJuego()</code> (<code>TODO 3.4</code> a <code>3.6</code>).</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>En <code>actualizarPantalla()</code>: <code>palabraDisplay.textContent = letrasAdivinadas.join(' ')</code><sup class="cita">[9]</sup>.</li>
+        <li>Las vidas son <code>MAX_FALLOS - fallos</code>. Escribidlas en <code>vidasRestantes</code>.</li>
+        <li>Las letras probadas, unidas con <code>', '</code>, en <code>letrasUsadasDisplay</code>. Si no hay ninguna, mejor escribid «Ninguna aún».</li>
+        <li>En <code>iniciarJuego()</code>, recorred <code>partesAhorcado</code> con <code>forEach</code> y quitad la clase <code>visible</code> a cada pieza. Haced lo mismo con <code>caraDerrota</code>.</li>
+        <li>Activad <code>inputLetra</code> y <code>btnProbar</code> (<code>disabled = false</code>), vaciad la caja y ponedle el foco.</li>
+        <li>Llamad a <code>actualizarPantalla()</code> y a <code>mostrarMensaje()</code> con un saludo.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba">recargad. Tienen que verse los guiones separados (<code>_ _ _ _ _</code>), «Vidas restantes: 6 / 6», «Ninguna aún» y vuestro mensaje de bienvenida. El cursor debe estar ya dentro de la caja de texto.</div>
+      <div class="ojo">si los guiones salen pegados (<code>_____</code>) o con comas (<code>_,_,_</code>), os falta el <code>' '</code> dentro del <code>join</code>. ¿Por qué esconder el muñeco si ya empieza escondido? Porque <code>iniciarJuego()</code> también se usa para la segunda partida, y ahí sí puede haber piezas a la vista.</div>
+      <details class="solucion" data-id="S1-2"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">// Dentro de actualizarPantalla()
+palabraDisplay.textContent = letrasAdivinadas.join(' ');
+vidasRestantes.textContent = MAX_FALLOS - fallos;
+letrasUsadasDisplay.textContent = letrasUsadas.length > 0 ? letrasUsadas.join(', ') : 'Ninguna aún';
+
+// Al final de iniciarJuego()
+partesAhorcado.forEach(parte => parte.classList.remove('visible'));
+caraDerrota.classList.remove('visible');
+
+inputLetra.disabled = false;
+btnProbar.disabled = false;
+inputLetra.value = '';
+inputLetra.focus();
+
+actualizarPantalla();
+mostrarMensaje('¡Nueva partida! Escribe una letra y pulsa Enter.');</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v1-2"> ¡Hecho! Se ven los guiones y las 6 vidas</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Paso 3">
+  <span class="etiqueta">Solución 1 · Paso 3 de 7 · Escuchadores</span>
+  <h2>Que el botón y la tecla <kbd>Enter</kbd> hagan algo</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">que pulsar «Probar Letra» o <kbd>Enter</kbd> llame a <code>procesarLetra()</code>, y que «Nueva Palabra» llame a <code>iniciarJuego()</code>.</div>
+      <p class="donde">bloques <code>TODO 7.1</code>, <code>7.2</code> y <code>7.3</code>, al final del archivo.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li><code>btnProbar.addEventListener('click', procesarLetra)</code><sup class="cita">[11]</sup>. Sin paréntesis detrás de <code>procesarLetra</code>: le dais la función, no la ejecutáis.</li>
+        <li>En <code>inputLetra</code>, escuchad <code>'keydown'</code><sup class="cita">[13]</sup>. La función recibe el evento: si <code>evento.key === 'Enter'</code><sup class="cita">[14]</sup>, llamad a <code>procesarLetra()</code>.</li>
+        <li><code>btnReiniciar</code> con <code>'click'</code> llama a <code>iniciarJuego</code>.</li>
+      </ol>
+      <div class="analogia">un escuchador es un timbre. Lo instaláis una vez en la puerta y, cada vez que alguien llama, suena solo. No hace falta instalarlo de nuevo en cada visita.</div>
+    </div>
+    <div>
+      <div class="prueba">escribid una letra y pulsad <kbd>Enter</kbd>: la caja se vacía y el cursor vuelve a ella (eso ya lo hace <code>procesarLetra()</code>). Pulsad «Nueva Palabra» varias veces: el número de guiones va cambiando.</div>
+      <div class="ojo">si al cargar la página ya pasa algo raro sin tocar nada, habéis escrito <code>procesarLetra()</code> con paréntesis dentro del <code>addEventListener</code>. Así se ejecuta en el acto y el escuchador recibe lo que devuelve (nada).</div>
+      <details class="solucion" data-id="S1-3"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">// TODO 7.1
+btnProbar.addEventListener('click', procesarLetra);
+
+// TODO 7.2
+inputLetra.addEventListener('keydown', evento => {
+  if (evento.key === 'Enter') procesarLetra();
+});
+
+// TODO 7.3
+btnReiniciar.addEventListener('click', iniciarJuego);</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v1-3"> ¡Hecho! Enter vacía la caja</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Paso 4">
+  <span class="etiqueta">Solución 1 · Paso 4 de 7 · Hito 2</span>
+  <h2>Validar la letra antes de jugarla</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">rechazar lo que no sea una letra y las letras repetidas, sin gastar vidas. Las válidas se apuntan en la lista de probadas.</div>
+      <p class="donde">bloques <code>TODO 4.2</code>, <code>4.3</code> y <code>4.5</code>, dentro de <code>procesarLetra()</code>. La lectura de la letra (<code>TODO 4.1</code>) ya está hecha con <code>trim()</code><sup class="cita">[15]</sup> y <code>toUpperCase()</code><sup class="cita">[16]</sup>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Comprobad que es una sola letra con la expresión regular <code>/^[A-ZÑ]$/</code> y su método <code>test()</code><sup class="cita">[17]</sup>. Si no lo es, avisad con <code>mostrarMensaje(..., 'aviso')</code> y <code>return</code>.</li>
+        <li>Si <code>letrasUsadas.includes(letra)</code><sup class="cita">[8]</sup>, avisad y <code>return</code>.</li>
+        <li>Si ha pasado los dos filtros, <code>letrasUsadas.push(letra)</code>.</li>
+        <li>Al final de la función: <code>actualizarPantalla()</code> y <code>verificarFinJuego()</code> (esta todavía está vacía; no pasa nada).</li>
+      </ol>
+      <div class="analogia">el portero de una discoteca. Primero mira el DNI (¿es una letra?) y luego la lista (¿ya ha entrado?). Si falla cualquiera de las dos, a la calle, y la fiesta sigue como estaba.</div>
+    </div>
+    <div>
+      <div class="prueba">escribid <code>7</code> y <kbd>Enter</kbd>: aviso, y las vidas siguen en 6. Escribid <code>a</code>: aparece <code>A</code> en «Letras probadas» (en mayúscula). Escribid otra vez <code>a</code>: aviso de repetida y la lista no cambia.</div>
+      <div class="ojo">si la <code>ñ</code> se rechaza, os falta la <code>Ñ</code> dentro de los corchetes. Si una letra repetida se apunta dos veces, el <code>push</code> está antes de la comprobación o falta el <code>return</code>.</div>
+      <details class="solucion" data-id="S1-4"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">// TODO 4.2
+if (!/^[A-ZÑ]$/.test(letra)) {
+  mostrarMensaje('Introduce una letra válida (A-Z).', 'aviso');
+  return;
+}
+if (letrasUsadas.includes(letra)) {
+  mostrarMensaje(`La letra "${letra}" ya está probada.`, 'aviso');
+  return;
+}
+
+// TODO 4.3
+letrasUsadas.push(letra);
+
+// TODO 4.5 (al final de procesarLetra)
+actualizarPantalla();
+verificarFinJuego();</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v1-4"> ¡Hecho! El 7 y las repetidas se rechazan</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Paso 5">
+  <span class="etiqueta">Solución 1 · Paso 5 de 7 · Hito 3</span>
+  <h2>Destapar las letras acertadas</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">si la letra está en la palabra, cambiar el guion por la letra en <strong>todas</strong> las posiciones donde aparezca.</div>
+      <p class="donde">bloque <code>TODO 4.4</code>, justo después del <code>push</code> y antes de <code>actualizarPantalla()</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li><code>if (palabraSecreta.includes(letra))</code><sup class="cita">[7]</sup>.</li>
+        <li>Dentro, un <code>for</code> que recorra la palabra. Si <code>palabraSecreta[i] === letra</code>, entonces <code>letrasAdivinadas[i] = letra</code>.</li>
+        <li>Celebradlo con <code>mostrarMensaje(..., 'exito')</code>.</li>
+        <li>Dejad preparado el <code>else</code> vacío: lo rellenáis en el paso siguiente.</li>
+      </ol>
+      <div class="analogia">el calendario de adviento otra vez: si la letra es la A, abrís todas las ventanitas que tengan una A dentro, no solo la primera.</div>
+    </div>
+    <div>
+      <div class="prueba">mirad la palabra con <code>palabraSecreta</code> en la consola (sí, es trampa; para probar vale). Si es <code>PANTALLA</code> y escribís <code>A</code>, tiene que salir <code>_ A _ _ A _ _ A</code>: las tres A de golpe.</div>
+      <div class="ojo">si solo se destapa la primera A, estáis usando <code>indexOf</code> o tenéis un <code>break</code> dentro del bucle. Si no se destapa nada, comprobad que comparáis con <code>===</code> y no con <code>=</code>.</div>
+      <details class="solucion" data-id="S1-5"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">// TODO 4.4 (parte del acierto)
+if (palabraSecreta.includes(letra)) {
+  for (let i = 0; i &lt; palabraSecreta.length; i++) {
+    if (palabraSecreta[i] === letra) {
+      letrasAdivinadas[i] = letra;
+    }
+  }
+  mostrarMensaje(`¡Acierto! La letra "${letra}" está en la palabra.`, 'exito');
+} else {
+  // Paso 6
+}</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v1-5"> ¡Hecho! Se destapan todas las apariciones</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Paso 6">
+  <span class="etiqueta">Solución 1 · Paso 6 de 7 · Hito 4</span>
+  <h2>Contar el fallo y dibujar una pieza</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">cada letra que no está suma un fallo, resta una vida y enciende la siguiente pieza del muñeco.</div>
+      <p class="donde">el <code>else</code> del paso anterior y la función <code>dibujarSiguienteParte(numeroFallo)</code> (<code>TODO 5.4</code>).</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>En el <code>else</code>: <code>fallos++</code>, luego <code>dibujarSiguienteParte(fallos)</code> y un mensaje de tipo <code>'error'</code>.</li>
+        <li>En <code>dibujarSiguienteParte</code>: la pieza es <code>partesAhorcado[numeroFallo - 1]</code>. ¿Por qué el menos uno? Porque el primer fallo es el 1 y la primera posición del array es la 0.</li>
+        <li>Si esa pieza existe, <code>classList.add('visible')</code><sup class="cita">[2]</sup>.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba">probad letras que no estén en ninguna palabra del banco: <code>K</code>, <code>W</code>, <code>Q</code>… Primer fallo: cabeza y 5 vidas. Segundo: tronco y 4. Tercero y cuarto: brazos. Quinto y sexto: piernas.</div>
+      <div class="ojo">si el primer fallo dibuja el tronco en vez de la cabeza, os sobra el <code>- 1</code> o hacéis <code>fallos++</code> después de dibujar. Si las vidas no bajan, revisad que <code>actualizarPantalla()</code> sigue al final de <code>procesarLetra()</code>.</div>
+      <details class="solucion" data-id="S1-6"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">// TODO 4.4 (parte del fallo)
+} else {
+  fallos++;
+  dibujarSiguienteParte(fallos);
+  mostrarMensaje(`¡Fallo! La letra "${letra}" no está.`, 'error');
+}
+
+// TODO 5.4
+function dibujarSiguienteParte(numeroFallo) {
+  const parte = partesAhorcado[numeroFallo - 1];
+  if (parte) parte.classList.add('visible');
+}</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v1-6"> ¡Hecho! El muñeco se dibuja en orden</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v1" data-seccion="Solución 1 · Paso 7">
+  <span class="etiqueta">Solución 1 · Paso 7 de 7 · Hitos 5 y 6</span>
+  <h2>¿Has ganado o has perdido?</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">después de cada jugada, comprobar si ya no quedan guiones (victoria) o si se han agotado las vidas (derrota). En los dos casos, bloquear la partida.</div>
+      <p class="donde">función <code>verificarFinJuego()</code>, bloques <code>TODO 6.1</code> y <code>6.2</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Victoria: <code>!letrasAdivinadas.includes('_')</code>. Poned <code>juegoTerminado = true</code>, un mensaje de <code>'exito'</code> y llamad a <code>finalizarPartida()</code>.</li>
+        <li>Derrota (con <code>else if</code>): <code>fallos >= MAX_FALLOS</code>. Mostrad <code>caraDerrota</code>, enseñad la palabra entera y llamad también a <code>finalizarPartida()</code>.</li>
+        <li>Para enseñar la palabra con espacios: <code>palabraSecreta.split('').join(' ')</code>.</li>
+      </ol>
+      <div class="analogia">el árbitro que mira el marcador al final de cada jugada. No juega; solo decide si el partido sigue.</div>
+    </div>
+    <div>
+      <div class="prueba">ganad una partida (mirad la palabra en la consola si hace falta): mensaje de victoria y la caja queda desactivada. Después perded con <code>K W Q Z X Ñ</code>: muñeco completo, ojos en cruz, palabra destapada y caja desactivada. «Nueva Palabra» lo deja todo como al principio.</div>
+      <div class="ojo">si al perder sigue dejando escribir, falta <code>finalizarPartida()</code> o <code>juegoTerminado = true</code>. Si gana con la primera letra, estáis buscando <code>''</code> (vacío) en vez de <code>'_'</code>.</div>
+      <details class="solucion" data-id="S1-7"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">function verificarFinJuego() {
+  if (!letrasAdivinadas.includes('_')) {
+    juegoTerminado = true;
+    mostrarMensaje(`🎉 ¡Has ganado! La palabra es "${palabraSecreta}".`, 'exito');
+    finalizarPartida();
+  } else if (fallos >= MAX_FALLOS) {
+    juegoTerminado = true;
+    caraDerrota.classList.add('visible');
+    palabraDisplay.textContent = palabraSecreta.split('').join(' ');
+    mostrarMensaje(`💀 ¡Has perdido! La palabra era "${palabraSecreta}".`, 'error');
+    finalizarPartida();
+  }
+}</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v1-7"> ¡Hecho! Se puede ganar y perder</label>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- SOLUCIÓN 2 -->
+<!-- ===================================================================== -->
+<section class="slide v2 portada" data-seccion="Solución 2 · Teclado y eventos" id="s2">
+  <div class="numero">2</div>
+  <span class="etiqueta">Solución 2 · Carpeta version-2-teclado-eventos</span>
+  <h1>Teclado y eventos</h1>
+  <p class="lead">Adiós a la caja de texto. Ahora el teclado de letras lo fabrica vuestro JavaScript, un único escuchador vigila las 27 teclas y, de regalo, también se puede jugar con el teclado del ordenador.</p>
+  <div class="ruta"><span>1 · Teclado</span><span>2 · Iniciar</span><span>3 · Casillas y vidas</span><span>4 · Delegación</span><span>5 · Aciertos y fallos</span><span>6 · Teclado físico</span><span>7 · Pista</span><span>8 · Fin</span></div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Lo que cambia">
+  <span class="etiqueta">Solución 2 · Lo que cambia respecto a la 1</span>
+  <h2>Tres novedades antes de empezar</h2>
+  <div class="g3">
+    <div class="caja v2c">
+      <h3>Palabras con ficha</h3>
+<pre><code class="js">{ palabra: 'CSS',
+  categoria: 'Diseño Web',
+  pista: 'Hojas de estilo...' }</code></pre>
+      <p class="suave">Cada palabra es un objeto con su categoría y su pista. La partida guarda el objeto entero en <code>partidaActual</code>.</p>
+    </div>
+    <div class="caja v2c">
+      <h3>Un <code>Set</code> para las usadas</h3>
+<pre><code class="js">letrasUsadas.add('A');
+letrasUsadas.has('A'); // true
+letrasUsadas.clear();</code></pre>
+      <p class="suave">Un <code>Set</code> no admite repetidos<sup class="cita">[3]</sup>. Se usa <code>add</code>, <code>has</code> y <code>clear</code> en vez de <code>push</code> e <code>includes</code>.</p>
+    </div>
+    <div class="caja v2c">
+      <h3>Casillas en vez de guiones</h3>
+<pre><code class="js">letrasAdivinadas =
+  ['', 'S', ''];</code></pre>
+      <p class="suave">Las letras sin descubrir son cadenas vacías <code>''</code>, no <code>'_'</code>. Cada letra se pinta en su propia cajita.</p>
+    </div>
+  </div>
+  <p style="margin-top:12px">La validación de la Solución 1 (¿es una letra?, ¿está repetida?) ya viene escrita al principio de <code>jugarLetra()</code>. Y <code>mostrarMensaje()</code>, como antes, también.</p>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Paso 1">
+  <span class="etiqueta">Solución 2 · Paso 1 de 8 · Preparativos</span>
+  <h2>Fabricar el teclado con JavaScript</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">crear un botón por cada letra del alfabeto (27, con la Ñ) dentro del contenedor <code>tecladoVirtual</code>.</div>
+      <p class="donde">bloque <code>TODO 3.1</code>, dentro de <code>renderizarTecladoVirtual()</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Recorred <code>LETRAS_ALFABETO</code> con <code>forEach</code>.</li>
+        <li>Para cada letra: <code>document.createElement('button')</code><sup class="cita">[18]</sup>.</li>
+        <li>Ponedle <code>type = 'button'</code>, <code>className = 'tecla'</code> y la letra en <code>textContent</code>.</li>
+        <li>Guardad la letra también en <code>btn.dataset.letra</code><sup class="cita">[19]</sup>. Eso crea el atributo <code>data-letra="A"</code> en el HTML.</li>
+        <li>Metedlo en el contenedor con <code>tecladoVirtual.appendChild(btn)</code><sup class="cita">[20]</sup>.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba">como nadie llama todavía a esta función, probadla a mano. Escribid en la consola <code>renderizarTecladoVirtual()</code>: aparecen las 27 teclas. Con <code>tecladoVirtual.children.length</code> debe salir <code>27</code>.</div>
+      <div class="analogia">el <code>dataset</code> es la etiqueta de la taquilla del gimnasio. El botón puede mostrar lo que quiera por fuera, pero la etiqueta dice de quién es.</div>
+      <div class="ojo">si salen 27 botones sin texto, os falta el <code>textContent</code>. Si salen sin estilo, revisad que la clase es <code>'tecla'</code> sin punto delante: el punto solo se pone en los selectores.</div>
+      <details class="solucion" data-id="S2-1"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">LETRAS_ALFABETO.forEach(letra => {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'tecla';
+  btn.textContent = letra;
+  btn.dataset.letra = letra;
+  tecladoVirtual.appendChild(btn);
+});</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v2-1"> ¡Hecho! Salen las 27 teclas</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Paso 2">
+  <span class="etiqueta">Solución 2 · Paso 2 de 8 · Hito 1</span>
+  <h2>Iniciar la partida</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">elegir una ficha al azar, preparar la memoria, esconder pista y muñeco, mostrar la categoría y fabricar el teclado.</div>
+      <p class="donde">bloques <code>TODO 4.1</code> a <code>4.6</code>, dentro de <code>iniciarJuego()</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li><code>partidaActual</code> es <code>BANCO_PALABRAS</code> en una posición al azar (igual que en la Solución 1).</li>
+        <li><code>letrasAdivinadas = Array(partidaActual.palabra.length).fill('')</code><sup class="cita">[21]</sup>: un array del tamaño de la palabra, lleno de vacíos.</li>
+        <li><code>letrasUsadas.clear()</code>, <code>fallos = 0</code>, <code>juegoTerminado = false</code>.</li>
+        <li>Añadid la clase <code>oculta</code> a <code>cajaPista</code>, activad <code>btnPista</code> y quitad <code>visible</code> a las piezas y a la cara.</li>
+        <li><code>categoriaBadge.textContent = partidaActual.categoria</code> y llamad a <code>renderizarTecladoVirtual()</code>.</li>
+        <li>Terminad con <code>actualizarPalabraVisual()</code>, <code>actualizarMarcadorVidas()</code> y un mensaje.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba">recargad. Ya se ve el teclado sin escribir nada en la consola, y la categoría aparece arriba. Escribid <code>partidaActual</code> en la consola: sale el objeto con sus tres datos. Las casillas todavía no se ven: llegan en el paso 3.</div>
+      <div class="ojo">si sale <code>Cannot read properties of null (reading 'palabra')</code>, estáis usando <code>partidaActual</code> antes de darle valor. El sorteo va lo primero.</div>
+      <details class="solucion" data-id="S2-2"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">const indice = Math.floor(Math.random() * BANCO_PALABRAS.length);
+partidaActual = BANCO_PALABRAS[indice];
+
+letrasAdivinadas = Array(partidaActual.palabra.length).fill('');
+letrasUsadas.clear();
+fallos = 0;
+juegoTerminado = false;
+
+cajaPista.classList.add('oculta');
+btnPista.disabled = false;
+partesAhorcado.forEach(parte => parte.classList.remove('visible'));
+caraDerrota.classList.remove('visible');
+
+categoriaBadge.textContent = partidaActual.categoria;
+renderizarTecladoVirtual();
+
+actualizarPalabraVisual();
+actualizarMarcadorVidas();
+mostrarMensaje('¡Partida lista! Elige una letra.');</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v2-2"> ¡Hecho! Teclado y categoría al cargar</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Paso 3">
+  <span class="etiqueta">Solución 2 · Paso 3 de 8 · Hito 1</span>
+  <h2>Las casillas de la palabra y los corazones</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">una cajita por cada letra de la palabra (vacía o con la letra si ya se ha descubierto) y los corazones apagados según los fallos.</div>
+      <p class="donde"><code>TODO 6.1</code> en <code>actualizarPalabraVisual()</code> y <code>TODO 6.2</code> en <code>actualizarMarcadorVidas()</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>La primera línea ya vacía el contenedor con <code>innerHTML = ''</code><sup class="cita">[22]</sup>. Así no se acumulan casillas de una jugada a otra.</li>
+        <li>Un <code>for</code> sobre la palabra. En cada vuelta, un <code>span</code> con clase <code>casilla-letra</code>.</li>
+        <li>Si <code>letrasAdivinadas[i]</code> tiene algo, ponédselo como texto y añadid la clase <code>revelada</code>. Al final, <code>appendChild</code>.</li>
+        <li>Para los corazones: <code>vidasIconos.querySelectorAll('.corazon')</code> y, con <code>forEach((corazon, i) => ...)</code>, <code>classList.toggle('perdido', i >= vidas)</code><sup class="cita">[2]</sup>.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba">recargad: tantas casillas vacías como letras tiene la palabra. En la consola, escribid <code>fallos = 2</code> y luego <code>actualizarMarcadorVidas()</code>: se apagan dos corazones y pone «(4 restantes)». Recargad para dejarlo bien.</div>
+      <div class="analogia"><code>toggle</code> con segundo parámetro es un interruptor con orden: «enciende si se cumple, apaga si no». Os ahorra el <code>if / else</code>.</div>
+      <details class="solucion" data-id="S2-3"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">// TODO 6.1
+for (let i = 0; i &lt; partidaActual.palabra.length; i++) {
+  const casilla = document.createElement('span');
+  casilla.className = 'casilla-letra';
+  if (letrasAdivinadas[i]) {
+    casilla.textContent = letrasAdivinadas[i];
+    casilla.classList.add('revelada');
+  }
+  palabraDisplay.appendChild(casilla);
+}
+
+// TODO 6.2
+const corazones = vidasIconos.querySelectorAll('.corazon');
+corazones.forEach((corazon, i) => corazon.classList.toggle('perdido', i >= vidas));</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v2-3"> ¡Hecho! Casillas y corazones correctos</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Paso 4">
+  <span class="etiqueta">Solución 2 · Paso 4 de 8 · Delegación de eventos</span>
+  <h2>Un solo escuchador para 27 teclas</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">que al pulsar cualquier tecla en pantalla se llame a <code>jugarLetra()</code> con su letra, y que esa tecla quede desactivada.</div>
+      <p class="donde"><code>TODO 8.1</code> (al final del archivo) y <code>TODO 5.1</code> y <code>5.2</code> en <code>jugarLetra()</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Un único <code>addEventListener('click', ...)</code> en <code>tecladoVirtual</code>, no en cada tecla.</li>
+        <li>Dentro, <code>evento.target</code><sup class="cita">[23]</sup> es lo que se ha pulsado. <code>evento.target.closest('.tecla')</code><sup class="cita">[24]</sup> sube hasta encontrar la tecla (o devuelve <code>null</code> si se pulsó en un hueco).</li>
+        <li>Si hay tecla y no está desactivada, <code>jugarLetra(tecla.dataset.letra)</code>.</li>
+        <li>En <code>jugarLetra()</code>: <code>letrasUsadas.add(letra)</code>, buscad la tecla con <code>querySelector(`[data-letra="${letra}"]`)</code><sup class="cita">[25]</sup> y ponedle <code>disabled = true</code>.</li>
+      </ol>
+      <div class="analogia">el conserje de un edificio. En vez de poner un portero en cada piso, uno solo en la entrada pregunta «¿a qué piso va?». El clic sube desde la tecla hasta el contenedor por el burbujeo<sup class="cita">[26]</sup>, y allí lo atiende el conserje.</div>
+    </div>
+    <div>
+      <div class="prueba">pulsad varias teclas: cada una se queda apagada y no se puede volver a pulsar. Escribid <code>letrasUsadas</code> en la consola: aparecen las que habéis pulsado, sin repetir.</div>
+      <div class="ojo">si no pasa nada, poned un <code>console.log(evento.target)</code> dentro del escuchador. Si en la consola tampoco sale nada, el escuchador no está en <code>tecladoVirtual</code>. Si sale pero no juega, revisad que leéis <code>dataset.letra</code>, no <code>dataset.Letra</code>.</div>
+      <details class="solucion" data-id="S2-4"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">// TODO 8.1
+tecladoVirtual.addEventListener('click', evento => {
+  const tecla = evento.target.closest('.tecla');
+  if (tecla &amp;&amp; !tecla.disabled) jugarLetra(tecla.dataset.letra);
+});
+
+// TODO 5.1 y 5.2, dentro de jugarLetra()
+letrasUsadas.add(letra);
+
+const boton = tecladoVirtual.querySelector(`[data-letra="${letra}"]`);
+if (boton) boton.disabled = true;</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v2-4"> ¡Hecho! Las teclas se apagan al pulsarlas</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Paso 5">
+  <span class="etiqueta">Solución 2 · Paso 5 de 8 · Hitos 3 y 4</span>
+  <h2>Aciertos en verde, fallos en rojo</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">si la letra está, destaparla en las casillas y pintar la tecla de acierto; si no, pintarla de fallo, sumar el fallo y dibujar la pieza.</div>
+      <p class="donde">bloques <code>TODO 5.3</code> y <code>5.4</code>, en <code>jugarLetra()</code>, después de desactivar la tecla.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li><code>if (partidaActual.palabra.includes(letra))</code>.</li>
+        <li>Acierto: <code>boton.classList.add('acierto')</code> y el mismo bucle de la Solución 1 para rellenar <code>letrasAdivinadas[i]</code>.</li>
+        <li>Fallo: <code>boton.classList.add('fallo')</code>, <code>fallos++</code> y <code>partesAhorcado[fallos - 1].classList.add('visible')</code>.</li>
+        <li>Fuera del <code>if</code>: <code>actualizarPalabraVisual()</code>, <code>actualizarMarcadorVidas()</code> y <code>verificarFinJuego()</code>.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba">pulsad una letra que esté (mirad <code>partidaActual.palabra</code>): se destapa en su casilla y la tecla queda verde. Pulsad <code>K</code>: tecla roja, cabeza dibujada y un corazón menos.</div>
+      <div class="ojo">si la casilla no cambia aunque la tecla se ponga verde, os falta llamar a <code>actualizarPalabraVisual()</code> después del bucle. Pintar en memoria no es pintar en pantalla.</div>
+      <details class="solucion" data-id="S2-5"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">if (partidaActual.palabra.includes(letra)) {
+  if (boton) boton.classList.add('acierto');
+  for (let i = 0; i &lt; partidaActual.palabra.length; i++) {
+    if (partidaActual.palabra[i] === letra) letrasAdivinadas[i] = letra;
+  }
+  mostrarMensaje(`¡Acierto con "${letra}"!`, 'exito');
+} else {
+  if (boton) boton.classList.add('fallo');
+  fallos++;
+  if (partesAhorcado[fallos - 1]) partesAhorcado[fallos - 1].classList.add('visible');
+  mostrarMensaje(`¡Fallo con "${letra}"!`, 'error');
+}
+
+actualizarPalabraVisual();
+actualizarMarcadorVidas();
+verificarFinJuego();</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v2-5"> ¡Hecho! Verde, rojo y muñeco</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Paso 6">
+  <span class="etiqueta">Solución 2 · Paso 6 de 8 · Teclado físico</span>
+  <h2>Jugar también con el teclado del ordenador</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">que pulsar una letra en el teclado físico haga exactamente lo mismo que pulsarla en pantalla.</div>
+      <p class="donde">bloque <code>TODO 8.2</code>, al final del archivo.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Escuchad <code>'keydown'</code><sup class="cita">[13]</sup> en <code>window</code>, así funciona esté donde esté el foco.</li>
+        <li>Si se pulsa con <kbd>Ctrl</kbd>, <kbd>Alt</kbd> o <kbd>Meta</kbd> (<code>evento.ctrlKey</code>…), <code>return</code>: no queréis que <kbd>Ctrl</kbd>+<kbd>R</kbd> cuente como una R.</li>
+        <li><code>evento.key</code><sup class="cita">[14]</sup> trae la tecla; pasadla a mayúscula.</li>
+        <li>Si está en <code>LETRAS_ALFABETO</code>, llamad a <code>jugarLetra(letra)</code>. La misma función que usa el ratón.</li>
+      </ol>
+      <div class="analogia">dos puertas que dan al mismo pasillo. Da igual por cuál entréis: acabáis en <code>jugarLetra()</code>.</div>
+    </div>
+    <div>
+      <div class="prueba">pulsad letras en el teclado del ordenador: se juegan y su tecla en pantalla se apaga. Pulsad <kbd>F5</kbd>, <kbd>Enter</kbd> o un número: no pasa nada en el juego.</div>
+      <div class="ojo">si las letras se juegan dos veces o la tecla se pone verde y roja a la vez, revisad que la validación del principio de <code>jugarLetra()</code> sigue ahí: es la que impide repetir.</div>
+      <details class="solucion" data-id="S2-6"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">window.addEventListener('keydown', evento => {
+  if (evento.ctrlKey || evento.altKey || evento.metaKey) return;
+  const letra = evento.key.toUpperCase();
+  if (LETRAS_ALFABETO.includes(letra)) jugarLetra(letra);
+});</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v2-6"> ¡Hecho! Funciona con el teclado físico</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Paso 7">
+  <span class="etiqueta">Solución 2 · Paso 7 de 8 · Pista</span>
+  <h2>El botón de pista</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">al pulsar «Pedir Pista», mostrar la pista de la palabra y desactivar el botón para que solo se pueda pedir una vez.</div>
+      <p class="donde">bloque <code>TODO 6.3</code>, dentro de <code>alternarPista()</code>. El escuchador del botón ya está escrito.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Si la partida ha terminado, <code>return</code>.</li>
+        <li><code>textoPista.textContent = partidaActual.pista</code>.</li>
+        <li>Quitad la clase <code>oculta</code> a <code>cajaPista</code>.</li>
+        <li><code>btnPista.disabled = true</code>.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba">pulsad «Pedir Pista»: aparece el texto y el botón se apaga. Pulsad «Nueva Palabra»: la pista vuelve a esconderse y el botón se enciende (eso lo hicisteis en el paso 2).</div>
+      <div class="ojo">si la pista es la de la palabra anterior, estáis escribiendo el texto en <code>iniciarJuego()</code> antes del sorteo. Escribidlo aquí, al pedirla.</div>
+      <details class="solucion" data-id="S2-7"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">function alternarPista() {
+  if (juegoTerminado) return;
+  textoPista.textContent = partidaActual.pista;
+  cajaPista.classList.remove('oculta');
+  btnPista.disabled = true;
+}</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v2-7"> ¡Hecho! La pista aparece una vez</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v2" data-seccion="Solución 2 · Paso 8">
+  <span class="etiqueta">Solución 2 · Paso 8 de 8 · Hitos 5 y 6</span>
+  <h2>Fin de partida: bloquear el teclado</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">detectar victoria (no queda ninguna casilla vacía) o derrota (vidas agotadas) y, en los dos casos, apagar todas las teclas y la pista.</div>
+      <p class="donde"><code>TODO 7.1</code> y <code>7.2</code> en <code>verificarFinJuego()</code>, más una función nueva de ayuda.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Victoria: <code>!letrasAdivinadas.includes('')</code>. Ojo: ahora se busca la cadena vacía, no el guion.</li>
+        <li>Derrota: <code>fallos >= MAX_FALLOS</code>. Mostrad la cara y escribid cada letra de la palabra en su casilla.</li>
+        <li>Como bloquear el teclado se hace en los dos casos, cread una función <code>bloquearTeclado()</code> que recorra todas las <code>.tecla</code> y las desactive, y que desactive también <code>btnPista</code>.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba">ganad una partida: mensaje de victoria y teclado apagado entero. Perded con <code>K W Q Z X Ñ</code>: muñeco completo, ojos en cruz y la palabra escrita en las casillas. Pulsar letras ya no hace nada.</div>
+      <div class="ojo">si os sale «Victoria» nada más empezar, estáis buscando <code>'_'</code>, que ya no existe en esta solución. Copiar y pegar de la Solución 1 tiene estas cosas.</div>
+      <details class="solucion" data-id="S2-8"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">function verificarFinJuego() {
+  if (!letrasAdivinadas.includes('')) {
+    juegoTerminado = true;
+    bloquearTeclado();
+    mostrarMensaje(`🏆 ¡Victoria! Has descubierto "${partidaActual.palabra}".`, 'exito');
+  } else if (fallos >= MAX_FALLOS) {
+    juegoTerminado = true;
+    caraDerrota.classList.add('visible');
+    bloquearTeclado();
+    const casillas = palabraDisplay.querySelectorAll('.casilla-letra');
+    casillas.forEach((casilla, i) => { casilla.textContent = partidaActual.palabra[i]; });
+    mostrarMensaje(`💀 ¡Derrota! La palabra era "${partidaActual.palabra}".`, 'error');
+  }
+}
+
+function bloquearTeclado() {
+  tecladoVirtual.querySelectorAll('.tecla').forEach(tecla => tecla.disabled = true);
+  btnPista.disabled = true;
+}</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v2-8"> ¡Hecho! Se gana, se pierde y se bloquea</label>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- SOLUCIÓN 3 -->
+<!-- ===================================================================== -->
+<section class="slide v3 portada" data-seccion="Solución 3 · Avanzada con clases" id="s3">
+  <div class="numero">3</div>
+  <span class="etiqueta">Solución 3 · Carpeta version-3-avanzada-poo</span>
+  <h1>Avanzada con clases</h1>
+  <p class="lead">El juego se reparte entre cuatro clases. Tres ya vienen escritas: el sonido, las estadísticas y el motor que sabe las reglas. Vosotros programáis la cuarta, <code>AhorcadoUI</code>, la que conecta el motor con la pantalla.</p>
+  <div class="ruta"><span>Las 3 clases</span><span>1 · Caché del DOM</span><span>2 · Iniciar</span><span>3 · Teclado y salud</span><span>4 · Jugar</span><span>5 · Teclado físico</span><span>6 · Fin</span><span>7 · Botones</span><span>8 · Temporizador</span></div>
+</section>
+
+<section class="slide v3" data-seccion="Solución 3 · Preparativos">
+  <span class="etiqueta">Solución 3 · Preparativos (ya escritos)</span>
+  <h2>Tres clases que ya funcionan</h2>
+  <div class="g2">
+    <div>
+      <table>
+        <tr><th>Clase</th><th>Qué hace</th></tr>
+        <tr><td><code>SoundSynthesizer</code></td><td>Genera pitidos con la Web Audio API<sup class="cita">[27]</sup>: <code>playSuccess()</code>, <code>playError()</code> y <code>toggleMute()</code>.</td></tr>
+        <tr><td><code>StatsRepository</code></td><td>Guarda partidas, victorias y rachas en <code>localStorage</code><sup class="cita">[28]</sup>, convertidas a texto con <code>JSON</code><sup class="cita">[29]</sup>. Su método clave: <code>recordGame(victoria)</code>.</td></tr>
+        <tr><td><code>AhorcadoEngine</code></td><td>Las reglas del juego, sin tocar la pantalla. <code>iniciarNuevaPartida()</code> y <code>probarLetra(letra)</code>.</td></tr>
+      </table>
+      <div class="analogia">el motor es el árbitro con el reglamento; la interfaz es el marcador del estadio. El árbitro no enciende bombillas y el marcador no decide si fue gol.</div>
+    </div>
+    <div>
+      <p>Lo más importante es lo que devuelve <code>probarLetra()</code>: un objeto con todo lo que la pantalla necesita saber.</p>
+<pre><code class="js">{ letra: 'K', acierto: false, fallos: 1, maxFallos: 6,
+  victoria: false, derrota: false, palabraSecreta: 'JAVASCRIPT' }</code></pre>
+      <div class="prueba">las clases se pueden probar solas en la consola, sin pantalla:<br><code>const m = new AhorcadoEngine();</code><br><code>m.iniciarNuevaPartida();</code><br><code>m.probarLetra('A');</code><br>Mirad el objeto que devuelve. Probad otra vez <code>'A'</code>: devuelve <code>null</code> porque está repetida.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide v3" data-seccion="Solución 3 · Paso 1">
+  <span class="etiqueta">Solución 3 · Paso 1 de 8 · Preparativos</span>
+  <h2>Guardar los elementos en <code>this.dom</code></h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">en el constructor, buscar una sola vez todos los elementos de la página y guardarlos en un objeto <code>this.dom</code>.</div>
+      <p class="donde">dentro del <code>constructor()</code> de <code>AhorcadoUI</code>, debajo de <code>this.statsRepo</code>, donde pone «Cache de elementos».</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Cread <code>this.dom = { ... }</code>. Cada propiedad es un <code>document.getElementById(...)</code>. Los <code>id</code> los tenéis en el <code>index.html</code>.</li>
+        <li>Necesitáis al menos: <code>teclado-virtual</code>, <code>palabra-display</code>, <code>categoria-display</code>, <code>vidas-numero</code>, <code>barra-salud-fill</code>, <code>mensaje-estado</code>, los de la pista, el selector de dificultad, el botón de audio, el de nueva partida y los del modal de fin.</li>
+        <li>Las 8 piezas del muñeco (aquí hay manos) en un array: <code>['cabeza', 'cuerpo', ...].map(n => document.getElementById('parte-' + n))</code>.</li>
+        <li>De momento, al final del constructor, un <code>console.log(this.dom)</code>.</li>
+      </ol>
+      <div class="analogia">es la agenda de teléfonos. Buscáis cada número una vez y lo apuntáis; luego llamáis sin volver a mirar la guía.</div>
+    </div>
+    <div>
+      <div class="prueba">recargad y abrid el objeto que sale en la consola. Ninguna propiedad puede valer <code>null</code>. Si alguna lo es, ese <code>id</code> está mal escrito.</div>
+      <div class="ojo">dentro de una clase, todo lo que sea «del objeto» lleva <code>this.</code> delante<sup class="cita">[30]</sup>. Escribir solo <code>dom.teclado</code> da <code>ReferenceError: dom is not defined</code>.</div>
+      <details class="solucion" data-id="S3-1"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">this.dom = {
+  teclado: document.getElementById('teclado-virtual'),
+  palabra: document.getElementById('palabra-display'),
+  categoria: document.getElementById('categoria-display'),
+  vidas: document.getElementById('vidas-numero'),
+  saludFill: document.getElementById('barra-salud-fill'),
+  mensaje: document.getElementById('mensaje-estado'),
+  btnPista: document.getElementById('btn-pista'),
+  cajaPista: document.getElementById('caja-pista'),
+  textoPista: document.getElementById('texto-pista'),
+  selectDif: document.getElementById('select-dificultad'),
+  btnAudio: document.getElementById('btn-audio'),
+  iconoAudio: document.getElementById('icono-audio'),
+  btnNueva: document.getElementById('btn-nueva-partida'),
+  modalFin: document.getElementById('modal-fin'),
+  modalIcono: document.getElementById('modal-icono'),
+  modalTitulo: document.getElementById('modal-titulo'),
+  modalDesc: document.getElementById('modal-descripcion'),
+  modalRacha: document.getElementById('modal-stat-racha'),
+  modalVidas: document.getElementById('modal-stat-vidas'),
+  modalBtn: document.getElementById('modal-btn-jugar'),
+  caraDerrota: document.getElementById('parte-cara-derrota'),
+  partesSvg: ['cabeza', 'cuerpo', 'brazo-izq', 'brazo-der',
+              'pierna-izq', 'pierna-der', 'mano-izq', 'mano-der']
+    .map(nombre => document.getElementById('parte-' + nombre))
+};
+console.log(this.dom);</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v3-1"> ¡Hecho! Ningún null en this.dom</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v3" data-seccion="Solución 3 · Paso 2">
+  <span class="etiqueta">Solución 3 · Paso 2 de 8 · Hito 1</span>
+  <h2>Iniciar la partida y pintar las casillas</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">un método <code>iniciar()</code> que pide partida al motor y prepara la pantalla, y otro <code>renderPalabra()</code> que dibuja las casillas.</div>
+      <p class="donde">dos métodos nuevos dentro de la clase, debajo del constructor. Al final del constructor, cambiad el <code>console.log</code> por <code>this.iniciar();</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li><code>const item = this.engine.iniciarNuevaPartida();</code> devuelve la ficha con <code>categoria</code> y <code>pista</code>.</li>
+        <li>Esconded el modal (<code>oculta</code>), las piezas y la cara (quitad <code>visible</code>).</li>
+        <li>Escribid categoría y pista, ocultad <code>cajaPista</code> y activad <code>btnPista</code>.</li>
+        <li><code>renderPalabra()</code> vacía <code>this.dom.palabra</code> y recorre <code>this.engine.letrasAdivinadas</code>: un <code>span.casilla-letra</code> por letra, con la clase <code>revelada</code> si no está vacía.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba">recargad: aparecen la categoría arriba y las casillas vacías de la palabra. El teclado sigue vacío; llega en el paso 3.</div>
+      <div class="ojo">si sale <code>this.renderPalabra is not a function</code>, el método está fuera de la llave de cierre de la clase o tiene la palabra <code>function</code> delante. Dentro de una clase, los métodos se escriben sin <code>function</code><sup class="cita">[4]</sup>.</div>
+      <details class="solucion" data-id="S3-2"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">iniciar() {
+  const item = this.engine.iniciarNuevaPartida();
+
+  this.dom.modalFin.classList.add('oculta');
+  this.dom.partesSvg.forEach(parte => parte.classList.remove('visible'));
+  this.dom.caraDerrota.classList.remove('visible');
+
+  this.dom.categoria.textContent = item.categoria;
+  this.dom.textoPista.textContent = item.pista;
+  this.dom.cajaPista.classList.add('oculta');
+  this.dom.btnPista.disabled = false;
+  this.dom.mensaje.textContent = '¡Partida lista! Elige una letra.';
+
+  this.renderPalabra();
+}
+
+renderPalabra() {
+  this.dom.palabra.innerHTML = '';
+  this.engine.letrasAdivinadas.forEach(letra => {
+    const casilla = document.createElement('span');
+    casilla.className = 'casilla-letra';
+    if (letra) {
+      casilla.textContent = letra;
+      casilla.classList.add('revelada');
+    }
+    this.dom.palabra.appendChild(casilla);
+  });
+}</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v3-2"> ¡Hecho! Categoría y casillas al cargar</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v3" data-seccion="Solución 3 · Paso 3">
+  <span class="etiqueta">Solución 3 · Paso 3 de 8 · Hito 1</span>
+  <h2>El teclado y la barra de salud</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">fabricar las 27 teclas y mostrar las vidas como texto («6 / 6») y como barra.</div>
+      <p class="donde">dos métodos nuevos, <code>renderTeclado()</code> y <code>actualizarSalud()</code>, y sus llamadas al final de <code>iniciar()</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li><code>renderTeclado()</code> es la función del paso 1 de la Solución 2, con <code>this.dom.teclado</code> y <code>ALFABETO</code>.</li>
+        <li>En <code>actualizarSalud()</code>, el máximo depende de la dificultad: <code>this.engine.configDificultades[this.engine.dificultad].maxFallos</code>.</li>
+        <li>Vidas = máximo − <code>this.engine.fallos</code>. El texto: <code>`${vidas} / ${max}`</code>.</li>
+        <li>La barra: <code>this.dom.saludFill.style.width = `${(vidas / max) * 100}%`</code>.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba">recargad: teclado completo, «6 / 6» y barra llena. Todavía no se puede jugar, pero ya tiene toda la pinta.</div>
+      <div class="ojo">si la barra no se mueve nunca, os falta el <code>%</code> al final. Un <code>width</code> sin unidades no vale en CSS.</div>
+      <details class="solucion" data-id="S3-3"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">// Al final de iniciar()
+this.renderTeclado();
+this.actualizarSalud();
+
+renderTeclado() {
+  this.dom.teclado.innerHTML = '';
+  ALFABETO.forEach(letra => {
+    const tecla = document.createElement('button');
+    tecla.type = 'button';
+    tecla.className = 'tecla';
+    tecla.textContent = letra;
+    tecla.dataset.letra = letra;
+    this.dom.teclado.appendChild(tecla);
+  });
+}
+
+actualizarSalud() {
+  const max = this.engine.configDificultades[this.engine.dificultad].maxFallos;
+  const vidas = max - this.engine.fallos;
+  this.dom.vidas.textContent = `${vidas} / ${max}`;
+  this.dom.saludFill.style.width = `${(vidas / max) * 100}%`;
+}</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v3-3"> ¡Hecho! Teclado, «6 / 6» y barra llena</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v3" data-seccion="Solución 3 · Paso 4">
+  <span class="etiqueta">Solución 3 · Paso 4 de 8 · Hitos 3 y 4</span>
+  <h2>Jugar una letra: el motor decide, la interfaz pinta</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">al pulsar una tecla, preguntar al motor y, según su respuesta, pintar el acierto o el fallo con su sonido.</div>
+      <p class="donde">un método <code>bindEvents()</code> con el escuchador del teclado, otro <code>jugar(letra)</code>, y la llamada <code>this.bindEvents();</code> en el constructor, antes de <code>this.iniciar();</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>En <code>bindEvents()</code>: la misma delegación de la Solución 2, pero llamando a <code>this.jugar(...)</code>. Usad funciones flecha<sup class="cita">[31]</sup>: así <code>this</code> sigue siendo la interfaz dentro del escuchador.</li>
+        <li>En <code>jugar(letra)</code>: <code>const res = this.engine.probarLetra(letra);</code>. Si <code>res</code> es <code>null</code>, <code>return</code>.</li>
+        <li>Desactivad la tecla y añadidle <code>'acierto'</code> o <code>'fallo'</code> según <code>res.acierto</code>.</li>
+        <li>Acierto: <code>this.audio.playSuccess()</code> y <code>this.renderPalabra()</code>. Fallo: <code>playError()</code>, encended <code>partesSvg[res.fallos - 1]</code> y <code>this.actualizarSalud()</code>.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba">pulsad letras: los aciertos suenan agudo y se destapan; los fallos suenan grave, dibujan pieza y bajan la barra. Fijaos en que <code>jugar()</code> no tiene ni un solo <code>includes</code>: las reglas son cosa del motor.</div>
+      <div class="ojo">si sale <code>Cannot read properties of undefined (reading 'probarLetra')</code>, habéis escrito el escuchador con <code>function (evento) {...}</code>. Con <code>function</code>, <code>this</code> deja de ser la interfaz. Cambiadla por una flecha.</div>
+      <details class="solucion" data-id="S3-4"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">// En el constructor, antes de this.iniciar():
+this.bindEvents();
+
+bindEvents() {
+  this.dom.teclado.addEventListener('click', evento => {
+    const tecla = evento.target.closest('.tecla');
+    if (tecla &amp;&amp; !tecla.disabled) this.jugar(tecla.dataset.letra);
+  });
+}
+
+jugar(letra) {
+  const res = this.engine.probarLetra(letra);
+  if (!res) return;
+
+  const tecla = this.dom.teclado.querySelector(`[data-letra="${letra}"]`);
+  if (tecla) {
+    tecla.disabled = true;
+    tecla.classList.add(res.acierto ? 'acierto' : 'fallo');
+  }
+
+  if (res.acierto) {
+    this.audio.playSuccess();
+    this.renderPalabra();
+  } else {
+    this.audio.playError();
+    const parte = this.dom.partesSvg[res.fallos - 1];
+    if (parte) parte.classList.add('visible');
+    this.actualizarSalud();
+  }
+}</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v3-4"> ¡Hecho! Se juega con el ratón y suena</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v3" data-seccion="Solución 3 · Paso 5">
+  <span class="etiqueta">Solución 3 · Paso 5 de 8 · Teclado físico</span>
+  <h2>El teclado del ordenador, otra vez</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">que las letras del teclado físico también llamen a <code>this.jugar()</code>.</div>
+      <p class="donde">dentro de <code>bindEvents()</code>, debajo del escuchador del clic.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li><code>window.addEventListener('keydown', evento => { ... })</code>, con flecha.</li>
+        <li>Ignorad las combinaciones con <kbd>Ctrl</kbd>, <kbd>Alt</kbd> o <kbd>Meta</kbd>.</li>
+        <li>Pasad <code>evento.key</code> a mayúscula y, si está en <code>ALFABETO</code>, <code>this.jugar(letra)</code>.</li>
+      </ol>
+      <p>Es la misma idea de la Solución 2. La diferencia está en a quién se llama: a un método del objeto, no a una función suelta.</p>
+    </div>
+    <div>
+      <div class="prueba">jugad una partida entera solo con el teclado físico. Las teclas de la pantalla se van apagando igual que con el ratón.</div>
+      <div class="ojo">si una letra repetida no hace nada, está bien: el motor devuelve <code>null</code> y <code>jugar()</code> sale por el <code>return</code>. Es el comportamiento que queremos.</div>
+      <details class="solucion" data-id="S3-5"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">window.addEventListener('keydown', evento => {
+  if (evento.ctrlKey || evento.altKey || evento.metaKey) return;
+  const letra = evento.key.toUpperCase();
+  if (ALFABETO.includes(letra)) this.jugar(letra);
+});</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v3-5"> ¡Hecho! Se juega con el teclado físico</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v3" data-seccion="Solución 3 · Paso 6">
+  <span class="etiqueta">Solución 3 · Paso 6 de 8 · Hitos 5 y 6</span>
+  <h2>Fin de partida con ventana y estadísticas</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">cuando el motor diga victoria o derrota, bloquear el teclado, guardar la partida en las estadísticas y abrir la ventana de fin.</div>
+      <p class="donde">un método nuevo <code>finPartida(res)</code> y, al final de <code>jugar()</code>, la línea <code>if (res.victoria || res.derrota) this.finPartida(res);</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Desactivad todas las <code>.tecla</code> y <code>btnPista</code>.</li>
+        <li><code>this.statsRepo.recordGame(res.victoria)</code>. Una línea, y la partida queda guardada en <code>localStorage</code>.</li>
+        <li>Victoria: icono 🏆, título y descripción. Derrota: icono 💀, cara de derrota y la palabra escrita en las casillas con <code>res.palabraSecreta</code>.</li>
+        <li>Rellenad la racha (<code>this.statsRepo.stats.rachaActual</code>) y las vidas que quedaban.</li>
+        <li>Quitad <code>oculta</code> al modal dentro de un <code>setTimeout</code> de unos 400 ms, para que dé tiempo a ver la última jugada.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba">ganad y perded una partida: sale la ventana con el resultado. Recargad la página y escribid en la consola <code>localStorage.getItem('ahorcado_stats_pro_2026')</code>: siguen ahí vuestras partidas, aunque hayáis recargado.</div>
+      <div class="analogia"><code>localStorage</code> es una libreta que el navegador guarda en un cajón. Al cerrar la página, la libreta sigue en el cajón; la próxima vez la volvéis a abrir.</div>
+      <details class="solucion" data-id="S3-6"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">finPartida(res) {
+  this.dom.teclado.querySelectorAll('.tecla').forEach(tecla => tecla.disabled = true);
+  this.dom.btnPista.disabled = true;
+  this.statsRepo.recordGame(res.victoria);
+
+  if (res.victoria) {
+    this.dom.modalIcono.textContent = '🏆';
+    this.dom.modalTitulo.textContent = '¡Victoria!';
+    this.dom.modalDesc.textContent = `Has adivinado "${res.palabraSecreta}".`;
+  } else {
+    this.dom.caraDerrota.classList.add('visible');
+    const casillas = this.dom.palabra.querySelectorAll('.casilla-letra');
+    casillas.forEach((casilla, i) => { casilla.textContent = res.palabraSecreta[i]; });
+    this.dom.modalIcono.textContent = '💀';
+    this.dom.modalTitulo.textContent = 'Derrota';
+    this.dom.modalDesc.textContent = `La palabra era "${res.palabraSecreta}".`;
+  }
+
+  this.dom.modalRacha.textContent = this.statsRepo.stats.rachaActual;
+  this.dom.modalVidas.textContent = res.maxFallos - res.fallos;
+  setTimeout(() => this.dom.modalFin.classList.remove('oculta'), 400);
+}</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v3-6"> ¡Hecho! Ventana de fin y estadísticas guardadas</label>
+    </div>
+  </div>
+</section>
+
+<section class="slide v3" data-seccion="Solución 3 · Paso 7">
+  <span class="etiqueta">Solución 3 · Paso 7 de 8 · Los botones de la barra</span>
+  <h2>Dificultad, sonido, pista y nueva partida</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">que funcionen el selector de dificultad, el botón de sonido, la pista, «Nueva partida» y «Jugar otra vez».</div>
+      <p class="donde">dentro de <code>bindEvents()</code>, debajo del teclado físico.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li>Selector: evento <code>'change'</code><sup class="cita">[32]</sup>. Guardad <code>evento.target.value</code> en <code>this.engine.dificultad</code> y llamad a <code>this.iniciar()</code>.</li>
+        <li>Sonido: <code>this.audio.toggleMute()</code> devuelve si queda silenciado. Cambiad el icono entre 🔇 y 🔊.</li>
+        <li>Pista: quitad <code>oculta</code> a la caja y desactivad el botón.</li>
+        <li>«Nueva partida» y «Jugar otra vez»: los dos llaman a <code>this.iniciar()</code> (que ya esconde el modal).</li>
+      </ol>
+    </div>
+    <div>
+      <div class="prueba">elegid «Fácil»: el marcador pasa a «8 / 8» y empieza otra partida. Con 8 fallos aparecen también las manos. Elegid «Difícil»: «5 / 5». Silenciad el sonido, recargad y comprobad en la consola que <code>localStorage.getItem('ahorcado_muted')</code> vale <code>'true'</code>.</div>
+      <div class="ojo aviso">el modo Difícil ya cambia las vidas, pero todavía no tiene reloj. Los 45 segundos llegan en el paso 8.</div>
+      <details class="solucion" data-id="S3-7"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">this.dom.selectDif.addEventListener('change', evento => {
+  this.engine.dificultad = evento.target.value;
+  this.iniciar();
+});
+
+this.dom.btnAudio.addEventListener('click', () => {
+  const silenciado = this.audio.toggleMute();
+  this.dom.iconoAudio.textContent = silenciado ? '🔇' : '🔊';
+});
+
+this.dom.btnPista.addEventListener('click', () => {
+  this.dom.cajaPista.classList.remove('oculta');
+  this.dom.btnPista.disabled = true;
+});
+
+this.dom.btnNueva.addEventListener('click', () => this.iniciar());
+this.dom.modalBtn.addEventListener('click', () => this.iniciar());</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v3-7"> ¡Hecho! Todos los botones funcionan</label>
+    </div>
+  </div>
+</section>
+
+
+<section class="slide v3" data-seccion="Solución 3 · Paso 8">
+  <span class="etiqueta">Solución 3 · Paso 8 de 8 · Temporizador</span>
+  <h2>45 segundos de reloj en el modo Difícil</h2>
+  <div class="g2">
+    <div>
+      <div class="objetivo">en Difícil, mostrar la barra de tiempo, descontar un segundo cada segundo y dar la partida por perdida al llegar a cero. En Fácil y Normal, la barra no aparece.</div>
+      <p class="donde">dos retoques en <code>AhorcadoEngine</code> y un método nuevo en <code>AhorcadoUI</code>. La barra ya está en el HTML: <code>caja-temporizador</code>, <code>tiempo-texto</code> y <code>barra-tiempo-fill</code>.</p>
+      <h3>Pistas, en orden</h3>
+      <ol>
+        <li><strong>Motor.</strong> Añadid <code>tiempoMax: 45</code> a la configuración de <code>dificil</code>. Así el tiempo es una regla del juego, como las vidas.</li>
+        <li><strong>Motor.</strong> Un método <code>tiempoAgotado()</code> que ponga <code>juegoTerminado = true</code> y devuelva un informe igual que <code>probarLetra()</code>, con <code>derrota: true</code> y <code>letra: null</code>.</li>
+        <li><strong>Interfaz.</strong> Guardad en <code>this.dom</code> los tres elementos de la barra y <code>modal-stat-tiempo</code>. En el constructor, <code>this.temporizador = null;</code>.</li>
+        <li>En <code>iniciarTemporizador()</code>: parad el reloj anterior con <code>clearInterval</code><sup class="cita">[33]</sup>. Si la dificultad no tiene <code>tiempoMax</code>, ocultad la caja y <code>return</code>.</li>
+        <li>Si lo tiene, con <code>setInterval(..., 1000)</code><sup class="cita">[34]</sup> restad un segundo, repintad texto y barra y, al llegar a 0, <code>this.finPartida(this.engine.tiempoAgotado())</code>.</li>
+        <li>Llamadlo al final de <code>iniciar()</code>, apuntando la hora de salida con <code>Date.now()</code><sup class="cita">[35]</sup>. En <code>finPartida()</code>, lo primero, <code>clearInterval(this.temporizador)</code>.</li>
+      </ol>
+      <div class="analogia">el reloj de ajedrez. Se pone en marcha al empezar, se para en cuanto termina la partida y, si llega a cero, pierdes aunque el tablero vaya bien.</div>
+    </div>
+    <div>
+      <div class="prueba">elegid «Difícil»: aparece la barra con <code>45s</code> y baja cada segundo. Dejad que llegue a cero sin jugar: teclado apagado, palabra destapada y la ventana dice «¡Tiempo agotado!». Ganad otra partida a tiempo: el reloj se queda quieto. Volved a «Normal»: la barra desaparece.</div>
+      <div class="ojo">si el reloj corre al doble de velocidad después de cambiar de partida, os falta el <code>clearInterval</code> del principio: hay dos relojes funcionando a la vez. Si al ganar aparece después «¡Tiempo agotado!», falta pararlo en <code>finPartida()</code>.</div>
+      <details class="solucion" data-id="S3-8"><summary>Ver la solución (solo si ya lo habéis intentado)</summary>
+<pre><code class="js">// ---- AhorcadoEngine ----
+dificil: { maxFallos: 5, pistasGratis: false, tiempoMax: 45 }
+
+tiempoAgotado() {
+  this.juegoTerminado = true;
+  const max = this.configDificultades[this.dificultad].maxFallos;
+  return { letra: null, acierto: false, fallos: this.fallos, maxFallos: max,
+           victoria: false, derrota: true, palabraSecreta: this.itemActual.palabra };
+}
+
+// ---- AhorcadoUI ----
+// En el constructor:
+this.temporizador = null;
+this.inicioPartida = 0;
+// En this.dom:
+cajaTiempo: document.getElementById('caja-temporizador'),
+tiempoTexto: document.getElementById('tiempo-texto'),
+barraTiempo: document.getElementById('barra-tiempo-fill'),
+modalTiempo: document.getElementById('modal-stat-tiempo'),
+
+// Al final de iniciar():
+this.inicioPartida = Date.now();
+this.iniciarTemporizador();
+
+iniciarTemporizador() {
+  clearInterval(this.temporizador);
+  const max = this.engine.configDificultades[this.engine.dificultad].tiempoMax;
+
+  if (!max) {
+    this.dom.cajaTiempo.classList.add('oculta');
+    return;
+  }
+
+  let restantes = max;
+  const pintar = () => {
+    this.dom.tiempoTexto.textContent = `${restantes}s`;
+    this.dom.barraTiempo.style.width = `${(restantes / max) * 100}%`;
+  };
+
+  this.dom.cajaTiempo.classList.remove('oculta');
+  pintar();
+
+  this.temporizador = setInterval(() => {
+    restantes--;
+    pintar();
+    if (restantes &lt;= 0) {
+      clearInterval(this.temporizador);
+      this.finPartida(this.engine.tiempoAgotado());
+    }
+  }, 1000);
+}
+
+// En finPartida(res): primera línea
+clearInterval(this.temporizador);
+// ... y en la rama de derrota:
+this.dom.modalTitulo.textContent = res.letra === null ? '¡Tiempo agotado!' : 'Derrota';
+// ... y junto a la racha y las vidas:
+this.dom.modalTiempo.textContent = `${Math.round((Date.now() - this.inicioPartida) / 1000)}s`;</code></pre></details>
+      <label class="hecho"><input type="checkbox" data-paso="v3-8"> ¡Hecho! El reloj funciona en Difícil</label>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- CIERRE -->
+<!-- ===================================================================== -->
+<section class="slide fin" data-seccion="Comprobación final" id="final">
+  <span class="etiqueta">Comprobación final · Para las tres soluciones</span>
+  <h2>Antes de entregar, pasad esta lista</h2>
+  <table>
+    <tr><th>Hito</th><th>Qué hacéis</th><th>Qué tiene que pasar</th><th>✔</th></tr>
+    <tr><td>1</td><td>Recargad la página</td><td>Tantos huecos como letras y todas las vidas</td><td><input type="checkbox" data-paso="f-1"></td></tr>
+    <tr><td>1</td><td>Pulsad «Nueva palabra» tres veces</td><td>La palabra (y su longitud) va cambiando</td><td><input type="checkbox" data-paso="f-2"></td></tr>
+    <tr><td>2</td><td>Probad <code>7</code> en la Solución 1, o una letra repetida en cualquiera</td><td>Aviso o nada, y las vidas no bajan</td><td><input type="checkbox" data-paso="f-3"></td></tr>
+    <tr><td>3</td><td>Una letra que se repita en la palabra</td><td>Se destapan todas sus apariciones</td><td><input type="checkbox" data-paso="f-4"></td></tr>
+    <tr><td>4</td><td><code>K</code>, <code>W</code>, <code>Q</code>…</td><td>Cabeza, tronco, brazos y piernas, en ese orden</td><td><input type="checkbox" data-paso="f-5"></td></tr>
+    <tr><td>5</td><td>Descubrid la palabra entera</td><td>Mensaje de victoria y ya no se puede jugar</td><td><input type="checkbox" data-paso="f-6"></td></tr>
+    <tr><td>6</td><td><code>K W Q Z X Ñ</code></td><td>Muñeco completo, ojos en cruz y palabra destapada</td><td><input type="checkbox" data-paso="f-7"></td></tr>
+    <tr><td>—</td><td>Solución 3 en Difícil: esperad sin jugar</td><td>El reloj baja de 45 a 0 y la partida termina sola</td><td><input type="checkbox" data-paso="f-10"></td></tr>
+    <tr><td>—</td><td>Partida nueva después de perder</td><td>Todo limpio: sin piezas, sin letras, vidas completas</td><td><input type="checkbox" data-paso="f-8"></td></tr>
+    <tr><td>—</td><td>Consola abierta durante todas las pruebas</td><td>Ningún error en rojo</td><td><input type="checkbox" data-paso="f-9"></td></tr>
+  </table>
+  <p class="suave">Y quitad los <code>console.log</code> provisionales. Funcionan, sí, pero ensucian la entrega.</p>
+</section>
+
+<section class="slide fin" data-seccion="Mensajes de error" id="errores">
+  <span class="etiqueta">Si algo falla · Traducción de la consola</span>
+  <h2>Lo que os dice la consola y lo que significa</h2>
+  <table>
+    <tr><th>Mensaje en rojo</th><th>Qué significa</th><th>Dónde mirar</th></tr>
+    <tr><td><code>Uncaught ReferenceError: palabraSecretta is not defined</code></td><td>Usáis un nombre que no existe. Casi siempre es una errata.</td><td>Copiad el nombre desde donde se declara, no lo escribáis de memoria.</td></tr>
+    <tr><td><code>Uncaught SyntaxError: Unexpected token '}'</code></td><td>Sobra o falta una llave, un paréntesis o una coma.</td><td>La línea que indica la consola o la de justo encima.</td></tr>
+    <tr><td><code>Cannot read properties of null (reading 'classList')</code></td><td>Un <code>getElementById</code> no ha encontrado nada.</td><td>El <code>id</code>: comparadlo letra a letra con el <code>index.html</code>.</td></tr>
+    <tr><td><code>Cannot read properties of undefined (reading 'classList')</code></td><td>Pedís una posición del array que no existe, casi siempre <code>partesAhorcado[6]</code>.</td><td>El <code>- 1</code> del índice, o falta el <code>if (parte)</code>.</td></tr>
+    <tr><td><code>this.jugar is not a function</code></td><td>Dentro de un escuchador escrito con <code>function</code>, <code>this</code> ya no es vuestro objeto.</td><td>Usad funciones flecha en los escuchadores de la Solución 3.</td></tr>
+    <tr><td><code>Assignment to constant variable</code></td><td>Intentáis cambiar una variable declarada con <code>const</code>.</td><td><code>fallos</code>, <code>palabraSecreta</code>… van con <code>let</code>.</td></tr>
+    <tr><td>Sin error, pero no cambia nada</td><td>No habéis guardado o no habéis recargado. Lo de siempre.</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd> y <kbd>F5</kbd>.</td></tr>
+  </table>
+  <p>Un consejo que vale para toda vuestra vida programando: leed el mensaje de error entero. Os dice qué ha pasado y en qué línea. Ignorarlo es como ir al médico y taparse los oídos.</p>
+</section>
+
+<section class="slide" data-seccion="Fuentes" id="fuentes">
+  <h2>Fuentes y Documentación Oficial</h2>
+  <ol class="fuentes">
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Learn_web_development/Howto/Tools_and_setup/What_are_browser_developer_tools" target="_blank">¿Qué son las herramientas de desarrollo del navegador?</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Element/classList" target="_blank">Element.classList</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Set" target="_blank">Set</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Classes" target="_blank">Clases</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Math/random" target="_blank">Math.random()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Math/floor" target="_blank">Math.floor()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/String/includes" target="_blank">String.prototype.includes()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Array/includes" target="_blank">Array.prototype.includes()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Array/join" target="_blank">Array.prototype.join()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Node/textContent" target="_blank">Node.textContent</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/EventTarget/addEventListener" target="_blank">EventTarget.addEventListener()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Document/getElementById" target="_blank">Document.getElementById()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/keydown_event" target="_blank">Element: keydown event</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key" target="_blank">KeyboardEvent: key property</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/String/trim" target="_blank">String.prototype.trim()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/String/toUpperCase" target="_blank">String.prototype.toUpperCase()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test" target="_blank">RegExp.prototype.test()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Document/createElement" target="_blank">Document.createElement()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dataset" target="_blank">HTMLElement: dataset property</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Node/appendChild" target="_blank">Node.appendChild()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Array/fill" target="_blank">Array.prototype.fill()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Element/innerHTML" target="_blank">Element.innerHTML</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Event/target" target="_blank">Event.target</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Element/closest" target="_blank">Element.closest()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Document/querySelector" target="_blank">Document.querySelector()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Learn_web_development/Core/Scripting/Event_bubbling" target="_blank">Burbujeo de eventos</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Web_Audio_API" target="_blank">Web Audio API</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Window/localStorage" target="_blank">Window.localStorage</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/JSON" target="_blank">JSON</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Operators/this" target="_blank">this</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Functions/Arrow_functions" target="_blank">Funciones flecha</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event" target="_blank">HTMLElement: change event</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Window/clearInterval" target="_blank">clearInterval()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/API/Window/setInterval" target="_blank">setInterval()</a></li>
+    <li>MDN Web Docs — <a href="https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Date/now" target="_blank">Date.now()</a></li>
+  </ol>
+</section>
+
+</div></main>
+
+<div class="pie-ayuda"><kbd>←</kbd> <kbd>→</kbd> o <kbd>Espacio</kbd> navegar · <kbd>Inicio</kbd>/<kbd>Fin</kbd> · <kbd>F</kbd> pantalla completa · Las casillas «¡Hecho!» se guardan en este navegador</div>
+
+<script>
+// ------------------------------------------------------------
+// Resaltado de sintaxis sencillo para los bloques de código
+// ------------------------------------------------------------
+(function resaltar() {
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const kws = new Set(['const','let','function','if','else','return','for','of','new','class','this','switch','case','break','default','typeof','null','undefined','true','false','try','catch']);
+  const re = /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|('(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\.)*`)|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_$][\w$]*)\b(?=\s*\()|\b([A-Za-z_$][\w$]*)\b/g;
+  document.querySelectorAll('pre code.js').forEach(el => {
+    const src = el.textContent;
+    let out = '', last = 0, m;
+    re.lastIndex = 0;
+    while ((m = re.exec(src))) {
+      out += esc(src.slice(last, m.index));
+      if (m[1]) out += '<span class="c">' + esc(m[1]) + '</span>';
+      else if (m[2]) out += '<span class="s">' + esc(m[2]) + '</span>';
+      else if (m[3]) out += '<span class="n">' + m[3] + '</span>';
+      else if (m[4]) out += kws.has(m[4]) ? '<span class="k">' + m[4] + '</span>' : '<span class="f">' + m[4] + '</span>';
+      else out += kws.has(m[5]) ? '<span class="k">' + m[5] + '</span>' : m[5];
+      last = re.lastIndex;
+    }
+    el.innerHTML = out + esc(src.slice(last));
+  });
+  document.querySelectorAll('pre code.js-html').forEach(el => {
+    el.innerHTML = el.innerHTML
+      .replace(/\b(data-[a-z]+|id|class|viewBox)=(".*?")/g, '<span class="f">$1</span>=<span class="s">$2</span>')
+      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<i class="c">$1</i>');
+  });
+})();
+
+// Navegación
+const slides = [...document.querySelectorAll('.slide')];
+const escenario = document.getElementById('escenario');
+let actual = 0;
+
+function ajustar() {
+  const s = slides[actual];
+  s.style.zoom = 1;
+  const disponible = escenario.clientHeight - 64;
+  if (s.offsetHeight > disponible) s.style.zoom = Math.max(0.55, disponible / s.offsetHeight);
+}
+
+function mostrar(i) {
+  actual = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((s, j) => s.classList.toggle('activa', j === actual));
+  document.getElementById('contador').textContent = (actual + 1) + ' / ' + slides.length;
+  document.getElementById('barra').style.width = ((actual + 1) / slides.length * 100) + '%';
+  document.getElementById('seccionActual').textContent = slides[actual].dataset.seccion || '';
+  escenario.scrollTop = 0;
+  ajustar();
+  history.replaceState(null, '', '#' + (actual + 1));
+}
+
+const irA = id => mostrar(slides.indexOf(document.getElementById(id)));
+document.getElementById('btnSig').addEventListener('click', () => mostrar(actual + 1));
+document.getElementById('btnAnt').addEventListener('click', () => mostrar(actual - 1));
+document.getElementById('btnInicio').addEventListener('click', () => irA('caminos'));
+document.getElementById('btnPantalla').addEventListener('click', pantallaCompleta);
+function pantallaCompleta() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+document.querySelectorAll('[data-ir]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); irA(a.dataset.ir); }));
+document.querySelectorAll('details').forEach(d => d.addEventListener('toggle', ajustar));
+window.addEventListener('resize', ajustar);
+
+window.addEventListener('keydown', e => {
+  if (e.target.closest('input, summary, button, a') && (e.key === ' ' || e.key === 'Enter')) return;
+  switch (e.key) {
+    case 'ArrowRight': case 'PageDown': case ' ': e.preventDefault(); mostrar(actual + 1); break;
+    case 'ArrowLeft': case 'PageUp': e.preventDefault(); mostrar(actual - 1); break;
+    case 'Home': mostrar(0); break;
+    case 'End': mostrar(slides.length - 1); break;
+    case 'f': case 'F': pantallaCompleta(); break;
+  }
+});
+
+// Casillas «Hecho» guardadas en el navegador
+const CLAVE = 'ahorcado-guia-alumno';
+let hechos = {};
+try { hechos = JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch (e) { hechos = {}; }
+const casillas = [...document.querySelectorAll('input[data-paso]')];
+
+function pintarProgreso() {
+  ['v1', 'v2', 'v3'].forEach((v, i) => {
+    const suyas = casillas.filter(c => c.dataset.paso.startsWith(v + '-'));
+    const hechas = suyas.filter(c => c.checked).length;
+    document.querySelector('.progreso.p' + (i + 1) + ' > div').style.width = (hechas / suyas.length * 100) + '%';
+    document.querySelector('[data-progreso="' + v + '"]').textContent = hechas + ' de ' + suyas.length + ' pasos hechos';
+  });
+}
+casillas.forEach(c => {
+  c.checked = !!hechos[c.dataset.paso];
+  c.addEventListener('change', () => {
+    hechos[c.dataset.paso] = c.checked;
+    try { localStorage.setItem(CLAVE, JSON.stringify(hechos)); } catch (e) {}
+    pintarProgreso();
+  });
+});
+pintarProgreso();
+
+const inicial = parseInt(location.hash.slice(1), 10);
+mostrar(Number.isNaN(inicial) ? 0 : inicial - 1);
+</script>
+</body>
+</html>
