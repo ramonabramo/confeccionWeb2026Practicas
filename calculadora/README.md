@@ -48,9 +48,8 @@ calculadora/
 └── 📁 version-2-delegacion-eventos/                        # [OPCIÓN 2] Delegación en el contenedor padre
     ├── index.html                                           # Interfaz visual
     ├── main.css                                             # Estilos CSS
-    ├── app.js                                               # Código maestro comentado por hitos
-    ├── app.alumnos.js                                       # Plantilla para entregar a los alumnos
-    ├── app.solucion.js                                      # Solución limpia canónica
+    ├── app.js                                               # Solución completa comentada por hitos (la que carga index.html)
+    ├── app.alumno.js                                        # Plantilla con TODO para entregar a los alumnos
     └── GUIA_PASO_A_PASO.md                                  # Guía en Markdown
 ```
 
@@ -98,5 +97,5 @@ El alumnado debe construir el código de forma **incremental por hitos de funcio
 ## 🖥️ Cómo Impartir la Práctica en Clase
 
 1. **Para proyectar en el aula:** La carpeta `documentacion/` tiene una presentación HTML autónoma por solución y otra comparativa, listas para abrir en cualquier navegador (usa las teclas <kbd>→</kbd> y <kbd>←</kbd> para navegar y <kbd>F</kbd> para pantalla completa).
-2. **Para entregar al alumnado:** Proporcionar la carpeta correspondiente con el archivo `app.alumnos.js` (renombrado a `app.js`), que contiene los esqueletos y bloques `TODO` ordenados hito a hito.
-3. **Para corrección del docente:** Usar el archivo `app.solucion.js` de cada carpeta como solución canónica.
+2. **Para entregar al alumnado:** Proporcionar la carpeta correspondiente sustituyendo `app.js` por `app.alumno.js` (renombrado a `app.js`), que contiene los esqueletos y bloques `TODO` ordenados hito a hito.
+3. **Para corrección del docente:** El `app.js` de cada carpeta es la solución completa y comentada.
